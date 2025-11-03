@@ -20,7 +20,7 @@ const tabBarIcon =
                 source={icon}
                 style={[
                     styles.icon,
-                    { tintColor: focused ? AppColor.mainColor : AppColor.color_8e8e93 },
+                    { tintColor: focused ? AppColor.mainColor : AppColor.accentColor },
                 ]}
             />
         );
@@ -67,7 +67,7 @@ export default BottomNavigation;
 
 const styles = StyleSheet.create({
     tabBar: {
-        backgroundColor: AppColor.color_fff,
+        backgroundColor: AppColor.ffffff,
         height: 100,
         paddingTop: 5
     },
