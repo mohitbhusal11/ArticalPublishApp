@@ -4,12 +4,14 @@ import BottomNavigation from './BottomNavigation';
 import LoginScreen from '../screen/LoginScreen/LoginScreen';
 import ForgotPasswordScreen from '../screen/ForgotPasswordScreen/ForgotPasswordScreen';
 import ResetPasswordScreen from '../screen/ResetPasswordScreen/ResetPasswordScreen';
+import EditorScreen from '../screen/EditorScreen/EditorScreen';
 
 export type RootStackParamList = {
   BottomNavigation: undefined;
   LoginScreen: undefined;
   ForgotPasswordScreen: undefined;
   ResetPasswordScreen: { userId: string };
+  EditorScreen: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -22,6 +24,7 @@ const MainNavigation = () => {
       {token ? (
         <>
           <Stack.Screen name="BottomNavigation" component={BottomNavigation} />
+          <Stack.Screen name="EditorScreen" component={EditorScreen} />
 
         </>
       ) : (

@@ -44,7 +44,7 @@ const sampleData: Story[] = [
   },
 ];
 
-const Home: React.FC = ({navigation}) => {
+const StoriesScreen: React.FC = ({navigation}) => {
   const [search, setSearch] = useState<string>("");
   const [stories, setStories] = useState<Story[]>(sampleData);
 
@@ -96,10 +96,6 @@ const Home: React.FC = ({navigation}) => {
   return (
     <View style={styles.container}>
       {/* Create New Story Button */}
-      <TouchableOpacity onPress={handlenewstory} style={styles.createButton}>
-        <Text style={styles.createButtonText}>Create New Story</Text>
-      </TouchableOpacity>
-
       {/* Search Bar */}
       <TextInput
         style={styles.searchInput}
@@ -123,7 +119,7 @@ const Home: React.FC = ({navigation}) => {
   );
 };
 
-export default Home;
+export default StoriesScreen;
 
 // 🎨 Styles
 const styles = StyleSheet.create({

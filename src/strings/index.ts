@@ -30,5 +30,9 @@ export const AppString = {
     firstPartOfOtpDesc: "OTP has been sent to your mobile",
     secondPartOfOtpDesc: "It is valid for 5 minute ",
     thirdPartOfOtpDesc: "You can resend once the timer expires",
+    submit: "Submit",
+    cancel: "Cancel",
+    insert: "Insert",
+    insertLink: "Insert Link",
   },
 };

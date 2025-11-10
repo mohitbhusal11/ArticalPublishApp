@@ -1,0 +1,133 @@
+import { StyleSheet } from "react-native";
+import { AppColor } from "../../config/AppColor";
+
+export const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#f8fafc",
+    },
+    scrollContent: {
+        flexGrow: 1,
+        paddingHorizontal: 16,
+        paddingTop: 20,
+        paddingBottom: 40,
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: 400,
+        color: "#1e293b",
+        marginBottom: 4,
+    },
+    editor: {
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "#e2e8f0",
+        padding: 15,
+        shadowColor: "#000",
+        shadowOpacity: 0.05,
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 3,
+        elevation: 1,
+        flexGrow: 1,
+    },
+    toolbarWrapper: {
+        marginTop: 0,
+        marginBottom: 4,
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "#e2e8f0",
+        paddingVertical: 0,
+        shadowColor: "#000",
+        shadowOpacity: 0.05,
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 3,
+        elevation: 1,
+    },
+    toolbarScroll: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        alignItems: "center",
+        paddingHorizontal: 8,
+    },
+    toolbarContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "flex-start",
+    },
+    toolbar: {
+        backgroundColor: "transparent",
+    },
+    submitText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    submitBtn: {
+        marginTop: 20,
+        backgroundColor: AppColor.mainColor,
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: "center",
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: 400,
+        color: "#1e293b",
+        marginBottom: 4,
+        marginTop: 24
+    },
+    titleInput: {
+        fontSize: 22,
+        fontWeight: 500,
+        color: "#111827",
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#e2e8f0",
+        padding: 12,
+        marginBottom: 16,
+    },
+    editorWrapper: {
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "#e2e8f0",
+        overflow: "hidden",
+        shadowColor: "#000",
+        shadowOpacity: 0.05,
+        shadowOffset: { width: 0, height: 1 },
+        shadowRadius: 3,
+        elevation: 1,
+        flexGrow: 1,
+    },
+
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 10,
+    },
+    button: {
+        flex: 1,
+        paddingVertical: 10,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginHorizontal: 5,
+    },
+    cancelButton: {
+        backgroundColor: '#eee',
+    },
+    insertButton: {
+        backgroundColor: '#007bff',
+    },
+    insertText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
+    cancelText: {
+        color: '#333',
+        fontWeight: '500',
+    },
+
+});

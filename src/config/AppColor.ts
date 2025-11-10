@@ -1,7 +1,7 @@
 export const AppColor = {
-  mainColor: "#ff8546",
+  mainColor: "#366EE9",
   secondaryColor: "#FBF6F4",
-  accentColor: "#FFB87A",
+  accentColor: "rgba(124, 123, 123, 1)",
   ffffff: "#ffffff",
   color_ffffff: "#ffffff",
   c000000: "#000000",

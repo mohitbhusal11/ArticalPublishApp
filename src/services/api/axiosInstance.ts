@@ -18,6 +18,7 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
     "X-Client-Type": "mobile",
+    "x-api-key" : "cyezieny2h"
   },
 });
 

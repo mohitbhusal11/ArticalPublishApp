@@ -7,4 +7,10 @@ export const AppImage = {
     gradient_line_left_to_right: require('../assets/images/gradient_line_left_to_right.png'),
     password_ic: require('../assets/images/password_ic.png'),
     user_ic: require('../assets/images/user_ic.png'),
+    plus_icon: require('../assets/images/plus_icon.png'),
+    plus_icon_white: require('../assets/images/plus_icon_white.png'),
+    dashboard_ic: require('../assets/images/dashboard_ic.png'),
+    stories_ic: require('../assets/images/stories_ic.png'),
+    assignment_ic: require('../assets/images/assignment_ic.png'),
+    setting_ic: require('../assets/images/setting_ic.png'),
 }

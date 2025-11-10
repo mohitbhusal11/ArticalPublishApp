@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "870291393369",
+    "project_id": "raj-express-news-network",
+    "storage_bucket": "raj-express-news-network.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870291393369:android:5de8d095a90415f153da48",
+        "android_client_info": {
+          "package_name": "com.rensapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVI4nfZ659SCD8SBtiuMqhwo7oXK8vfwg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
