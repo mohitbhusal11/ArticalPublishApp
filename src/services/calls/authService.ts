@@ -11,14 +11,14 @@ export const login =
       const response = await axiosInstance.post(Endpoints.AUTH.LOGIN, {
         UserName: userName,
         Password: password,
-        clientType: "mobile",
-        fcmToken: fcmToken,
-        deviceId: deviceId
+        // clientType: "mobile",
+        // fcmToken: fcmToken,
+        // deviceId: deviceId
       });
 
       console.log("login response: ", response.data);
 
-      const token = response.data.token;
+      const token = response.data.accessToken;
 
       dispatch(setToken(token));
       await dispatch(fetchUserDetails());

@@ -8,7 +8,7 @@ export const Endpoints = {
     changePassword: "auth/change-password",
   },
   USER: {
-    PROFILE: "user/me",
+    PROFILE: "users/me",
   },
   DeleteUser: {
     DeleteUser: "user"

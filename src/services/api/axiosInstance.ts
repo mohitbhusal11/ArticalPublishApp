@@ -5,9 +5,9 @@ import { clearUserDetails } from "../../redux/slices/userSlice";
 import ToastUtils from "../../utils/toast";
 
 const baseURL = __DEV__
-  ? "http://172.168.0.14:5220/api/"
+  ? "http://172.168.0.14:7200/"
    //: "http://103.85.92.210:5220/api/";
-   : "https://rfm.rajfacilitymanagement.com/api/api/";
+   : "http://172.168.0.14:7200/";
 
 
 export const imageBaseURL = __DEV__ ? "http://172.168.0.14:8089" : "https://assets.rajfacilitymanagement.com";
