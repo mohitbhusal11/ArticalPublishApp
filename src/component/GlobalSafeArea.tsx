@@ -8,7 +8,7 @@ interface GlobalSafeAreaProps {
 
 const GlobalSafeArea: React.FC<GlobalSafeAreaProps> = ({ children, style }) => {
   return (
-    <SafeAreaView style={[{ flex: 1 }, style]}>
+    <SafeAreaView style={[{ flex: 1, paddingBottom: 65 }, style]}>
       {children}
     </SafeAreaView>
   );
