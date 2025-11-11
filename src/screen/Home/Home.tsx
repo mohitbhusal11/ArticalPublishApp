@@ -6,56 +6,206 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
+  ScrollView,
 } from "react-native";
 import { AppColor } from "../../config/AppColor";
 import { AppImage } from "../../config/AppImage";
 import { AppString } from "../../strings";
 import DashboardCard from "../../component/DashboardCard";
 import ToastUtils from "../../utils/toast";
+import GlobalText from "../../component/GlobalText";
+import GlobalSafeArea from "../../component/GlobalSafeArea";
 
-const dummyData = [
-  {
-    id: "1",
-    title: "Story Submitted",
-    count: 147,
-    discount: 5,
-    discountColor: "red",
-    icon: AppImage.assignment_ic,
-    iconBgColor: "#EAF2FF",
-    redirectionScreen: "all_story"
-  },
-  {
-    id: "2",
-    title: "Approved",
-    count: 98,
-    discount: 5,
-    discountColor: "red",
-    icon: AppImage.stories_ic,
-    iconBgColor: "#E9F7EF",
-    redirectionScreen: "approved_story"
-  },
-  {
-    id: "3",
-    title: "Pending",
-    count: 21,
-    discount: 2,
-    discountColor: "orange",
-    icon: AppImage.dashboard_ic,
-    iconBgColor: "#E9F7EF",
-    redirectionScreen: "pending_story"
-  },
-  {
-    id: "4",
-    title: "Rejected",
-    count: 12,
-    discount: 3,
-    discountColor: "red",
-    redirectionScreen: "rejected_story"
-  },
-]
+// const dummyData = [
+//   {
+//     id: "1",
+//     title: "Story Submitted",
+//     count: 147,
+//     discount: -5,
+//     discountColor: "red",
+//     icon: AppImage.assignment_ic,
+//     iconBgColor: "#EAF2FF",
+//     redirectionScreen: "all_story"
+//   },
+//   {
+//     id: "2",
+//     title: "Approved",
+//     count: 98,
+//     discount: 5,
+//     discountColor: "green",
+//     icon: AppImage.stories_ic,
+//     iconBgColor: "#E9F7EF",
+//     redirectionScreen: "approved_story"
+//   },
+//   {
+//     id: "3",
+//     title: "Pending",
+//     count: 21,
+//     discount: 2,
+//     discountColor: "green",
+//     icon: AppImage.dashboard_ic,
+//     iconBgColor: "#E9F7EF",
+//     redirectionScreen: "pending_story"
+//   },
+//   {
+//     id: "4",
+//     title: "Rejected",
+//     count: 12,
+//     discount: 3,
+//     discountColor: "green",
+//     redirectionScreen: "rejected_story"
+//   },
+// ]
+
+const dummyData = {
+  stories: [
+    {
+      id: "1",
+      title: "Story Submitted",
+      count: 147,
+      discount: -5,
+      discountColor: "red",
+      icon: AppImage.assignment_ic,
+      iconBgColor: "#EAF2FF",
+      redirectionScreen: "submitted_story",
+    },
+    {
+      id: "2",
+      title: "Approved Story",
+      count: 98,
+      discount: 5,
+      discountColor: "green",
+      icon: AppImage.stories_ic,
+      iconBgColor: "#E9F7EF",
+      redirectionScreen: "approved_story",
+    },
+    {
+      id: "3",
+      title: "Under Review",
+      count: 42,
+      discount: 3,
+      discountColor: "orange",
+      icon: AppImage.dashboard_ic,
+      iconBgColor: "#FFF3E0",
+      redirectionScreen: "review_story",
+    },
+    {
+      id: "4",
+      title: "Rejected Story",
+      count: 19,
+      discount: -2,
+      discountColor: "red",
+      icon: AppImage.assignment_ic,
+      iconBgColor: "#FFE5E5",
+      redirectionScreen: "rejected_story",
+    },
+  ],
+  assignments: [
+    {
+      id: "5",
+      title: "Assignment Submitted",
+      count: 36,
+      discount: -1,
+      discountColor: "red",
+      icon: AppImage.assignment_ic,
+      iconBgColor: "#EAF2FF",
+      redirectionScreen: "submitted_assignment",
+    },
+    {
+      id: "6",
+      title: "Approved Assignment",
+      count: 28,
+      discount: 4,
+      discountColor: "green",
+      icon: AppImage.dashboard_ic,
+      iconBgColor: "#E9F7EF",
+      redirectionScreen: "approved_assignment",
+    },
+    {
+      id: "7",
+      title: "Under Review Assignment",
+      count: 15,
+      discount: 2,
+      discountColor: "orange",
+      icon: AppImage.stories_ic,
+      iconBgColor: "#FFF3E0",
+      redirectionScreen: "review_assignment",
+    },
+    {
+      id: "8",
+      title: "Rejected Assignment",
+      count: 9,
+      discount: -3,
+      discountColor: "red",
+      icon: AppImage.assignment_ic,
+      iconBgColor: "#FFE5E5",
+      redirectionScreen: "rejected_assignment",
+    },
+  ],
+  others: [
+    {
+      id: "9",
+      title: "Feedback Submitted",
+      count: 11,
+      discount: 0,
+      discountColor: "blue",
+      icon: AppImage.stories_ic,
+      iconBgColor: "#EAF2FF",
+      redirectionScreen: "feedback_submitted",
+    },
+    {
+      id: "10",
+      title: "Feedback Approved",
+      count: 6,
+      discount: 2,
+      discountColor: "green",
+      icon: AppImage.dashboard_ic,
+      iconBgColor: "#E9F7EF",
+      redirectionScreen: "feedback_approved",
+    },
+    {
+      id: "11",
+      title: "Feedback Review",
+      count: 4,
+      discount: 1,
+      discountColor: "orange",
+      icon: AppImage.assignment_ic,
+      iconBgColor: "#FFF3E0",
+      redirectionScreen: "feedback_review",
+    },
+    {
+      id: "12",
+      title: "Feedback Rejected",
+      count: 3,
+      discount: -1,
+      discountColor: "red",
+      icon: AppImage.stories_ic,
+      iconBgColor: "#FFE5E5",
+      redirectionScreen: "feedback_rejected",
+    },
+  ],
+};
+
+interface CardItem {
+  id: string;
+  title: string;
+  count: number;
+  discount: number;
+  discountColor: string;
+  icon?: string;
+  iconBgColor?: string;
+  redirectionScreen: string;
+}
+
+interface Category {
+  id: string;
+  title: string;
+  data: CardItem[];
+}
+
 
 const Home: React.FC = ({ navigation }) => {
-  const [search, setSearch] = useState<string>("");
+
   const [data, setData] = useState(dummyData)
 
   const handlenewstory = () => {
@@ -65,6 +215,11 @@ const Home: React.FC = ({ navigation }) => {
   const handleViewMyAssignments = () => {
     navigation.navigate("AssignmentsScreen")
   }
+
+  const categoryList: Category[] = Object.keys(data).map((key) => ({
+    title: key.charAt(0).toUpperCase() + key.slice(1),
+    data: (data as any)[key],
+  }));
 
   const handleCardClicked = (redirectionScreen: string) => {
 
@@ -94,39 +249,38 @@ const Home: React.FC = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
-      {/* Create New Story Button */}
-      <TouchableOpacity onPress={handlenewstory} style={styles.createButton}>
-        <Image source={AppImage.stories_ic} style={styles.btnImageStyle} />
-        <Text style={styles.createButtonText}>{AppString.common.createNewStory}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={handleViewMyAssignments} style={[styles.createButton, { backgroundColor: AppColor.ffffff }]}>
-        <Image source={AppImage.assignment_ic} style={[styles.btnImageStyle, { tintColor: AppColor.mainColor }]} />
-        <Text style={[styles.createButtonText, { color: AppColor.mainColor }]}>{AppString.common.viewMyAssignments}</Text>
-      </TouchableOpacity>
+    <GlobalSafeArea style={styles.container}>
 
       <FlatList
-        data={data}
+        data={categoryList}
+        keyExtractor={(item) => item.title}
         renderItem={({ item }) => (
-          <DashboardCard
-            title={item.title}
-            count={item.count}
-            discount={item.discount}
-            discountColor={item.discountColor}
-            icon={item.icon}
-            iconBgColor={item.iconBgColor}
-            onPress={handleCardClicked.bind(null, item.redirectionScreen)}
-          />
+          <View style={{ marginBottom: 12 }}>
+            <GlobalText style={styles.cardsTitle}>{item.title}</GlobalText>
+            <FlatList
+              data={item.data}
+              keyExtractor={(subItem) => subItem.id}
+              numColumns={2}
+              columnWrapperStyle={styles.row}
+              contentContainerStyle={styles.listContainer}
+              scrollEnabled={false} // prevent scroll conflict
+              renderItem={({ item: card }) => (
+                <DashboardCard
+                  title={card.title}
+                  count={card.count}
+                  discount={card.discount}
+                  discountColor={card.discountColor}
+                  icon={card.icon}
+                  iconBgColor={card.iconBgColor}
+                  onPress={() => handleCardClicked(card.redirectionScreen)}
+                />
+              )}
+            />
+          </View>
         )}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
       />
 
-    </View>
+    </GlobalSafeArea>
   );
 };
 
@@ -232,9 +386,16 @@ const styles = StyleSheet.create({
     resizeMode: 'contain'
   },
   listContainer: {
-    paddingVertical: 12,
+    paddingVertical: 2,
   },
   row: {
     justifyContent: "space-between",
   },
+  cardsTitle: {
+    paddingHorizontal: 12,
+    fontSize: 24,
+    fontWeight: 500,
+    color: AppColor.mainColor,
+    marginTop: 12
+  }
 });

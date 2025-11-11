@@ -9,6 +9,7 @@ import {
   ListRenderItem,
 } from "react-native";
 import { AppColor } from "../../config/AppColor";
+import { AppString } from "../../strings";
 
 // 🧩 Interface for Story data model
 export interface Story {
@@ -70,7 +71,7 @@ const StoriesScreen: React.FC = ({navigation}) => {
 
         {/* Edit Button */}
         {!item.isPublished && <TouchableOpacity>
-          <Text style={styles.editText}>Edit</Text>
+          <Text style={styles.editText}>{AppString.common.edit}</Text>
         </TouchableOpacity>}
       </View>
 
@@ -83,7 +84,7 @@ const StoriesScreen: React.FC = ({navigation}) => {
       <View style={styles.cardFooter}>
         <Text style={styles.date}>{item.date}</Text>
         <TouchableOpacity>
-          <Text style={styles.deleteText}>Delete</Text>
+          <Text style={styles.deleteText}>{AppString.common.delete}</Text>
         </TouchableOpacity>
       </View>
     </View>

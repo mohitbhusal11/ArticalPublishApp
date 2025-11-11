@@ -16,6 +16,10 @@ export interface User {
   securityQuestionId: number;
   securityAnswer: string;
   businessUnitName: string;
+  fcmToken: string;
+  platform: string;
+  fcmTokenUpdatedAt: string;
+  deviceId: string
 }
 
 export interface DeleteUser {

@@ -13,4 +13,8 @@ export const AppImage = {
     stories_ic: require('../assets/images/stories_ic.png'),
     assignment_ic: require('../assets/images/assignment_ic.png'),
     setting_ic: require('../assets/images/setting_ic.png'),
+    profile_placeholder_ic: require('../assets/images/profile_placeholder_ic.jpg'),
+    setting_row_password_ic: require('../assets/images/setting_row_password_ic.png'),
+    delete_user_ic: require('../assets/images/delete_user_ic.png'),
+    setting_row_logout_ic: require('../assets/images/setting_row_logout_ic.png'),
 }

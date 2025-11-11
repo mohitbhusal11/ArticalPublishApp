@@ -1,22 +1,28 @@
-import React from "react";
-import {
-    View,
-    TouchableOpacity,
-    Image,
-    StyleSheet,
-} from "react-native";
+import React, { useEffect } from "react";
+import { View, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { AppColor } from "../config/AppColor";
 import { AppImage } from "../config/AppImage";
 import Home from "../screen/Home/Home";
-import BottomNotificationListScreen from "../screen/BottomNotificationListScreen/BottomNotificationListScreen";
 import StoriesScreen from "../screen/StoriesScreen/StoriesScreen";
 import AssignmentsScreen from "../screen/AssignmentsScreen/AssignmentsScreen";
 import SettingsScreen from "../screen/SettingsScreen/SettingsScreen";
+import { fetchUserDetails } from "../services/calls/userService";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../redux/store";
 
 const Tab = createBottomTabNavigator();
 
-const BottomNavigation = ({ navigation }) => {
+const BottomNavigation = ({ navigation }: any) => {
+    const token = useSelector((state: RootState) => state.auth.token);
+    const dispatch = useDispatch<AppDispatch>();
+    useEffect(() => {
+        console.log("in bottomsheet useefffect: ", token);
+        if (token) {
+            dispatch(fetchUserDetails());
+        }
+    }, [dispatch, token]);
+
     return (
         <Tab.Navigator
             screenOptions={{
@@ -114,18 +120,11 @@ export default BottomNavigation;
 const styles = StyleSheet.create({
     tabBar: {
         position: "absolute",
-        // bottom: 20,
         left: 20,
         right: 20,
         height: 65,
         backgroundColor: AppColor.ffffff,
-        // borderRadius: 30,
-        // shadowColor: "#000",
-        // shadowOpacity: 0.08,
         shadowOffset: { width: 0, height: 4 },
-        // shadowRadius: 10,
-        // elevation: 8,
-        // borderTopWidth: 0,
     },
     icon: {
         width: 24,
@@ -134,7 +133,7 @@ const styles = StyleSheet.create({
     },
     centerButtonContainer: {
         position: "absolute",
-        top: -30, // half-overlap
+        top: -30,
         alignSelf: "center",
     },
     centerButton: {
