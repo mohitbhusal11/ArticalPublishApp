@@ -33,6 +33,8 @@ export const AppString = {
     submit: "Submit",
     cancel: "Cancel",
     insert: "Insert",
+    delete: "Delete",
+    edit: "Edit",
     insertLink: "Insert Link",
     createNewStory: "Create New Story",
     viewMyAssignments: "View My Assignments",
