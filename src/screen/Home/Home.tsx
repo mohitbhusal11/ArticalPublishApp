@@ -44,7 +44,7 @@ const sampleData: Story[] = [
   },
 ];
 
-const Home: React.FC = ({navigation}) => {
+const Home: React.FC = ({ navigation }) => {
   const [search, setSearch] = useState<string>("");
   const [stories, setStories] = useState<Story[]>(sampleData);
 
@@ -69,9 +69,10 @@ const Home: React.FC = ({navigation}) => {
         </View>
 
         {/* Edit Button */}
-        {!item.isPublished && <TouchableOpacity>
-          <Text style={styles.editText}>Edit</Text>
-        </TouchableOpacity>}
+        {/* {!item.isPublished &&
+          <TouchableOpacity>
+            <Text style={styles.editText}>Edit</Text>
+          </TouchableOpacity>} */}
       </View>
 
       {/* Description (HTML stripped) */}
@@ -82,9 +83,9 @@ const Home: React.FC = ({navigation}) => {
       {/* Footer */}
       <View style={styles.cardFooter}>
         <Text style={styles.date}>{item.date}</Text>
-        <TouchableOpacity>
+        {!item.isPublished && <TouchableOpacity>
           <Text style={styles.deleteText}>Delete</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>}
       </View>
     </View>
   );
