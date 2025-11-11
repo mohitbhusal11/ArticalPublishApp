@@ -4,122 +4,128 @@ import {
   Text,
   View,
   TouchableOpacity,
-  TextInput,
   FlatList,
-  ListRenderItem,
+  Image,
 } from "react-native";
 import { AppColor } from "../../config/AppColor";
+import { AppImage } from "../../config/AppImage";
+import { AppString } from "../../strings";
+import DashboardCard from "../../component/DashboardCard";
+import ToastUtils from "../../utils/toast";
 
-// 🧩 Interface for Story data model
-export interface Story {
-  id: string;
-  title: string;
-  description: string; // HTML string
-  date: string;
-  isPublished: boolean;
-}
-
-// 🧩 Helper function to strip HTML tags for preview
-const stripHtml = (html: string): string => {
-  return html.replace(/<[^>]+>/g, "").trim();
-};
-
-// 🧩 Sample data (same as API response format)
-const sampleData: Story[] = [
+const dummyData = [
   {
     id: "1",
-    title: "My First Story",
-    description:
-      "<div>this is description&nbsp;</div><h3>this is heading h3</h3><div><br></div><div>there will be html data.</div>",
-    date: "Nov 10, 2025",
-    isPublished: true,
+    title: "Story Submitted",
+    count: 147,
+    discount: 5,
+    discountColor: "red",
+    icon: AppImage.assignment_ic,
+    iconBgColor: "#EAF2FF",
+    redirectionScreen: "all_story"
   },
   {
     id: "2",
-    title: "A Beautiful Journey",
-    description:
-      "<div>Exploring the world of creativity through stories and imagination.</div>",
-    date: "Nov 09, 2025",
-    isPublished: false,
+    title: "Approved",
+    count: 98,
+    discount: 5,
+    discountColor: "red",
+    icon: AppImage.stories_ic,
+    iconBgColor: "#E9F7EF",
+    redirectionScreen: "approved_story"
   },
-];
+  {
+    id: "3",
+    title: "Pending",
+    count: 21,
+    discount: 2,
+    discountColor: "orange",
+    icon: AppImage.dashboard_ic,
+    iconBgColor: "#E9F7EF",
+    redirectionScreen: "pending_story"
+  },
+  {
+    id: "4",
+    title: "Rejected",
+    count: 12,
+    discount: 3,
+    discountColor: "red",
+    redirectionScreen: "rejected_story"
+  },
+]
 
 const Home: React.FC = ({ navigation }) => {
   const [search, setSearch] = useState<string>("");
-  const [stories, setStories] = useState<Story[]>(sampleData);
-
-  const renderCard: ListRenderItem<Story> = ({ item }) => (
-    <View style={styles.card}>
-      {/* Header */}
-      <View style={styles.cardHeader}>
-        <Text style={styles.title} numberOfLines={1}>
-          {item.title}
-        </Text>
-
-        {/* Status Badge */}
-        <View
-          style={[
-            styles.statusBadge,
-            { backgroundColor: item.isPublished ? "#4CAF50" : "#F39C12" },
-          ]}
-        >
-          <Text style={styles.statusText}>
-            {item.isPublished ? "Published" : "Draft"}
-          </Text>
-        </View>
-
-        {/* Edit Button */}
-        {/* {!item.isPublished &&
-          <TouchableOpacity>
-            <Text style={styles.editText}>Edit</Text>
-          </TouchableOpacity>} */}
-      </View>
-
-      {/* Description (HTML stripped) */}
-      <Text style={styles.description} numberOfLines={3}>
-        {stripHtml(item.description)}
-      </Text>
-
-      {/* Footer */}
-      <View style={styles.cardFooter}>
-        <Text style={styles.date}>{item.date}</Text>
-        {!item.isPublished && <TouchableOpacity>
-          <Text style={styles.deleteText}>Delete</Text>
-        </TouchableOpacity>}
-      </View>
-    </View>
-  );
+  const [data, setData] = useState(dummyData)
 
   const handlenewstory = () => {
     navigation.navigate("EditorScreen")
+  }
+
+  const handleViewMyAssignments = () => {
+    navigation.navigate("AssignmentsScreen")
+  }
+
+  const handleCardClicked = (redirectionScreen: string) => {
+
+    console.log(redirectionScreen);
+
+    switch (redirectionScreen) {
+      case "all_story":
+        navigation.navigate("StoriesScreen", { filter: "all_story" })
+        break;
+      case "approved_story":
+        navigation.navigate("StoriesScreen", { filter: "approved_story" })
+        break;
+      case "pending_story":
+        navigation.navigate("StoriesScreen", { filter: "pending_story" })
+        break;
+      case "rejected_story":
+        navigation.navigate("StoriesScreen", { filter: "rejected_story" })
+        break;
+
+      default:
+        ToastUtils.info("This card don't have redirection screen.")
+        navigation.navigate("StoriesScreen", { filter: "all_story" })
+        break;
+    }
+
+
   }
 
   return (
     <View style={styles.container}>
       {/* Create New Story Button */}
       <TouchableOpacity onPress={handlenewstory} style={styles.createButton}>
-        <Text style={styles.createButtonText}>Create New Story</Text>
+        <Image source={AppImage.stories_ic} style={styles.btnImageStyle} />
+        <Text style={styles.createButtonText}>{AppString.common.createNewStory}</Text>
       </TouchableOpacity>
 
-      {/* Search Bar */}
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search stories..."
-        placeholderTextColor="#777"
-        value={search}
-        onChangeText={setSearch}
-      />
+      <TouchableOpacity onPress={handleViewMyAssignments} style={[styles.createButton, { backgroundColor: AppColor.ffffff }]}>
+        <Image source={AppImage.assignment_ic} style={[styles.btnImageStyle, { tintColor: AppColor.mainColor }]} />
+        <Text style={[styles.createButtonText, { color: AppColor.mainColor }]}>{AppString.common.viewMyAssignments}</Text>
+      </TouchableOpacity>
 
-      {/* FlatList */}
       <FlatList
-        data={stories.filter((s) =>
-          s.title.toLowerCase().includes(search.toLowerCase())
+        data={data}
+        renderItem={({ item }) => (
+          <DashboardCard
+            title={item.title}
+            count={item.count}
+            discount={item.discount}
+            discountColor={item.discountColor}
+            icon={item.icon}
+            iconBgColor={item.iconBgColor}
+            onPress={handleCardClicked.bind(null, item.redirectionScreen)}
+          />
         )}
         keyExtractor={(item) => item.id}
-        renderItem={renderCard}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
       />
+
     </View>
   );
 };
@@ -144,6 +150,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    flexDirection: 'row',
+    gap: 10
   },
   createButtonText: {
     color: "#fff",
@@ -217,5 +225,16 @@ const styles = StyleSheet.create({
     color: "#E74C3C",
     fontWeight: "600",
     fontSize: 13,
+  },
+  btnImageStyle: {
+    width: 18,
+    height: 18,
+    resizeMode: 'contain'
+  },
+  listContainer: {
+    paddingVertical: 12,
+  },
+  row: {
+    justifyContent: "space-between",
   },
 });

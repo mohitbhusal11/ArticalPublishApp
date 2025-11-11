@@ -5,6 +5,9 @@ import LoginScreen from '../screen/LoginScreen/LoginScreen';
 import ForgotPasswordScreen from '../screen/ForgotPasswordScreen/ForgotPasswordScreen';
 import ResetPasswordScreen from '../screen/ResetPasswordScreen/ResetPasswordScreen';
 import EditorScreen from '../screen/EditorScreen/EditorScreen';
+import StoriesScreen from '../screen/StoriesScreen/StoriesScreen';
+import AssignmentsScreen from '../screen/AssignmentsScreen/AssignmentsScreen';
+import SettingsScreen from '../screen/SettingsScreen/SettingsScreen';
 
 export type RootStackParamList = {
   BottomNavigation: undefined;
@@ -12,6 +15,9 @@ export type RootStackParamList = {
   ForgotPasswordScreen: undefined;
   ResetPasswordScreen: { userId: string };
   EditorScreen: undefined;
+  StoriesScreen: undefined;
+  AssignmentsScreen: undefined;
+  SettingsScreen: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -25,6 +31,9 @@ const MainNavigation = () => {
         <>
           <Stack.Screen name="BottomNavigation" component={BottomNavigation} />
           <Stack.Screen name="EditorScreen" component={EditorScreen} />
+          <Stack.Screen name="StoriesScreen" component={StoriesScreen} />
+          <Stack.Screen name="AssignmentsScreen" component={AssignmentsScreen} />
+          <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
 
         </>
       ) : (

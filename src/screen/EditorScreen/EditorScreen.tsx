@@ -185,6 +185,7 @@ const EditorScreen = () => {
             >
                 <Text style={styles.label}>Title</Text>
                 <TextInput
+                    maxLength={200}
                     placeholder="Enter your title..."
                     value={title}
                     onChangeText={setTitle}
@@ -246,25 +247,25 @@ const EditorScreen = () => {
                 </View>
 
                 <RichEditor
-                        ref={richText}
-                        placeholder="Start writing something awesome..."
-                        style={styles.editor}
-                        initialContentHTML=""
-                        onChange={(text) => setHtmlContent(text)}
-                        editorStyle={{
-                            backgroundColor: "#fff",
-                            color: "#222",
-                            placeholderColor: "#aaa",
-                            contentCSSText: `
+                    ref={richText}
+                    placeholder="Start writing something awesome..."
+                    style={styles.editor}
+                    initialContentHTML=""
+                    onChange={(text) => setHtmlContent(text)}
+                    editorStyle={{
+                        backgroundColor: "#fff",
+                        color: "#222",
+                        placeholderColor: "#aaa",
+                        contentCSSText: `
                             font-size: 16px;
                             line-height: 24px;
                             overflow-y: auto;
                             padding: 10px;
                         `,
-                        }}
+                    }}
 
 
-                    />
+                />
 
                 <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
                     <GlobalText style={styles.submitText}>{AppString.common.submit}</GlobalText>

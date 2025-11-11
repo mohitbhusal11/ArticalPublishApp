@@ -34,5 +34,7 @@ export const AppString = {
     cancel: "Cancel",
     insert: "Insert",
     insertLink: "Insert Link",
+    createNewStory: "Create New Story",
+    viewMyAssignments: "View My Assignments",
   },
 };

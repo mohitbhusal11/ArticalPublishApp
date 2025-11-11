@@ -89,10 +89,6 @@ const StoriesScreen: React.FC = ({navigation}) => {
     </View>
   );
 
-  const handlenewstory = () => {
-    navigation.navigate("EditorScreen")
-  }
-
   return (
     <View style={styles.container}>
       {/* Create New Story Button */}
