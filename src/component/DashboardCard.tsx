@@ -36,7 +36,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
         <View style={styles.textContainer}>
           <GlobalText style={styles.count}>{count}</GlobalText>
           <GlobalText style={[styles.discount, { color: discountColor }]}>
-            ↓ {discount}%
+            {discount >= 0 ? "↑" : "↓" }  {discount}%
           </GlobalText>
         </View>
       </View>

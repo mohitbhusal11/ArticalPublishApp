@@ -125,17 +125,6 @@ const SettingsScreen = ({ navigation }: any) => {
             }
           />
 
-          {/* <View style={styles.divider} />
-
-          <SettingsRow
-            icon={AppImage.setting_row_report_ic}
-            title={AppString.common.dailyCollectionReport}
-            subtitle={AppString.common.dailyCollectionReportDesc}
-            onPress={
-              handleApprovedSuccessfullyScreen
-            }
-          /> */}
-
           <View style={styles.divider} />
 
           <SettingsRow
@@ -152,8 +141,6 @@ const SettingsScreen = ({ navigation }: any) => {
             title={AppString.common.logOut}
             onPress={() => setShowLogout(true)}
           />
-
-          <View style={styles.divider} />
 
         </View>
 

@@ -18,7 +18,7 @@ const dummyData = [
     id: "1",
     title: "Story Submitted",
     count: 147,
-    discount: 5,
+    discount: -5,
     discountColor: "red",
     icon: AppImage.assignment_ic,
     iconBgColor: "#EAF2FF",
@@ -29,7 +29,7 @@ const dummyData = [
     title: "Approved",
     count: 98,
     discount: 5,
-    discountColor: "red",
+    discountColor: "green",
     icon: AppImage.stories_ic,
     iconBgColor: "#E9F7EF",
     redirectionScreen: "approved_story"
@@ -39,7 +39,7 @@ const dummyData = [
     title: "Pending",
     count: 21,
     discount: 2,
-    discountColor: "orange",
+    discountColor: "green",
     icon: AppImage.dashboard_ic,
     iconBgColor: "#E9F7EF",
     redirectionScreen: "pending_story"
@@ -49,13 +49,13 @@ const dummyData = [
     title: "Rejected",
     count: 12,
     discount: 3,
-    discountColor: "red",
+    discountColor: "green",
     redirectionScreen: "rejected_story"
   },
 ]
 
 const Home: React.FC = ({ navigation }) => {
-  const [search, setSearch] = useState<string>("");
+ 
   const [data, setData] = useState(dummyData)
 
   const handlenewstory = () => {
