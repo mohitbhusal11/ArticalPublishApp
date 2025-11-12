@@ -21,12 +21,22 @@ const customFontAction = "customFontPicker";
 const handleHead1 = ({ tintColor }: { tintColor: string }) => (
     <Text style={{ color: tintColor, fontWeight: "bold" }}>H1</Text>
 );
+const handleHead2 = ({ tintColor }: { tintColor: string }) => (
+    <Text style={{ color: tintColor, fontWeight: "bold" }}>H2</Text>
+);
 const handleHead3 = ({ tintColor }: { tintColor: string }) => (
     <Text style={{ color: tintColor, fontWeight: "bold" }}>H3</Text>
+);
+const handleHead4 = ({ tintColor }: { tintColor: string }) => (
+    <Text style={{ color: tintColor, fontWeight: "bold" }}>H4</Text>
 );
 const handleHead5 = ({ tintColor }: { tintColor: string }) => (
     <Text style={{ color: tintColor, fontWeight: "bold" }}>H5</Text>
 );
+const handleHead6 = ({ tintColor }: { tintColor: string }) => (
+    <Text style={{ color: tintColor, fontWeight: "bold" }}>H6</Text>
+);
+
 
 const FontIcon = ({ tintColor }: { tintColor: string }) => (
     <Text style={{ color: tintColor, fontWeight: "bold" }}>Aa</Text>
@@ -41,6 +51,9 @@ const EditorScreen = () => {
     const [showLinkModal, setShowLinkModal] = useState(false);
     const [linkTitle, setLinkTitle] = useState('');
     const [linkUrl, setLinkUrl] = useState('');
+    const [showTableModal, setShowTableModal] = useState(false);
+    const [rows, setRows] = useState("");
+    const [cols, setCols] = useState("");
 
     const [showFontModal, setShowFontModal] = useState(false);
     const [fonts] = useState([
@@ -150,6 +163,50 @@ const EditorScreen = () => {
         setShowLinkModal(true);
     };
 
+    const handleFontList = () => {
+        setShowFontModal(true)
+    }
+
+    const handleInsertTable = () => {
+        setShowTableModal(true);
+    };
+
+    const handleConfirmInsert = () => {
+        const numRows = parseInt(rows, 10);
+        const numCols = parseInt(cols, 10);
+
+        if (!numRows || !numCols || numRows <= 0 || numCols <= 0) {
+            Alert.alert("Invalid Input", "Please enter valid row and column numbers.");
+            return;
+        }
+
+        let tableHTML = `<table border="1" style="border-collapse: collapse; width: 100%;"><tr>`;
+        // Add headers
+        for (let c = 1; c <= numCols; c++) {
+            tableHTML += `<th>Header ${c}</th>`;
+        }
+        tableHTML += `</tr>`;
+
+        // Add rows (empty cells)
+        for (let r = 1; r <= numRows; r++) {
+            tableHTML += `<tr>`;
+            for (let c = 1; c <= numCols; c++) {
+                tableHTML += `<td style="height: 35px; padding: 8px; min-width: 60px;">&nbsp;</td>`;
+            }
+            tableHTML += `</tr>`;
+        }
+        tableHTML += `</table><br/>`;
+
+        // Insert into the editor
+        richText.current?.insertHTML(tableHTML);
+
+        // Reset
+        setRows("");
+        setCols("");
+        setShowTableModal(false);
+    };
+
+
     const insertLink = () => {
         if (linkTitle && linkUrl) {
             richText.current?.insertLink(linkTitle, linkUrl);
@@ -183,7 +240,7 @@ const EditorScreen = () => {
                 showsVerticalScrollIndicator={false}
                 nestedScrollEnabled={true}
             >
-                <Text style={styles.label}>Title</Text>
+                <Text style={styles.label}>{AppString.common.title}</Text>
                 <TextInput
                     maxLength={200}
                     placeholder="Enter your title..."
@@ -192,7 +249,7 @@ const EditorScreen = () => {
                     style={styles.titleInput}
                     placeholderTextColor="#aaa"
                 />
-                <Text style={styles.title}>Description</Text>
+                <Text style={styles.title}>{AppString.common.description}</Text>
 
                 <View style={styles.toolbarWrapper}>
                     <ScrollView
@@ -200,6 +257,18 @@ const EditorScreen = () => {
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.toolbarScroll}>
                         <View style={styles.toolbarContainer}>
+                            <TouchableOpacity
+                                style={styles.customToolButton}
+                                onPress={handleFontList}>
+                                <Text style={styles.customToolText}>Aa</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.customToolButton}
+                                onPress={handleInsertTable}>
+                                <Text style={[styles.customToolText, {fontSize: 20}]}>▦</Text>
+                            </TouchableOpacity>
+                            
                             <RichToolbar
                                 editor={richText}
                                 selectedIconTint="#2563eb"
@@ -208,9 +277,11 @@ const EditorScreen = () => {
                                 iconSize={20}
                                 actions={[
                                     actions.heading1,
+                                    actions.heading2,
                                     actions.heading3,
+                                    actions.heading4,
                                     actions.heading5,
-                                    customFontAction,
+                                    actions.heading6,
                                     actions.setBold,
                                     actions.setItalic,
                                     actions.setUnderline,
@@ -226,21 +297,17 @@ const EditorScreen = () => {
                                 ]}
                                 iconMap={{
                                     [actions.heading1]: handleHead1,
+                                    [actions.heading2]: handleHead2,
                                     [actions.heading3]: handleHead3,
+                                    [actions.heading4]: handleHead4,
                                     [actions.heading5]: handleHead5,
+                                    [actions.heading6]: handleHead6,
                                     [customFontAction]: FontIcon,
                                 }}
                                 onPressAddImage={handleAddImage}
                                 // onPressAddImage={handleAddImageBase64}
                                 // onPressAddImage={handleAddImageUpload}
                                 onInsertLink={handleInsertLink}
-                                onPress={(action: string) => {
-                                    if (action === customFontAction) {
-                                        richText.current?.blurContentEditor();
-                                        setTimeout(() => setShowFontModal(true), 150);
-                                    }
-                                }}
-
                             />
                         </View>
                     </ScrollView>
@@ -333,7 +400,7 @@ const EditorScreen = () => {
                         maxHeight: '60%',
                     }}>
                         <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 10 }}>
-                            Select Font
+                            {AppString.common.selectFont}
                         </Text>
                         <ScrollView>
                             {fonts.map((font) => (
@@ -360,8 +427,52 @@ const EditorScreen = () => {
                                 borderRadius: 8,
                                 alignItems: 'center',
                             }}>
-                            <Text style={{ fontWeight: '500' }}>Cancel</Text>
+                            <Text style={{ fontWeight: '500' }}>{AppString.common.cancel}</Text>
                         </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                visible={showTableModal}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowTableModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>{AppString.common.insertTable}</Text>
+
+                        <TextInput
+                            style={styles.input}
+                            keyboardType="numeric"
+                            placeholder="Rows"
+                            value={rows}
+                            onChangeText={setRows}
+                        />
+
+                        <TextInput
+                            style={styles.input}
+                            keyboardType="numeric"
+                            placeholder="Columns"
+                            value={cols}
+                            onChangeText={setCols}
+                        />
+
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.cancelButton]}
+                                onPress={() => setShowTableModal(false)}
+                            >
+                                <Text style={styles.cancelText}>{AppString.common.cancel}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.button, styles.insertButton]}
+                                onPress={handleConfirmInsert}
+                            >
+                                <Text style={styles.insertText}>{AppString.common.insert}</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </Modal>

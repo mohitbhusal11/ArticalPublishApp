@@ -129,5 +129,55 @@ export const styles = StyleSheet.create({
         color: '#333',
         fontWeight: '500',
     },
+    customToolButton: {
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        marginHorizontal: 2,
+        borderRadius: 6,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "transparent",
+    },
+    customToolText: {
+        color: "#444",
+        fontSize: 16,
+        fontWeight: "600",
+    },
+
+    modalOverlay: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0,0,0,0.4)",
+    },
+    modalContent: {
+        width: "85%",
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 20,
+        shadowColor: "#000",
+        shadowOpacity: 0.15,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#111827",
+        marginBottom: 15,
+        textAlign: "center",
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: "#e2e8f0",
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        marginVertical: 8,
+        fontSize: 16,
+        color: "#111",
+    },
+
 
 });
