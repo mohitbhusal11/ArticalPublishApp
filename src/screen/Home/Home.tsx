@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   FlatList,
@@ -14,6 +14,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { imageBaseURL } from "../../services/api/axiosInstance";
 import { styles } from "./style";
+import { DashboardCategory, DashboardItem, DashboardResponse, fetchDashboard } from "../../services/calls/dashboardService";
+import { useIsFocused } from "@react-navigation/native";
 
 const dummyData = [
   {
@@ -157,10 +159,11 @@ const dummyData = [
 ];
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
-  const [data] = useState(dummyData);
+  const [data, setData] = useState<DashboardCategory[]>([]);
   const [hasNotification, setHasNotification] = useState(true);
   const user = useSelector((state: RootState) => state.userDetails.details);
   const imgUrl = imageBaseURL + user?.imgUrl
+  const isFocused = useIsFocused();
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -194,6 +197,26 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
   };
 
+  const handleEditProfileClick = () => {
+    navigation.navigate('EditProfileScreen')
+  }
+
+  const getDashboardData = async () => {
+    try {
+      const data = await fetchDashboard(); // 👈 now call only once
+      console.log("response: ", data);
+      setData(data.payload);
+    } catch (err) {
+      console.error("Error loading dashboard:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      getDashboardData();
+    }
+  }, [isFocused]);
+
   return (
     <GlobalSafeArea style={styles.container}>
       <View style={styles.topBar}>
@@ -208,7 +231,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           />
           {hasNotification && <View style={styles.notificationDot} />}
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleEditProfileClick} >
           <Image
             source={user?.imgUrl
               ? { uri: imgUrl }

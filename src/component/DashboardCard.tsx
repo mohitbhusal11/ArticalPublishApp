@@ -5,13 +5,13 @@ import { AppColor } from "../config/AppColor";
 import GlobalText from "./GlobalText";
 
 type DashboardCardProps = {
-    title: string;
-    count: number;
-    discount: number;
-    discountColor?: string;
-    icon?: any;
-    onPress?: () => void;
-    iconBgColor?: string;
+  title: string;
+  count: number;
+  discount: number;
+  discountColor?: string;
+  icon?: any;
+  onPress?: () => void;
+  iconBgColor?: string;
 };
 
 const defaultIcon = AppImage.setting_ic;
@@ -25,18 +25,21 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
   onPress,
   iconBgColor = "#EAF2FF",
 }) => {
+
+  console.log("icon: ", icon);
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
       <GlobalText numberOfLines={1} style={styles.title}>{title}</GlobalText>
       <View style={styles.row}>
         <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
-          <Image source={icon} style={styles.icon} resizeMode="contain" />
+          <Image source={typeof icon === "string" ? { uri: icon } : icon} style={styles.icon} resizeMode="contain" />
         </View>
 
         <View style={styles.textContainer}>
           <GlobalText style={styles.count}>{count}</GlobalText>
           <GlobalText style={[styles.discount, { color: discountColor }]}>
-            {discount >= 0 ? "↑" : "↓" }  {discount}%
+            {discount >= 0 ? "↑" : "↓"}  {discount}%
           </GlobalText>
         </View>
       </View>
