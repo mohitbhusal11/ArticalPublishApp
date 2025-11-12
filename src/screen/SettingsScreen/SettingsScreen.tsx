@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { AppString } from '../../strings'
 import { styles } from './style'
-import { Image, ScrollView, TouchableOpacity, View } from 'react-native'
+import { Image, Pressable, ScrollView, TouchableOpacity, View } from 'react-native'
 import { AppImage } from '../../config/AppImage'
 import { persistor, RootState, store } from '../../redux/store'
 import { useSelector } from 'react-redux'
@@ -80,7 +80,7 @@ const SettingsScreen = ({ navigation }: any) => {
     <GlobalSafeArea style={styles.mainContainer} >
       <ScrollView style={styles.scrollerView} >
 
-        <View style={styles.myProfileView} >
+        <Pressable onPress={handleEditProfileClick} style={styles.myProfileView} >
           <View style={styles.leftSideProfileCard} >
             <Image style={styles.profileImage} source={user?.imgUrl
               ? { uri: imgUrl }
@@ -99,7 +99,7 @@ const SettingsScreen = ({ navigation }: any) => {
               <GlobalText style={styles.editProfileText} >{AppString.common.viewProfile}</GlobalText>
             </TouchableOpacity>
           </View>
-        </View>
+        </Pressable>
 
         <View style={styles.moreOptionContainer} >
           <SettingsRow
@@ -139,6 +139,7 @@ const SettingsScreen = ({ navigation }: any) => {
           <SettingsRow
             icon={AppImage.setting_row_logout_ic}
             title={AppString.common.logOut}
+            subtitle={AppString.common.logoutDesc}
             onPress={() => setShowLogout(true)}
           />
 

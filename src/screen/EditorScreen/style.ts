@@ -103,11 +103,6 @@ export const styles = StyleSheet.create({
         flexGrow: 1,
     },
 
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 10,
-    },
     button: {
         flex: 1,
         paddingVertical: 10,
@@ -150,17 +145,7 @@ export const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "rgba(0,0,0,0.4)",
     },
-    modalContent: {
-        width: "85%",
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        padding: 20,
-        shadowColor: "#000",
-        shadowOpacity: 0.15,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        elevation: 3,
-    },
+
     modalTitle: {
         fontSize: 18,
         fontWeight: "600",
@@ -168,16 +153,78 @@ export const styles = StyleSheet.create({
         marginBottom: 15,
         textAlign: "center",
     },
-    input: {
-        borderWidth: 1,
-        borderColor: "#e2e8f0",
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        marginVertical: 8,
-        fontSize: 16,
-        color: "#111",
+
+    iconStyle: {
+        fontWeight: "bold"
     },
+
+
+    overlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalBox: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+    },
+    linkTitle: {
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    textInput: {
+        borderBottomWidth: 1,
+        marginBottom: 10,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    fontModalBox: {
+        width: '80%',
+        backgroundColor: AppColor.ffffff,
+        borderRadius: 10,
+        padding: 20,
+        maxHeight: '60%',
+    },
+    fontModalTitle: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        marginBottom: 10,
+    },
+    fontOption: {
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderColor: '#eee',
+    },
+    fontCancelButton: {
+        marginTop: 15,
+        backgroundColor: '#eee',
+        paddingVertical: 10,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    fontCancelText: {
+        fontWeight: '500',
+    },
+
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+    },
+    input: {
+        borderBottomWidth: 1,
+        marginBottom: 10,
+    },
+
+    fontlistitemtext: {
+        fontSize: 18
+    }
 
 
 });

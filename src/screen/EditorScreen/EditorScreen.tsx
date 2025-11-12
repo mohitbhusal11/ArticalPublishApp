@@ -19,27 +19,27 @@ import { AppColor } from "../../config/AppColor";
 const customFontAction = "customFontPicker";
 
 const handleHead1 = ({ tintColor }: { tintColor: string }) => (
-    <Text style={{ color: tintColor, fontWeight: "bold" }}>H1</Text>
+    <Text style={[styles.iconStyle, { color: tintColor }]}>H1</Text>
 );
 const handleHead2 = ({ tintColor }: { tintColor: string }) => (
-    <Text style={{ color: tintColor, fontWeight: "bold" }}>H2</Text>
+    <Text style={[styles.iconStyle, { color: tintColor }]}>H2</Text>
 );
 const handleHead3 = ({ tintColor }: { tintColor: string }) => (
-    <Text style={{ color: tintColor, fontWeight: "bold" }}>H3</Text>
+    <Text style={[styles.iconStyle, { color: tintColor }]}>H3</Text>
 );
 const handleHead4 = ({ tintColor }: { tintColor: string }) => (
-    <Text style={{ color: tintColor, fontWeight: "bold" }}>H4</Text>
+    <Text style={[styles.iconStyle, { color: tintColor }]}>H4</Text>
 );
 const handleHead5 = ({ tintColor }: { tintColor: string }) => (
-    <Text style={{ color: tintColor, fontWeight: "bold" }}>H5</Text>
+    <Text style={[styles.iconStyle, { color: tintColor }]}>H5</Text>
 );
 const handleHead6 = ({ tintColor }: { tintColor: string }) => (
-    <Text style={{ color: tintColor, fontWeight: "bold" }}>H6</Text>
+    <Text style={[styles.iconStyle, { color: tintColor }]}>H6</Text>
 );
 
 
 const FontIcon = ({ tintColor }: { tintColor: string }) => (
-    <Text style={{ color: tintColor, fontWeight: "bold" }}>Aa</Text>
+    <Text style={[styles.iconStyle, { color: tintColor }]}>Aa</Text>
 );
 
 
@@ -65,6 +65,9 @@ const EditorScreen = () => {
         "Tahoma",
         "Trebuchet MS",
         "Helvetica",
+
+        // Hindi fonts
+        "Noto Sans"
     ]);
 
     const handleAddImage = async () => {
@@ -237,7 +240,7 @@ const EditorScreen = () => {
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
+                // showsVerticalScrollIndicator={false}
                 nestedScrollEnabled={true}
             >
                 <Text style={styles.label}>{AppString.common.title}</Text>
@@ -247,7 +250,7 @@ const EditorScreen = () => {
                     value={title}
                     onChangeText={setTitle}
                     style={styles.titleInput}
-                    placeholderTextColor="#aaa"
+                    placeholderTextColor={AppColor.color_aaa}
                 />
                 <Text style={styles.title}>{AppString.common.description}</Text>
 
@@ -266,9 +269,9 @@ const EditorScreen = () => {
                             <TouchableOpacity
                                 style={styles.customToolButton}
                                 onPress={handleInsertTable}>
-                                <Text style={[styles.customToolText, {fontSize: 20}]}>▦</Text>
+                                <Text style={styles.customToolText}>▦</Text>
                             </TouchableOpacity>
-                            
+
                             <RichToolbar
                                 editor={richText}
                                 selectedIconTint="#2563eb"
@@ -320,12 +323,13 @@ const EditorScreen = () => {
                     initialContentHTML=""
                     onChange={(text) => setHtmlContent(text)}
                     editorStyle={{
-                        backgroundColor: "#fff",
-                        color: "#222",
-                        placeholderColor: "#aaa",
+                        backgroundColor: AppColor.ffffff,
+                        color: AppColor.color_222,
+                        placeholderColor: AppColor.color_aaa,
                         contentCSSText: `
                             font-size: 16px;
                             line-height: 24px;
+                            font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
                             overflow-y: auto;
                             padding: 10px;
                         `,
@@ -338,27 +342,22 @@ const EditorScreen = () => {
                     <GlobalText style={styles.submitText}>{AppString.common.submit}</GlobalText>
                 </TouchableOpacity>
             </ScrollView>
-
+            
             <Modal visible={showLinkModal} transparent animationType="fade" onRequestClose={closeModal}>
-                <View style={{
-                    flex: 1, justifyContent: 'center', alignItems: 'center',
-                    backgroundColor: 'rgba(0,0,0,0.5)'
-                }}>
-                    <View style={{
-                        width: '80%', backgroundColor: '#fff', borderRadius: 10, padding: 20
-                    }}>
-                        <GlobalText style={{ fontWeight: 'bold', marginBottom: 10 }}>{AppString.common.insertLink}</GlobalText>
+                <View style={styles.overlay}>
+                    <View style={styles.modalBox}>
+                        <GlobalText style={styles.linkTitle}>{AppString.common.insertLink}</GlobalText>
                         <TextInput
                             placeholder="Link Title"
                             value={linkTitle}
                             onChangeText={setLinkTitle}
-                            style={{ borderBottomWidth: 1, marginBottom: 10 }}
+                            style={styles.textInput}
                         />
                         <TextInput
                             placeholder="Link URL"
                             value={linkUrl}
                             onChangeText={setLinkUrl}
-                            style={{ borderBottomWidth: 1, marginBottom: 20 }}
+                            style={[styles.textInput, { marginBottom: 20 }]}
                         />
 
                         <View style={styles.buttonRow}>
@@ -386,48 +385,27 @@ const EditorScreen = () => {
                 animationType="fade"
                 onRequestClose={() => setShowFontModal(false)}
             >
-                <View style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: 'rgba(0,0,0,0.5)'
-                }}>
-                    <View style={{
-                        width: '80%',
-                        backgroundColor: AppColor.ffffff,
-                        borderRadius: 10,
-                        padding: 20,
-                        maxHeight: '60%',
-                    }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 10 }}>
+                <View style={styles.overlay}>
+                    <View style={styles.fontModalBox}>
+                        <Text style={styles.fontModalTitle}>
                             {AppString.common.selectFont}
                         </Text>
                         <ScrollView>
                             {fonts.map((font) => (
                                 <TouchableOpacity
                                     key={font}
-                                    style={{
-                                        paddingVertical: 8,
-                                        borderBottomWidth: 1,
-                                        borderColor: '#eee',
-                                    }}
+                                    style={styles.fontOption}
                                     onPress={() => handleSelectFont(font)}
                                 >
-                                    <Text style={{ fontFamily: font, fontSize: 18 }}>{font}</Text>
+                                    <Text style={[styles.fontlistitemtext, {fontFamily: font}]}>{font}</Text>
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>
 
                         <TouchableOpacity
                             onPress={() => setShowFontModal(false)}
-                            style={{
-                                marginTop: 15,
-                                backgroundColor: '#eee',
-                                paddingVertical: 10,
-                                borderRadius: 8,
-                                alignItems: 'center',
-                            }}>
-                            <Text style={{ fontWeight: '500' }}>{AppString.common.cancel}</Text>
+                            style={styles.fontCancelButton}>
+                            <Text style={styles.fontCancelText}>{AppString.common.cancel}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

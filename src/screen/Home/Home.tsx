@@ -14,149 +14,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { imageBaseURL } from "../../services/api/axiosInstance";
 import { styles } from "./style";
-import { DashboardCategory, DashboardItem, DashboardResponse, fetchDashboard } from "../../services/calls/dashboardService";
+import { DashboardCategory, fetchDashboard } from "../../services/calls/dashboardService";
 import { useIsFocused } from "@react-navigation/native";
-
-const dummyData = [
-  {
-    id: "1",
-    title: "Stories",
-    data: [
-      {
-        id: "1",
-        title: "Story Submitted",
-        count: 147,
-        discount: -5,
-        discountColor: "red",
-        icon: AppImage.assignment_ic,
-        iconBgColor: "#EAF2FF",
-        redirectionScreen: "submitted_story",
-      },
-      {
-        id: "2",
-        title: "Approved Story",
-        count: 98,
-        discount: 5,
-        discountColor: "green",
-        icon: AppImage.stories_ic,
-        iconBgColor: "#E9F7EF",
-        redirectionScreen: "approved_story",
-      },
-      {
-        id: "3",
-        title: "Under Review",
-        count: 42,
-        discount: 3,
-        discountColor: "orange",
-        icon: AppImage.dashboard_ic,
-        iconBgColor: "#FFF3E0",
-        redirectionScreen: "review_story",
-      },
-      {
-        id: "4",
-        title: "Rejected Story",
-        count: 19,
-        discount: -2,
-        discountColor: "red",
-        icon: AppImage.assignment_ic,
-        iconBgColor: "#FFE5E5",
-        redirectionScreen: "rejected_story",
-      },
-    ],
-  },
-  {
-    id: "2",
-    title: "Assignments",
-    data: [
-      {
-        id: "5",
-        title: "Assignment Submitted",
-        count: 36,
-        discount: -1,
-        discountColor: "red",
-        icon: AppImage.assignment_ic,
-        iconBgColor: "#EAF2FF",
-        redirectionScreen: "submitted_assignment",
-      },
-      {
-        id: "6",
-        title: "Approved Assignment",
-        count: 28,
-        discount: 4,
-        discountColor: "green",
-        icon: AppImage.dashboard_ic,
-        iconBgColor: "#E9F7EF",
-        redirectionScreen: "approved_assignment",
-      },
-      {
-        id: "7",
-        title: "Under Review Assignment",
-        count: 15,
-        discount: 2,
-        discountColor: "orange",
-        icon: AppImage.stories_ic,
-        iconBgColor: "#FFF3E0",
-        redirectionScreen: "review_assignment",
-      },
-      {
-        id: "8",
-        title: "Rejected Assignment",
-        count: 9,
-        discount: -3,
-        discountColor: "red",
-        icon: AppImage.assignment_ic,
-        iconBgColor: "#FFE5E5",
-        redirectionScreen: "rejected_assignment",
-      },
-    ],
-  },
-  {
-    id: "3",
-    title: "Others",
-    data: [
-      {
-        id: "9",
-        title: "Feedback Submitted",
-        count: 11,
-        discount: 0,
-        discountColor: "blue",
-        icon: AppImage.stories_ic,
-        iconBgColor: "#EAF2FF",
-        redirectionScreen: "feedback_submitted",
-      },
-      {
-        id: "10",
-        title: "Feedback Approved",
-        count: 6,
-        discount: 2,
-        discountColor: "green",
-        icon: AppImage.dashboard_ic,
-        iconBgColor: "#E9F7EF",
-        redirectionScreen: "feedback_approved",
-      },
-      {
-        id: "11",
-        title: "Feedback Review",
-        count: 4,
-        discount: 1,
-        discountColor: "orange",
-        icon: AppImage.assignment_ic,
-        iconBgColor: "#FFF3E0",
-        redirectionScreen: "feedback_review",
-      },
-      {
-        id: "12",
-        title: "Feedback Rejected",
-        count: 3,
-        discount: -1,
-        discountColor: "red",
-        icon: AppImage.stories_ic,
-        iconBgColor: "#FFE5E5",
-        redirectionScreen: "feedback_rejected",
-      },
-    ],
-  },
-];
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [data, setData] = useState<DashboardCategory[]>([]);
@@ -243,13 +102,13 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
       <FlatList
         data={data}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 12 }}>
             <GlobalText style={styles.cardsTitle}>{item.title}</GlobalText>
             <FlatList
               data={item.data}
-              keyExtractor={(subItem) => subItem.id}
+              keyExtractor={(subItem) => subItem.id.toString()}
               numColumns={2}
               columnWrapperStyle={styles.row}
               contentContainerStyle={styles.listContainer}

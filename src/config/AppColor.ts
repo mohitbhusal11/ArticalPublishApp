@@ -13,6 +13,8 @@ export const AppColor = {
   color_727272: "#727272",
   color_C0C0C0: "#C0C0C0",
   color_555555: "#555555",
+  color_222: "#222",
+  color_aaa: "#aaa",
 
 
 
