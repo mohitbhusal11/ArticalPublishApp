@@ -224,7 +224,38 @@ export const styles = StyleSheet.create({
 
     fontlistitemtext: {
         fontSize: 18
+    },
+    topActions: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 10,
+        paddingHorizontal: 10,
+    },
+
+    draftText: {
+        fontSize: 16,
+        color: AppColor.mainColor,
+        marginRight: 20,
+        fontWeight: "500",
+    },
+    submitTextTopBar: {
+        fontSize: 16,
+        color: AppColor.color_27AE60,
+        marginRight: 20,
+        fontWeight: "500",
+    },
+
+    clearText: {
+        fontSize: 16,
+        color: "#ff3b30",
+        fontWeight: "500",
+    },
+    topbarcontainer: {
+        paddingHorizontal: 16,
+        paddingTop: 20,
     }
+
 
 
 });

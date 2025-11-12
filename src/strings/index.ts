@@ -65,5 +65,7 @@ export const AppString = {
     submitStory: "Submit Story",
     description: "Description",
     title: "Title",
+    draft: "Draft",
+    clear: "Clear",
   },
 };

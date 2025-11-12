@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     TextInput,
     Modal,
+    Image,
 } from "react-native";
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import { launchImageLibrary } from "react-native-image-picker";
@@ -15,6 +16,7 @@ import { styles } from "./style";
 import { AppString } from "../../strings";
 import GlobalText from "../../component/GlobalText";
 import { AppColor } from "../../config/AppColor";
+import { AppImage } from "../../config/AppImage";
 
 const customFontAction = "customFontPicker";
 
@@ -237,12 +239,33 @@ const EditorScreen = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                keyboardShouldPersistTaps="handled"
-                // showsVerticalScrollIndicator={false}
-                nestedScrollEnabled={true}
-            >
+            <View style={styles.topbarcontainer} >
+                <View style={styles.topActions}>
+                    <TouchableOpacity onPress={() => {
+                        setTitle("");
+                        setHtmlContent("");
+                        richText.current?.setContentHTML("");
+                    }}>
+                        <Text style={styles.clearText}>{AppString.common.clear}</Text>
+                    </TouchableOpacity>
+
+                    <View style={{flexDirection: 'row'}} >
+                        <TouchableOpacity onPress={() => {
+                            console.log("Draft saved:", { title, htmlContent });
+                            Alert.alert("Draft Saved", "Your draft has been saved temporarily.");
+                        }}>
+                            <Text style={styles.draftText}>{AppString.common.draft}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}
+                            onPress={handleSubmit}>
+                            <Image source={AppImage.submit_ic} style={{ width: 16, height: 16, tintColor: AppColor.color_27AE60 }} />
+                            <Text style={styles.submitTextTopBar}>{AppString.common.submit}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
                 <Text style={styles.label}>{AppString.common.title}</Text>
                 <TextInput
                     maxLength={200}
@@ -315,6 +338,86 @@ const EditorScreen = () => {
                         </View>
                     </ScrollView>
                 </View>
+            </View>
+
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+                // showsVerticalScrollIndicator={false}
+                nestedScrollEnabled={true}
+            >
+                {/* <Text style={styles.label}>{AppString.common.title}</Text>
+                <TextInput
+                    maxLength={200}
+                    placeholder="Enter your title..."
+                    value={title}
+                    onChangeText={setTitle}
+                    style={styles.titleInput}
+                    placeholderTextColor={AppColor.color_aaa}
+                />
+                <Text style={styles.title}>{AppString.common.description}</Text>
+
+                <View style={styles.toolbarWrapper}>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.toolbarScroll}>
+                        <View style={styles.toolbarContainer}>
+                            <TouchableOpacity
+                                style={styles.customToolButton}
+                                onPress={handleFontList}>
+                                <Text style={styles.customToolText}>Aa</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.customToolButton}
+                                onPress={handleInsertTable}>
+                                <Text style={styles.customToolText}>▦</Text>
+                            </TouchableOpacity>
+
+                            <RichToolbar
+                                editor={richText}
+                                selectedIconTint="#2563eb"
+                                iconTint="#666"
+                                style={styles.toolbar}
+                                iconSize={20}
+                                actions={[
+                                    actions.heading1,
+                                    actions.heading2,
+                                    actions.heading3,
+                                    actions.heading4,
+                                    actions.heading5,
+                                    actions.heading6,
+                                    actions.setBold,
+                                    actions.setItalic,
+                                    actions.setUnderline,
+                                    actions.insertBulletsList,
+                                    actions.insertOrderedList,
+                                    actions.insertLink,
+                                    actions.insertImage,
+                                    actions.alignLeft,
+                                    actions.alignCenter,
+                                    actions.alignRight,
+                                    actions.undo,
+                                    actions.redo,
+                                ]}
+                                iconMap={{
+                                    [actions.heading1]: handleHead1,
+                                    [actions.heading2]: handleHead2,
+                                    [actions.heading3]: handleHead3,
+                                    [actions.heading4]: handleHead4,
+                                    [actions.heading5]: handleHead5,
+                                    [actions.heading6]: handleHead6,
+                                    [customFontAction]: FontIcon,
+                                }}
+                                onPressAddImage={handleAddImage}
+                                // onPressAddImage={handleAddImageBase64}
+                                // onPressAddImage={handleAddImageUpload}
+                                onInsertLink={handleInsertLink}
+                            />
+                        </View>
+                    </ScrollView>
+                </View> */}
 
                 <RichEditor
                     ref={richText}
@@ -338,11 +441,11 @@ const EditorScreen = () => {
 
                 />
 
-                <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+                {/* <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
                     <GlobalText style={styles.submitText}>{AppString.common.submit}</GlobalText>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </ScrollView>
-            
+
             <Modal visible={showLinkModal} transparent animationType="fade" onRequestClose={closeModal}>
                 <View style={styles.overlay}>
                     <View style={styles.modalBox}>
@@ -397,7 +500,7 @@ const EditorScreen = () => {
                                     style={styles.fontOption}
                                     onPress={() => handleSelectFont(font)}
                                 >
-                                    <Text style={[styles.fontlistitemtext, {fontFamily: font}]}>{font}</Text>
+                                    <Text style={[styles.fontlistitemtext, { fontFamily: font }]}>{font}</Text>
                                 </TouchableOpacity>
                             ))}
                         </ScrollView>

@@ -18,4 +18,5 @@ export const AppImage = {
     delete_user_ic: require('../assets/images/delete_user_ic.png'),
     setting_row_logout_ic: require('../assets/images/setting_row_logout_ic.png'),
     notification: require('../assets/images/notification.png'),
+    submit_ic: require('../assets/images/submit_ic.png'),
 }
