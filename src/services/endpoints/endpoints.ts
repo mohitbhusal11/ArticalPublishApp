@@ -16,4 +16,7 @@ export const Endpoints = {
   IMAGE: {
     imageUploadComplaintRegister: "images/upload"
   },
+  Home: {
+    dashboard: "user-dashboards/me"
+  }
 };

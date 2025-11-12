@@ -13,6 +13,8 @@ export const AppColor = {
   color_727272: "#727272",
   color_C0C0C0: "#C0C0C0",
   color_555555: "#555555",
+  color_222: "#222",
+  color_aaa: "#aaa",
 
 
 
@@ -104,14 +106,11 @@ export const AppColor = {
   color_8D8D8D: "#8D8D8D",
   color_F4FFF9: "#F4FFF9",
   color_FCE8E8: "#FCE8E8",
-  color_Accepted: "#4CAF50",
-  color_Assigned: "#2196F3",
-  color_InProgress: "#FF9800",
-  color_Pending: "#FFC107",
-  color_Rejected: "#F44336",
-  color_Unassigned: "#9E9E9E",
-  color_Hold: "#FF9800",
-  color_Closed: "#607D8B",
+
+  color_F39C12: "#F39C12",
+  color_3498DB: "#3498DB",
+  color_27AE60: "#27AE60",
+  color_BDC3C7: "#BDC3C7",
 
 
   

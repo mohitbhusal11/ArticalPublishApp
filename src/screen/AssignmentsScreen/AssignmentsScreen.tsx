@@ -7,6 +7,8 @@ import {
   TextInput,
   FlatList,
 } from "react-native";
+import { AppString } from "../../strings";
+import { AppColor } from "../../config/AppColor";
 
 export interface Assignment {
   id: string;
@@ -76,13 +78,13 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
     const getBadgeColor = () => {
       switch (item.status) {
         case "pending":
-          return "#F39C12";
+          return AppColor.color_F39C12;
         case "accepted":
-          return "#3498DB";
+          return AppColor.color_3498DB;
         case "completed":
-          return "#27AE60";
+          return AppColor.color_27AE60;
         default:
-          return "#BDC3C7";
+          return AppColor.color_BDC3C7;
       }
     };
 
@@ -102,24 +104,24 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
         <Text style={styles.description}>{item.description}</Text>
 
         <View style={styles.metaRow}>
-          <Text style={styles.metaText}>📅 Deadline: {item.deadline}</Text>
-          <Text style={styles.metaText}>🧑‍💼 Assigned By: {item.assignedBy}</Text>
+          <Text style={styles.metaText}>📅 {AppString.common.deadline}: {item.deadline}</Text>
+          <Text style={styles.metaText}>🧑‍💼 {AppString.common.assignedBy}: {item.assignedBy}</Text>
         </View>
 
-        {/* Buttons based on status */}
+
         {item.status === "pending" && (
           <View style={styles.buttonRow}>
             <TouchableOpacity
               style={[styles.button, styles.acceptBtn]}
               onPress={() => handleAccept(item.id)}
             >
-              <Text style={styles.btnText}>Accept</Text>
+              <Text style={styles.btnText}>{AppString.common.accept}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.declineBtn]}
               onPress={() => handleDecline(item.id)}
             >
-              <Text style={styles.btnText}>Decline</Text>
+              <Text style={styles.btnText}>{AppString.common.deadline}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -129,7 +131,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
             style={[styles.button, styles.submitBtn]}
             onPress={() => handleSubmitStory(item.id)}
           >
-            <Text style={styles.btnText}>Submit Story</Text>
+            <Text style={styles.btnText}>{AppString.common.submitStory}</Text>
           </TouchableOpacity>
         )}
       </TouchableOpacity>

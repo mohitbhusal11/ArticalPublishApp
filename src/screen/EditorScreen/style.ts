@@ -103,11 +103,6 @@ export const styles = StyleSheet.create({
         flexGrow: 1,
     },
 
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 10,
-    },
     button: {
         flex: 1,
         paddingVertical: 10,
@@ -129,5 +124,138 @@ export const styles = StyleSheet.create({
         color: '#333',
         fontWeight: '500',
     },
+    customToolButton: {
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        marginHorizontal: 2,
+        borderRadius: 6,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "transparent",
+    },
+    customToolText: {
+        color: "#444",
+        fontSize: 16,
+        fontWeight: "600",
+    },
+
+    modalOverlay: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0,0,0,0.4)",
+    },
+
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#111827",
+        marginBottom: 15,
+        textAlign: "center",
+    },
+
+    iconStyle: {
+        fontWeight: "bold"
+    },
+
+
+    overlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalBox: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+    },
+    linkTitle: {
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    textInput: {
+        borderBottomWidth: 1,
+        marginBottom: 10,
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    fontModalBox: {
+        width: '80%',
+        backgroundColor: AppColor.ffffff,
+        borderRadius: 10,
+        padding: 20,
+        maxHeight: '60%',
+    },
+    fontModalTitle: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        marginBottom: 10,
+    },
+    fontOption: {
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderColor: '#eee',
+    },
+    fontCancelButton: {
+        marginTop: 15,
+        backgroundColor: '#eee',
+        paddingVertical: 10,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    fontCancelText: {
+        fontWeight: '500',
+    },
+
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+    },
+    input: {
+        borderBottomWidth: 1,
+        marginBottom: 10,
+    },
+
+    fontlistitemtext: {
+        fontSize: 18
+    },
+    topActions: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 10,
+        paddingHorizontal: 10,
+    },
+
+    draftText: {
+        fontSize: 16,
+        color: AppColor.mainColor,
+        marginRight: 20,
+        fontWeight: "500",
+    },
+    submitTextTopBar: {
+        fontSize: 16,
+        color: AppColor.color_27AE60,
+        marginRight: 20,
+        fontWeight: "500",
+    },
+
+    clearText: {
+        fontSize: 16,
+        color: "#ff3b30",
+        fontWeight: "500",
+    },
+    topbarcontainer: {
+        paddingHorizontal: 16,
+        paddingTop: 20,
+    }
+
+
 
 });
