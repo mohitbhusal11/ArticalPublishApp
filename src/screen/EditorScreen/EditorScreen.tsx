@@ -17,6 +17,9 @@ import { AppString } from "../../strings";
 import GlobalText from "../../component/GlobalText";
 import { AppColor } from "../../config/AppColor";
 import { AppImage } from "../../config/AppImage";
+import sanitizeHtml from "sanitize-html";
+import beautify from "js-beautify";
+import { postStory, PostStoryModal } from "../../services/calls/stories";
 
 const customFontAction = "customFontPicker";
 
@@ -97,23 +100,83 @@ const EditorScreen = () => {
             return;
         }
 
-        // const finalPayload = {
-        //     title: `<h1>${title.trim()}</h1>`,
-        //     description: htmlContent.trim(),
-        // };
-        const finalPayload = {
-            title: title.trim(),
-            description: htmlContent.trim(),
+        // let cleanDescription = sanitizeHtml(htmlContent, {
+        //     allowedTags: [
+        //         "p",
+        //         "b",
+        //         "i",
+        //         "u",
+        //         "strong",
+        //         "em",
+        //         "h1",
+        //         "h2",
+        //         "h3",
+        //         "h4",
+        //         "h5",
+        //         "h6",
+        //         "ul",
+        //         "ol",
+        //         "li",
+        //         "a",
+        //         "img",
+        //         "video",
+        //         "source",
+        //         "br",
+        //         "span",
+        //     ],
+        //     allowedAttributes: {
+        //         a: ["href", "name", "target", "rel"],
+        //         img: ["src", "alt", "width", "height"],
+        //         video: ["src", "controls", "poster", "width", "height"],
+        //         source: ["src", "type"],
+        //         span: ["style"],
+        //         p: ["style"],
+        //     },
+        //     allowedSchemes: ["http", "https", "data"],
+        //     selfClosing: ["img", "br", "source"],
+        //     transformTags: {
+        //         div: "p", // convert <div> → <p>
+        //         br: () => "", // remove redundant <br>
+        //         p: sanitizeHtml.simpleTransform("p", {}, true),
+        //     },
+        //     textFilter: (text) =>
+        //         text
+        //             .replace(/&nbsp;/g, " ")
+        //             .replace(/&gt;/g, ">")
+        //             .replace(/&lt;/g, "<")
+        //             .replace(/&amp;/g, "&")
+        //             .replace(/\s+/g, " "), // normalize spaces
+        // });
 
+        // cleanDescription = cleanDescription
+        //     .replace(/(<p>\s*<\/p>)+/g, "")
+        //     .replace(/(<br\s*\/?>\s*){2,}/g, "<br />")
+        //     .replace(/\s*<\/(p|h\d)>\s*/g, "</$1>\n")
+        //     .trim();
+
+        // const prettyHtml = beautify.html(cleanDescription, {
+        //     indent_size: 2,
+        //     preserve_newlines: true,
+        //     unformatted: ["b", "i", "u", "span"],
+        // });
+
+        const finalPayload : PostStoryModal = {
+            headLine: title.trim(),
+            description: htmlContent.trim(),
         };
 
         try {
             console.log("📤 Payload to send:", finalPayload);
+            const response = await postStory(finalPayload)
+            console.log("response poststory: ", response);
+            
+            // await api.post("/your-endpoint", finalPayload);
         } catch (error) {
             console.error("API Error:", error);
-
+            Alert.alert("Error", "Something went wrong while submitting.");
         }
     };
+
 
     const handleAddImageBase64 = async () => {
         try {
@@ -140,7 +203,7 @@ const EditorScreen = () => {
     const handleAddImageUpload = async () => {
         try {
             const result = await launchImageLibrary({
-                mediaType: "mixed",
+                mediaType: "photo",
                 quality: 0.8,
             });
 
@@ -156,6 +219,59 @@ const EditorScreen = () => {
                 });
 
                 console.log("formData: ", formData);
+
+                const staticImageUrl = "https://raj-express-staging.s3.ap-south-1.amazonaws.com/images/02_svg_4e91631d67.png";
+                richText.current?.insertImage(staticImageUrl);
+
+            }
+        } catch (error) {
+            console.error("Image Upload Error:", error);
+            Alert.alert("Error", "Something went wrong while uploading the image.");
+        }
+    };
+
+    const handleAddVideoUpload = async () => {
+        try {
+            const result = await launchImageLibrary({
+                mediaType: "video",
+                videoQuality: "medium",
+            });
+
+            if (result.didCancel) return;
+
+            if (result.assets && result.assets.length > 0) {
+                const asset = result.assets[0];
+                if (!asset.uri) return;
+
+                const formData = new FormData();
+                formData.append("video", {
+                    uri: asset.uri,
+                    type: asset.type || "video/mp4",
+                    name: asset.fileName || "upload.mp4",
+                });
+
+                console.log("Uploading video...", formData);
+
+                // const response = await fetch("https://your-api-endpoint.com/upload/video", {
+                //     method: "POST",
+                //     headers: {
+                //         "Content-Type": "multipart/form-data",
+                //     },
+                //     body: formData,
+                // });
+
+                // const data = await response.json();
+                // console.log("Upload Response:", data);
+
+                // if (response.ok && data.url) {
+                //     // Assuming API returns uploaded file URL as `data.url`
+                //     richText.current?.insertVideo(data.url);
+                // } else {
+                //     Alert.alert("Upload failed", "Could not upload the video.");
+                // }
+
+                const staticVideoUrl = "https://raj-express-staging.s3.ap-south-1.amazonaws.com/raj-express-staging/videos/0743dd55-37ae-4f69-a4f8-14cef534b0ba.webm";
+                richText.current?.insertVideo(staticVideoUrl);
 
             }
         } catch (error) {
@@ -249,7 +365,7 @@ const EditorScreen = () => {
                         <Text style={styles.clearText}>{AppString.common.clear}</Text>
                     </TouchableOpacity>
 
-                    <View style={{flexDirection: 'row'}} >
+                    <View style={{ flexDirection: 'row' }} >
                         <TouchableOpacity onPress={() => {
                             console.log("Draft saved:", { title, htmlContent });
                             Alert.alert("Draft Saved", "Your draft has been saved temporarily.");
@@ -315,6 +431,7 @@ const EditorScreen = () => {
                                     actions.insertOrderedList,
                                     actions.insertLink,
                                     actions.insertImage,
+                                    actions.insertVideo,
                                     actions.alignLeft,
                                     actions.alignCenter,
                                     actions.alignRight,
@@ -330,9 +447,10 @@ const EditorScreen = () => {
                                     [actions.heading6]: handleHead6,
                                     [customFontAction]: FontIcon,
                                 }}
-                                onPressAddImage={handleAddImage}
+                                // onPressAddImage={handleAddImage}
                                 // onPressAddImage={handleAddImageBase64}
-                                // onPressAddImage={handleAddImageUpload}
+                                onPressAddImage={handleAddImageUpload}
+                                insertVideo={handleAddVideoUpload}
                                 onInsertLink={handleInsertLink}
                             />
                         </View>
@@ -435,6 +553,12 @@ const EditorScreen = () => {
                             font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
                             overflow-y: auto;
                             padding: 10px;
+                            img {
+                                max-width: 100%;
+                                height: auto;
+                                border-radius: 8px;
+                                margin-vertical: 8px;
+                            }
                         `,
                     }}
 

@@ -18,5 +18,9 @@ export const Endpoints = {
   },
   Home: {
     dashboard: "user-dashboards/me"
+  },
+  Stories: {
+    postStory: "stories",
+    getStory: "stories",
   }
 };
