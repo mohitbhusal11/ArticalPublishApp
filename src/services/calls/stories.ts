@@ -2,8 +2,16 @@ import axiosInstance from "../api/axiosInstance";
 import { Endpoints } from "../endpoints/endpoints";
 
 export interface PostStoryModal {
-    headLine: string;
-    description: string;
+  headLine: string;
+  description: string;
+  media?: MediaModal[];
+}
+
+export interface MediaModal {
+  mediaType: "Photo" | "Video",
+  caption: string,
+  shotTime: string,
+  filePath: string
 }
 
 export interface Story {
@@ -47,23 +55,59 @@ export interface PaginatedStories {
 }
 
 
-export const postStory = async (payload: PostStoryModal) => {
-    try {
-        const response = await axiosInstance.post(Endpoints.Stories.postStory, payload);
-        return response.data;
-    } catch (error: any) {
-        console.log("postStory error:", error?.response?.data || error);
-        throw error;
-    }
+export const postStory = async (payload: PostStoryModal, id?: number) => {
+  try {
+    const url = id
+      ? `${Endpoints.Stories.postStory}?storyId=${id}`
+      : Endpoints.Stories.postStory;
+
+    const response = await axiosInstance.post(url, payload);
+    return response.data;
+  } catch (error: any) {
+    console.log("postStory error:", error?.response?.data || error);
+    throw error;
+  }
+};
+
+export const postDraft = async (payload: PostStoryModal, id?: number) => {
+  try {
+    const url = id
+      ? `${Endpoints.Stories.postDraft}?storyId=${id}`
+      : Endpoints.Stories.postDraft;
+
+    const response = await axiosInstance.post(url, payload);
+    return response.data;
+  } catch (error: any) {
+    console.log("postStory error:", error?.response?.data || error);
+    throw error;
+  }
 };
 
 
-export const getStories = async () => {
-    try {
-        const response = await axiosInstance.get<PaginatedStories>(Endpoints.Stories.getStory);
-        return response.data
-    } catch (error) {
-        console.log("getStories error: ", error);
-        throw error;
-    }
-}
+export const getStories = async ({
+  page,
+  pageSize,
+  status,
+  search,
+}: {
+  page: number;
+  pageSize: number;
+  status?: string;
+  search?: string;
+}) => {
+  try {
+    const response = await axiosInstance.get(Endpoints.Stories.getStory, {
+      params: {
+        page,
+        pageSize,
+        status,
+        search,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log("getStories error: ", error);
+    throw error;
+  }
+};

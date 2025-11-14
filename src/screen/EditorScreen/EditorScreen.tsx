@@ -17,9 +17,7 @@ import { AppString } from "../../strings";
 import GlobalText from "../../component/GlobalText";
 import { AppColor } from "../../config/AppColor";
 import { AppImage } from "../../config/AppImage";
-import sanitizeHtml from "sanitize-html";
-import beautify from "js-beautify";
-import { postStory, PostStoryModal } from "../../services/calls/stories";
+import { MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
 
 const customFontAction = "customFontPicker";
@@ -50,7 +48,7 @@ const FontIcon = ({ tintColor }: { tintColor: string }) => (
 
 
 
-const EditorScreen = ({navigation}) => {
+const EditorScreen = ({ navigation }) => {
     const richText = React.useRef<RichEditor>(null);
     const [title, setTitle] = useState("");
     const [htmlContent, setHtmlContent] = useState("");
@@ -60,6 +58,7 @@ const EditorScreen = ({navigation}) => {
     const [showTableModal, setShowTableModal] = useState(false);
     const [rows, setRows] = useState("");
     const [cols, setCols] = useState("");
+    const [mediaList, setMediaList] = useState<MediaModal[]>([])
 
     const [showFontModal, setShowFontModal] = useState(false);
     const [fonts] = useState([
@@ -101,70 +100,12 @@ const EditorScreen = ({navigation}) => {
             return;
         }
 
-        // let cleanDescription = sanitizeHtml(htmlContent, {
-        //     allowedTags: [
-        //         "p",
-        //         "b",
-        //         "i",
-        //         "u",
-        //         "strong",
-        //         "em",
-        //         "h1",
-        //         "h2",
-        //         "h3",
-        //         "h4",
-        //         "h5",
-        //         "h6",
-        //         "ul",
-        //         "ol",
-        //         "li",
-        //         "a",
-        //         "img",
-        //         "video",
-        //         "source",
-        //         "br",
-        //         "span",
-        //     ],
-        //     allowedAttributes: {
-        //         a: ["href", "name", "target", "rel"],
-        //         img: ["src", "alt", "width", "height"],
-        //         video: ["src", "controls", "poster", "width", "height"],
-        //         source: ["src", "type"],
-        //         span: ["style"],
-        //         p: ["style"],
-        //     },
-        //     allowedSchemes: ["http", "https", "data"],
-        //     selfClosing: ["img", "br", "source"],
-        //     transformTags: {
-        //         div: "p", // convert <div> → <p>
-        //         br: () => "", // remove redundant <br>
-        //         p: sanitizeHtml.simpleTransform("p", {}, true),
-        //     },
-        //     textFilter: (text) =>
-        //         text
-        //             .replace(/&nbsp;/g, " ")
-        //             .replace(/&gt;/g, ">")
-        //             .replace(/&lt;/g, "<")
-        //             .replace(/&amp;/g, "&")
-        //             .replace(/\s+/g, " "), // normalize spaces
-        // });
-
-        // cleanDescription = cleanDescription
-        //     .replace(/(<p>\s*<\/p>)+/g, "")
-        //     .replace(/(<br\s*\/?>\s*){2,}/g, "<br />")
-        //     .replace(/\s*<\/(p|h\d)>\s*/g, "</$1>\n")
-        //     .trim();
-
-        // const prettyHtml = beautify.html(cleanDescription, {
-        //     indent_size: 2,
-        //     preserve_newlines: true,
-        //     unformatted: ["b", "i", "u", "span"],
-        // });
-
-        const finalPayload : PostStoryModal = {
+        const finalPayload: PostStoryModal = {
             headLine: title.trim(),
             description: htmlContent.trim(),
+            // media: mediaList
         };
+        console.log("MediaList: ", mediaList);
 
         try {
             console.log("📤 Payload to send:", finalPayload);
@@ -178,26 +119,28 @@ const EditorScreen = ({navigation}) => {
         }
     };
 
+    const handleDraft = async () => {
+        if (!title.trim() || !htmlContent.trim()) {
+            Alert.alert("Missing Data", "Please add both Title and Description!");
+            return;
+        }
 
-    const handleAddImageBase64 = async () => {
+        const finalPayload: PostStoryModal = {
+            headLine: title.trim(),
+            description: htmlContent.trim(),
+            // media: mediaList
+        };
+        console.log("MediaList: ", mediaList);
+
         try {
-            const result = await launchImageLibrary({
-                mediaType: "photo",
-                quality: 0.8,
-                includeBase64: true, // Required to get base64 data
-            });
-
-            if (result.assets && result.assets.length > 0) {
-                const asset = result.assets[0];
-                if (asset.base64 && asset.type) {
-                    const base64Uri = `data:${asset.type};base64,${asset.base64}`;
-                    richText.current?.insertImage(base64Uri);
-                } else if (asset.uri) {
-                    richText.current?.insertImage(asset.uri);
-                }
-            }
+            console.log("📤 Payload to send:", finalPayload);
+            const response = await postDraft(finalPayload)
+            console.log("response poststory: ", response);
+            ToastUtils.success("Story created successfully");
+            navigation.goBack()
         } catch (error) {
-            console.warn("Error picking image:", error);
+            console.error("API Error:", error);
+            Alert.alert("Error", "Something went wrong while submitting.");
         }
     };
 
@@ -220,6 +163,13 @@ const EditorScreen = ({navigation}) => {
                 });
 
                 console.log("formData: ", formData);
+                const mediaPayload: MediaModal = {
+                    mediaType: 'Photo',
+                    caption: '',
+                    shotTime: '',
+                    filePath: asset.fileName || "upload.jpg"
+                }
+                setMediaList(prev => [...prev, mediaPayload])
 
                 const staticImageUrl = "https://raj-express-staging.s3.ap-south-1.amazonaws.com/images/02_svg_4e91631d67.png";
                 richText.current?.insertImage(staticImageUrl);
@@ -252,6 +202,14 @@ const EditorScreen = ({navigation}) => {
                 });
 
                 console.log("Uploading video...", formData);
+
+                const mediaPayload: MediaModal = {
+                    mediaType: 'Video',
+                    caption: '',
+                    shotTime: '',
+                    filePath: asset.fileName || "upload.jpg"
+                }
+                setMediaList(prev => [...prev, mediaPayload])
 
                 // const response = await fetch("https://your-api-endpoint.com/upload/video", {
                 //     method: "POST",
@@ -367,10 +325,7 @@ const EditorScreen = ({navigation}) => {
                     </TouchableOpacity>
 
                     <View style={{ flexDirection: 'row' }} >
-                        <TouchableOpacity onPress={() => {
-                            console.log("Draft saved:", { title, htmlContent });
-                            Alert.alert("Draft Saved", "Your draft has been saved temporarily.");
-                        }}>
+                        <TouchableOpacity onPress={handleDraft}>
                             <Text style={styles.draftText}>{AppString.common.draft}</Text>
                         </TouchableOpacity>
 
@@ -465,78 +420,6 @@ const EditorScreen = ({navigation}) => {
                 // showsVerticalScrollIndicator={false}
                 nestedScrollEnabled={true}
             >
-                {/* <Text style={styles.label}>{AppString.common.title}</Text>
-                <TextInput
-                    maxLength={200}
-                    placeholder="Enter your title..."
-                    value={title}
-                    onChangeText={setTitle}
-                    style={styles.titleInput}
-                    placeholderTextColor={AppColor.color_aaa}
-                />
-                <Text style={styles.title}>{AppString.common.description}</Text>
-
-                <View style={styles.toolbarWrapper}>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.toolbarScroll}>
-                        <View style={styles.toolbarContainer}>
-                            <TouchableOpacity
-                                style={styles.customToolButton}
-                                onPress={handleFontList}>
-                                <Text style={styles.customToolText}>Aa</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.customToolButton}
-                                onPress={handleInsertTable}>
-                                <Text style={styles.customToolText}>▦</Text>
-                            </TouchableOpacity>
-
-                            <RichToolbar
-                                editor={richText}
-                                selectedIconTint="#2563eb"
-                                iconTint="#666"
-                                style={styles.toolbar}
-                                iconSize={20}
-                                actions={[
-                                    actions.heading1,
-                                    actions.heading2,
-                                    actions.heading3,
-                                    actions.heading4,
-                                    actions.heading5,
-                                    actions.heading6,
-                                    actions.setBold,
-                                    actions.setItalic,
-                                    actions.setUnderline,
-                                    actions.insertBulletsList,
-                                    actions.insertOrderedList,
-                                    actions.insertLink,
-                                    actions.insertImage,
-                                    actions.alignLeft,
-                                    actions.alignCenter,
-                                    actions.alignRight,
-                                    actions.undo,
-                                    actions.redo,
-                                ]}
-                                iconMap={{
-                                    [actions.heading1]: handleHead1,
-                                    [actions.heading2]: handleHead2,
-                                    [actions.heading3]: handleHead3,
-                                    [actions.heading4]: handleHead4,
-                                    [actions.heading5]: handleHead5,
-                                    [actions.heading6]: handleHead6,
-                                    [customFontAction]: FontIcon,
-                                }}
-                                onPressAddImage={handleAddImage}
-                                // onPressAddImage={handleAddImageBase64}
-                                // onPressAddImage={handleAddImageUpload}
-                                onInsertLink={handleInsertLink}
-                            />
-                        </View>
-                    </ScrollView>
-                </View> */}
 
                 <RichEditor
                     ref={richText}
@@ -566,9 +449,6 @@ const EditorScreen = ({navigation}) => {
 
                 />
 
-                {/* <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-                    <GlobalText style={styles.submitText}>{AppString.common.submit}</GlobalText>
-                </TouchableOpacity> */}
             </ScrollView>
 
             <Modal visible={showLinkModal} transparent animationType="fade" onRequestClose={closeModal}>

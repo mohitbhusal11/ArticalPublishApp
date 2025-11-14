@@ -17,7 +17,7 @@ import { AppString } from "../../strings";
 import GlobalText from "../../component/GlobalText";
 import { AppColor } from "../../config/AppColor";
 import { AppImage } from "../../config/AppImage";
-import { postStory, PostStoryModal } from "../../services/calls/stories";
+import { MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
 import { styles } from "./style";
 
@@ -74,6 +74,8 @@ const DraftStoryScreen = ({ navigation, route }) => {
         "Noto Sans"
     ]);
 
+    const [mediaList, setMediaList] = useState<MediaModal[]>(item?.mediaList ?? [])
+
     const handleAttachments = async () => {
         try {
             const result = await launchImageLibrary({
@@ -102,11 +104,38 @@ const DraftStoryScreen = ({ navigation, route }) => {
         const finalPayload: PostStoryModal = {
             headLine: title.trim(),
             description: htmlContent.trim(),
+            // media: mediaList
         };
+        console.log("MediaList: ", mediaList);
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postStory(finalPayload)
+            const response = await postStory(finalPayload, item.id)
+            console.log("response poststory: ", response);
+            ToastUtils.success("Story created successfully");
+            navigation.goBack()
+        } catch (error) {
+            console.error("API Error:", error);
+            Alert.alert("Error", "Something went wrong while submitting.");
+        }
+    };
+
+    const handleDraft = async () => {
+        if (!title.trim() || !htmlContent.trim()) {
+            Alert.alert("Missing Data", "Please add both Title and Description!");
+            return;
+        }
+
+        const finalPayload: PostStoryModal = {
+            headLine: title.trim(),
+            description: htmlContent.trim(),
+            // media: mediaList
+        };
+        console.log("MediaList: ", mediaList);
+
+        try {
+            console.log("📤 Payload to send:", finalPayload);
+            const response = await postDraft(finalPayload, item.id)
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
@@ -135,6 +164,13 @@ const DraftStoryScreen = ({ navigation, route }) => {
                 });
 
                 console.log("formData: ", formData);
+                const mediaPayload: MediaModal = {
+                    mediaType: 'Photo',
+                    caption: '',
+                    shotTime: '',
+                    filePath: asset.fileName || "upload.jpg"
+                }
+                setMediaList(prev => [...prev, mediaPayload])
 
                 const staticImageUrl = "https://raj-express-staging.s3.ap-south-1.amazonaws.com/images/02_svg_4e91631d67.png";
                 richText.current?.insertImage(staticImageUrl);
@@ -167,6 +203,13 @@ const DraftStoryScreen = ({ navigation, route }) => {
                 });
 
                 console.log("Uploading video...", formData);
+                const mediaPayload: MediaModal = {
+                    mediaType: 'Video',
+                    caption: '',
+                    shotTime: '',
+                    filePath: asset.fileName || "upload.jpg"
+                }
+                setMediaList(prev => [...prev, mediaPayload])
 
                 // const response = await fetch("https://your-api-endpoint.com/upload/video", {
                 //     method: "POST",
@@ -278,10 +321,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
                     </TouchableOpacity>
 
                     <View style={{ flexDirection: 'row' }} >
-                        <TouchableOpacity onPress={() => {
-                            console.log("Draft saved:", { title, htmlContent });
-                            Alert.alert("Draft Saved", "Your draft has been saved temporarily.");
-                        }}>
+                        <TouchableOpacity onPress={handleDraft}>
                             <Text style={styles.draftText}>{AppString.common.draft}</Text>
                         </TouchableOpacity>
 

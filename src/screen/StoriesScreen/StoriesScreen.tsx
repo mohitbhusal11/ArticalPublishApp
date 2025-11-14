@@ -1,135 +1,181 @@
 import React, { useEffect, useState } from "react";
 import {
-  Text,
   View,
   TouchableOpacity,
   TextInput,
   FlatList,
-  ListRenderItem,
+  ActivityIndicator,
 } from "react-native";
-import { AppString } from "../../strings";
 import { getStories, Story } from "../../services/calls/stories";
-import { useIsFocused } from "@react-navigation/native";
+import { useIsFocused, useRoute } from "@react-navigation/native";
 import { styles } from "./style";
-
-// 🧩 Interface for Story data model
-// export interface Story {
-//   id: string;
-//   title: string;
-//   description: string; // HTML string
-//   date: string;
-//   isPublished: boolean;
-// }
+import GlobalText from "../../component/GlobalText";
+import GlobalSafeArea from "../../component/GlobalSafeArea";
+import { AppColor } from "../../config/AppColor";
 
 const stripHtml = (html: string): string => {
   return html.replace(/<[^>]+>/g, "").trim();
 };
 
-// const sampleData: Story[] = [
-//   {
-//     id: "1",
-//     title: "My First Story",
-//     description:
-//       "<div>this is description&nbsp;</div><h3>this is heading h3</h3><div><br></div><div>there will be html data.</div>",
-//     date: "Nov 10, 2025",
-//     isPublished: true,
-//   },
-//   {
-//     id: "2",
-//     title: "A Beautiful Journey",
-//     description:
-//       "<div>Exploring the world of creativity through stories and imagination.</div>",
-//     date: "Nov 09, 2025",
-//     isPublished: false,
-//   },
-// ];
-
-const StoriesScreen: React.FC = ({ navigation }) => {
-  const [search, setSearch] = useState<string>("");
-  const [stories, setStories] = useState<Story[]>([]);
-  const isFocused = useIsFocused();
-
-
-  const fetchStories = async () => {
-    try {
-      const response = await getStories()
-      console.log("response getStories: ", response);
-      setStories(response.data)
-    } catch (error) {
-      console.log("error in fetchStories: ", error);
-    }
+function getStatusColorAdvanced(status?: string): string {
+  switch (status?.toLowerCase()) {
+    case "draft":
+      return "#E74C3C";
+    case "submit":
+      return "#3B82F6";
+    case "publish":
+      return "#10B981";
+    case "review":
+      return "#F59E0B";
+    default:
+      return "#6B7280";
   }
+}
+
+const filters = ["All", "Approved", "Review", "Draft", "Publish"];
+
+const StoriesScreen = ({ navigation }: any) => {
+  const route = useRoute<any>();
+  const incomingStatus = route.params?.status ?? undefined;
+  console.log("incomingStatus: ", incomingStatus);
+  const isFocused = useIsFocused();
+  const [stories, setStories] = useState<Story[]>([]);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState(incomingStatus);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(20);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [statusTrigger, setStatusTrigger] = useState(0);
+
 
   useEffect(() => {
     if (isFocused) {
-      fetchStories()
+      const normalized =
+        !incomingStatus || incomingStatus.toLowerCase() === "all"
+          ? undefined
+          : incomingStatus.toLowerCase();
+      setStatus(normalized);
+      setStatusTrigger((prev) => prev + 1);
     }
-  }, [isFocused])
+  }, [isFocused, incomingStatus]);
+
+  useEffect(() => {
+    resetAndFetch();
+  }, [status, statusTrigger]);
+
+  const resetAndFetch = () => {
+    setPage(1);
+    setStories([]);
+    setHasMore(true);
+    fetchStories(1, false);
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      resetAndFetch();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const fetchStories = async (pageNumber: number, isLoadMore = false) => {
+    if (loading || loadingMore) return;
+
+    if (isLoadMore) setLoadingMore(true);
+    else setLoading(true);
+
+    try {
+      const query: any = {
+      page: pageNumber,
+      pageSize,
+      search,
+    };
+
+    if (status) {
+      query.status = status;
+    }
+
+    console.log("API Payload:", query);
+
+    const response = await getStories(query);
+
+      const newData = response.data ?? [];
+      const total = response.total ?? 0;
+
+      setStories((prev) => (pageNumber === 1 ? newData : [...prev, ...newData]));
+
+      setHasMore(pageNumber * pageSize < total);
+      console.log(response);
+
+    } catch (error) {
+      console.log("Fetch error:", error);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (!hasMore || loadingMore) return;
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchStories(nextPage, true);
+  };
 
   const handleStoryCard = (item: Story) => {
-    console.log("clicked ");
-
     switch (item.status?.toLowerCase()) {
-      case 'draft':
-        navigation.navigate("DraftStoryScreen", { item: item })
-        return;
-      case 'submit':
-        navigation.navigate("StoryDetailScreen", { item: item })
-        return;
-      case 'publish':
-        navigation.navigate("StoryDetailScreen", { item: item })
-        return;
-      case 'review':
-        navigation.navigate("StoryDetailScreen", { item: item })
+      case "draft":
+        navigation.navigate("DraftStoryScreen", { item });
         return;
       default:
-        navigation.navigate("StoryDetailScreen", { item: item })
+        navigation.navigate("StoryDetailScreen", { item });
         return;
     }
-  }
+  };
 
-  const renderCard: ListRenderItem<Story> = ({ item }) => (
-    <TouchableOpacity onPress={handleStoryCard.bind(null, item)} style={styles.card}>
+  const renderCard = ({ item }: any) => (
+    <TouchableOpacity
+      onPress={() => handleStoryCard(item)}
+      style={styles.card}
+    >
       <View style={styles.cardHeader}>
-        <Text style={styles.title} numberOfLines={1}>
+        <GlobalText style={styles.title} numberOfLines={1}>
           {item.headline}
-        </Text>
+        </GlobalText>
 
-        {/* Status Badge */}
-        {/* <View
+        <View
           style={[
             styles.statusBadge,
-            { backgroundColor: item.isPublished ? "#4CAF50" : "#F39C12" },
+            { backgroundColor: getStatusColorAdvanced(item.status) },
           ]}
         >
-          <Text style={styles.statusText}>
-            {item.isPublished ? "Published" : "Draft"}
-          </Text>
-        </View> */}
-
-        {/* Edit Button */}
-        {/* {!item.isPublished && <TouchableOpacity>
-          <Text style={styles.editText}>{AppString.common.edit}</Text>
-        </TouchableOpacity>} */}
+          <GlobalText style={styles.statusText}>{item.status}</GlobalText>
+        </View>
       </View>
 
-      <Text style={styles.description} numberOfLines={3}>
+      <GlobalText style={styles.description} numberOfLines={3}>
         {stripHtml(item.description)}
-      </Text>
+      </GlobalText>
 
       <View style={styles.cardFooter}>
-        {/* <Text style={styles.date}>{item.date}</Text> */}
-        <Text style={styles.date}>{new Date().getDate()}</Text>
-        <TouchableOpacity>
-          <Text style={styles.deleteText}>{AppString.common.delete}</Text>
-        </TouchableOpacity>
+        <GlobalText style={styles.date}>{item.createdAt}</GlobalText>
       </View>
     </TouchableOpacity>
   );
 
-  return (
-    <View style={styles.container}>
+  const onFilterPress = (filter: string) => {
+    const normalized =
+      filter.toLowerCase() === "all" ? undefined : filter.toLowerCase();
 
+    setStatus(normalized);
+    setStatusTrigger((prev) => prev + 1);
+  };
+
+
+  return (
+    <GlobalSafeArea style={styles.container}>
       <TextInput
         style={styles.searchInput}
         placeholder="Search stories..."
@@ -138,16 +184,78 @@ const StoriesScreen: React.FC = ({ navigation }) => {
         onChangeText={setSearch}
       />
 
+      <View style={{ marginTop: 10, marginBottom: 5, paddingVertical: 2 }}>
+        <FlatList
+          horizontal
+          data={filters}
+          keyExtractor={(item) => item}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 5 }}
+          renderItem={({ item }) => {
+            // const isActive = status === item;
+            const isActive =
+              (item.toLowerCase() === "all" && status === undefined) ||
+              status === item.toLowerCase();
+
+
+            return (
+              <TouchableOpacity
+                onPress={() => onFilterPress(item)}
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 18,
+                  borderRadius: 25,
+                  marginRight: 10,
+                  backgroundColor: isActive ? AppColor.mainColor : AppColor.color_D7D7D7,
+                  shadowColor: "#000",
+                  shadowOpacity: isActive ? 0.25 : 0.1,
+                  shadowRadius: 4,
+                  shadowOffset: { width: 0, height: 2 },
+                  elevation: isActive ? 4 : 1,
+                }}
+              >
+                <GlobalText
+                  style={{
+                    color: isActive ? "white" : "#111",
+                    fontSize: 14,
+                    fontWeight: "600",
+                  }}
+                >
+                  {item}
+                </GlobalText>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </View>
+
       <FlatList
-        data={stories.filter((s) =>
-          s.headline.toLowerCase().includes(search.toLowerCase())
-        )}
+        data={stories}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderCard}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.2}
+        ListFooterComponent={
+          loadingMore ? (
+            <ActivityIndicator size="small" style={{ marginVertical: 16 }} />
+          ) : null
+        }
+        ListEmptyComponent={
+          !loading && (
+            <GlobalText style={{ textAlign: "center", marginTop: 50 }}>
+              No stories found
+            </GlobalText>
+          )
+        }
       />
-    </View>
+
+      {loading && page === 1 && (
+        <ActivityIndicator
+          size="large"
+          style={{ position: "absolute", top: "50%", left: "50%" }}
+        />
+      )}
+    </GlobalSafeArea>
   );
 };
 

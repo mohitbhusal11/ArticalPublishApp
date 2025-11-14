@@ -33,22 +33,39 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const handleNotificationPress = () => {
     ToastUtils.info("Notifications clicked!");
-    setHasNotification(false); // remove dot once opened
+    setHasNotification(false);
   };
 
   const handleCardClicked = (redirectionScreen: string) => {
+    console.log("redirectionScreen: ", redirectionScreen);
+    
     switch (redirectionScreen) {
       case "submitted_story":
+        navigation.navigate("StoriesScreen", { status: "All" });
+        break;
       case "approved_story":
+        navigation.navigate("StoriesScreen", { status: "Approved" });
+        break;
       case "review_story":
-      case "rejected_story":
-        navigation.navigate("StoriesScreen", { filter: redirectionScreen });
+        navigation.navigate("StoriesScreen", { status: "Review" });
+        break;
+      case "draft_story":
+        navigation.navigate("StoriesScreen", { status: "Draft" });
+        break;
+      case "publish_story":
+        navigation.navigate("StoriesScreen", { status: "Publish" });
         break;
       case "submitted_assignment":
+        navigation.navigate("AssignmentsScreen", { status: redirectionScreen });
+        break;
       case "review_assignment":
+        navigation.navigate("AssignmentsScreen", { status: redirectionScreen });
+        break;
       case "rejected_assignment":
+        navigation.navigate("AssignmentsScreen", { filstatuster: redirectionScreen });
+        break;
       case "approved_assignment":
-        navigation.navigate("AssignmentsScreen", { filter: redirectionScreen });
+        navigation.navigate("AssignmentsScreen", { status: redirectionScreen });
         break;
       default:
         ToastUtils.info("This card doesn't have a redirection screen.");
