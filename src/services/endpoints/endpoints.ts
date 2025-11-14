@@ -22,5 +22,6 @@ export const Endpoints = {
   Stories: {
     postStory: "stories",
     getStory: "stories",
+    postDraft: "stories/draft",
   }
 };

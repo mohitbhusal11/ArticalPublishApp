@@ -36,14 +36,12 @@ export const styles = StyleSheet.create({
         color: "#333",
     },
     card: {
-        backgroundColor: "#fff",
+        backgroundColor: AppColor.ffffff,
         borderRadius: 12,
         padding: 15,
         marginBottom: 12,
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 5,
-        elevation: 2,
+        marginHorizontal: 4,
+        elevation: 1,
     },
     cardHeader: {
         flexDirection: "row",
@@ -58,15 +56,17 @@ export const styles = StyleSheet.create({
         marginRight: 8,
     },
     statusBadge: {
-        paddingHorizontal: 8,
+        width: 70,
+        paddingHorizontal: 2,
         paddingVertical: 4,
         borderRadius: 6,
         marginRight: 8,
     },
     statusText: {
-        color: "#fff",
+        color: AppColor.ffffff,
         fontSize: 11,
         fontWeight: "600",
+        textAlign: 'center',
     },
     editText: {
         color: "#4A90E2",

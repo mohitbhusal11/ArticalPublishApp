@@ -20,7 +20,7 @@ export type RootStackParamList = {
   ForgotPasswordScreen: undefined;
   ResetPasswordScreen: { userId: string };
   EditorScreen: undefined;
-  StoriesScreen: undefined;
+  StoriesScreen: {status?: string};
   AssignmentsScreen: undefined;
   SettingsScreen: undefined;
   EditProfileScreen: undefined;

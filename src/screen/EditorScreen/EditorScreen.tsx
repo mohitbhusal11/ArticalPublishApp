@@ -19,7 +19,7 @@ import { AppColor } from "../../config/AppColor";
 import { AppImage } from "../../config/AppImage";
 import sanitizeHtml from "sanitize-html";
 import beautify from "js-beautify";
-import { postStory, PostStoryModal } from "../../services/calls/stories";
+import { postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
 
 const customFontAction = "customFontPicker";
@@ -169,6 +169,29 @@ const EditorScreen = ({navigation}) => {
         try {
             console.log("📤 Payload to send:", finalPayload);
             const response = await postStory(finalPayload)
+            console.log("response poststory: ", response);
+            ToastUtils.success("Story created successfully");
+            navigation.goBack()
+        } catch (error) {
+            console.error("API Error:", error);
+            Alert.alert("Error", "Something went wrong while submitting.");
+        }
+    };
+
+    const handleDraft = async () => {
+        if (!title.trim() || !htmlContent.trim()) {
+            Alert.alert("Missing Data", "Please add both Title and Description!");
+            return;
+        }
+
+        const finalPayload: PostStoryModal = {
+            headLine: title.trim(),
+            description: htmlContent.trim(),
+        };
+
+        try {
+            console.log("📤 Payload to send:", finalPayload);
+            const response = await postDraft(finalPayload)
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
@@ -367,10 +390,7 @@ const EditorScreen = ({navigation}) => {
                     </TouchableOpacity>
 
                     <View style={{ flexDirection: 'row' }} >
-                        <TouchableOpacity onPress={() => {
-                            console.log("Draft saved:", { title, htmlContent });
-                            Alert.alert("Draft Saved", "Your draft has been saved temporarily.");
-                        }}>
+                        <TouchableOpacity onPress={handleDraft}>
                             <Text style={styles.draftText}>{AppString.common.draft}</Text>
                         </TouchableOpacity>
 
