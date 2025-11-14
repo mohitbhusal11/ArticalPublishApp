@@ -68,8 +68,24 @@ const StoriesScreen: React.FC = ({ navigation }) => {
 
   const handleStoryCard = (item: Story) => {
     console.log("clicked ");
-    
-    navigation.navigate("StoryDetailScreen", {item: item})
+
+    switch (item.status?.toLowerCase()) {
+      case 'draft':
+        navigation.navigate("DraftStoryScreen", { item: item })
+        return;
+      case 'submit':
+        navigation.navigate("StoryDetailScreen", { item: item })
+        return;
+      case 'publish':
+        navigation.navigate("StoryDetailScreen", { item: item })
+        return;
+      case 'review':
+        navigation.navigate("StoryDetailScreen", { item: item })
+        return;
+      default:
+        navigation.navigate("StoryDetailScreen", { item: item })
+        return;
+    }
   }
 
   const renderCard: ListRenderItem<Story> = ({ item }) => (
@@ -113,7 +129,7 @@ const StoriesScreen: React.FC = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-     
+
       <TextInput
         style={styles.searchInput}
         placeholder="Search stories..."

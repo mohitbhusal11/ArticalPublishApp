@@ -12,15 +12,14 @@ import {
 } from "react-native";
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import { launchImageLibrary } from "react-native-image-picker";
-import { styles } from "./style";
+
 import { AppString } from "../../strings";
 import GlobalText from "../../component/GlobalText";
 import { AppColor } from "../../config/AppColor";
 import { AppImage } from "../../config/AppImage";
-import sanitizeHtml from "sanitize-html";
-import beautify from "js-beautify";
 import { postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
+import { styles } from "./style";
 
 const customFontAction = "customFontPicker";
 
@@ -50,10 +49,11 @@ const FontIcon = ({ tintColor }: { tintColor: string }) => (
 
 
 
-const EditorScreen = ({navigation}) => {
+const DraftStoryScreen = ({ navigation, route }) => {
+    const { item } = route.params;
     const richText = React.useRef<RichEditor>(null);
-    const [title, setTitle] = useState("");
-    const [htmlContent, setHtmlContent] = useState("");
+    const [title, setTitle] = useState(item.headline);
+    const [htmlContent, setHtmlContent] = useState(item.description);
     const [showLinkModal, setShowLinkModal] = useState(false);
     const [linkTitle, setLinkTitle] = useState('');
     const [linkUrl, setLinkUrl] = useState('');
@@ -71,15 +71,13 @@ const EditorScreen = ({navigation}) => {
         "Tahoma",
         "Trebuchet MS",
         "Helvetica",
-
-        // Hindi fonts
         "Noto Sans"
     ]);
 
-    const handleAddImage = async () => {
+    const handleAttachments = async () => {
         try {
             const result = await launchImageLibrary({
-                mediaType: "photo",
+                mediaType: "mixed",
                 quality: 0.8,
             });
 
@@ -101,67 +99,7 @@ const EditorScreen = ({navigation}) => {
             return;
         }
 
-        // let cleanDescription = sanitizeHtml(htmlContent, {
-        //     allowedTags: [
-        //         "p",
-        //         "b",
-        //         "i",
-        //         "u",
-        //         "strong",
-        //         "em",
-        //         "h1",
-        //         "h2",
-        //         "h3",
-        //         "h4",
-        //         "h5",
-        //         "h6",
-        //         "ul",
-        //         "ol",
-        //         "li",
-        //         "a",
-        //         "img",
-        //         "video",
-        //         "source",
-        //         "br",
-        //         "span",
-        //     ],
-        //     allowedAttributes: {
-        //         a: ["href", "name", "target", "rel"],
-        //         img: ["src", "alt", "width", "height"],
-        //         video: ["src", "controls", "poster", "width", "height"],
-        //         source: ["src", "type"],
-        //         span: ["style"],
-        //         p: ["style"],
-        //     },
-        //     allowedSchemes: ["http", "https", "data"],
-        //     selfClosing: ["img", "br", "source"],
-        //     transformTags: {
-        //         div: "p", // convert <div> → <p>
-        //         br: () => "", // remove redundant <br>
-        //         p: sanitizeHtml.simpleTransform("p", {}, true),
-        //     },
-        //     textFilter: (text) =>
-        //         text
-        //             .replace(/&nbsp;/g, " ")
-        //             .replace(/&gt;/g, ">")
-        //             .replace(/&lt;/g, "<")
-        //             .replace(/&amp;/g, "&")
-        //             .replace(/\s+/g, " "), // normalize spaces
-        // });
-
-        // cleanDescription = cleanDescription
-        //     .replace(/(<p>\s*<\/p>)+/g, "")
-        //     .replace(/(<br\s*\/?>\s*){2,}/g, "<br />")
-        //     .replace(/\s*<\/(p|h\d)>\s*/g, "</$1>\n")
-        //     .trim();
-
-        // const prettyHtml = beautify.html(cleanDescription, {
-        //     indent_size: 2,
-        //     preserve_newlines: true,
-        //     unformatted: ["b", "i", "u", "span"],
-        // });
-
-        const finalPayload : PostStoryModal = {
+        const finalPayload: PostStoryModal = {
             headLine: title.trim(),
             description: htmlContent.trim(),
         };
@@ -175,29 +113,6 @@ const EditorScreen = ({navigation}) => {
         } catch (error) {
             console.error("API Error:", error);
             Alert.alert("Error", "Something went wrong while submitting.");
-        }
-    };
-
-
-    const handleAddImageBase64 = async () => {
-        try {
-            const result = await launchImageLibrary({
-                mediaType: "photo",
-                quality: 0.8,
-                includeBase64: true, // Required to get base64 data
-            });
-
-            if (result.assets && result.assets.length > 0) {
-                const asset = result.assets[0];
-                if (asset.base64 && asset.type) {
-                    const base64Uri = `data:${asset.type};base64,${asset.base64}`;
-                    richText.current?.insertImage(base64Uri);
-                } else if (asset.uri) {
-                    richText.current?.insertImage(asset.uri);
-                }
-            }
-        } catch (error) {
-            console.warn("Error picking image:", error);
         }
     };
 
@@ -303,13 +218,12 @@ const EditorScreen = ({navigation}) => {
         }
 
         let tableHTML = `<table border="1" style="border-collapse: collapse; width: 100%;"><tr>`;
-        // Add headers
+
         for (let c = 1; c <= numCols; c++) {
             tableHTML += `<th>Header ${c}</th>`;
         }
         tableHTML += `</tr>`;
 
-        // Add rows (empty cells)
         for (let r = 1; r <= numRows; r++) {
             tableHTML += `<tr>`;
             for (let c = 1; c <= numCols; c++) {
@@ -319,10 +233,8 @@ const EditorScreen = ({navigation}) => {
         }
         tableHTML += `</table><br/>`;
 
-        // Insert into the editor
         richText.current?.insertHTML(tableHTML);
 
-        // Reset
         setRows("");
         setCols("");
         setShowTableModal(false);
@@ -343,7 +255,6 @@ const EditorScreen = ({navigation}) => {
     };
 
     const handleSelectFont = (font: string) => {
-        // Apply font to selected or future text
         richText.current?.commandDOM(
             `document.execCommand('fontName', false, '${font}')`
         );
@@ -448,8 +359,6 @@ const EditorScreen = ({navigation}) => {
                                     [actions.heading6]: handleHead6,
                                     [customFontAction]: FontIcon,
                                 }}
-                                // onPressAddImage={handleAddImage}
-                                // onPressAddImage={handleAddImageBase64}
                                 onPressAddImage={handleAddImageUpload}
                                 insertVideo={handleAddVideoUpload}
                                 onInsertLink={handleInsertLink}
@@ -462,87 +371,13 @@ const EditorScreen = ({navigation}) => {
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 keyboardShouldPersistTaps="handled"
-                // showsVerticalScrollIndicator={false}
-                nestedScrollEnabled={true}
-            >
-                {/* <Text style={styles.label}>{AppString.common.title}</Text>
-                <TextInput
-                    maxLength={200}
-                    placeholder="Enter your title..."
-                    value={title}
-                    onChangeText={setTitle}
-                    style={styles.titleInput}
-                    placeholderTextColor={AppColor.color_aaa}
-                />
-                <Text style={styles.title}>{AppString.common.description}</Text>
-
-                <View style={styles.toolbarWrapper}>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.toolbarScroll}>
-                        <View style={styles.toolbarContainer}>
-                            <TouchableOpacity
-                                style={styles.customToolButton}
-                                onPress={handleFontList}>
-                                <Text style={styles.customToolText}>Aa</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.customToolButton}
-                                onPress={handleInsertTable}>
-                                <Text style={styles.customToolText}>▦</Text>
-                            </TouchableOpacity>
-
-                            <RichToolbar
-                                editor={richText}
-                                selectedIconTint="#2563eb"
-                                iconTint="#666"
-                                style={styles.toolbar}
-                                iconSize={20}
-                                actions={[
-                                    actions.heading1,
-                                    actions.heading2,
-                                    actions.heading3,
-                                    actions.heading4,
-                                    actions.heading5,
-                                    actions.heading6,
-                                    actions.setBold,
-                                    actions.setItalic,
-                                    actions.setUnderline,
-                                    actions.insertBulletsList,
-                                    actions.insertOrderedList,
-                                    actions.insertLink,
-                                    actions.insertImage,
-                                    actions.alignLeft,
-                                    actions.alignCenter,
-                                    actions.alignRight,
-                                    actions.undo,
-                                    actions.redo,
-                                ]}
-                                iconMap={{
-                                    [actions.heading1]: handleHead1,
-                                    [actions.heading2]: handleHead2,
-                                    [actions.heading3]: handleHead3,
-                                    [actions.heading4]: handleHead4,
-                                    [actions.heading5]: handleHead5,
-                                    [actions.heading6]: handleHead6,
-                                    [customFontAction]: FontIcon,
-                                }}
-                                onPressAddImage={handleAddImage}
-                                // onPressAddImage={handleAddImageBase64}
-                                // onPressAddImage={handleAddImageUpload}
-                                onInsertLink={handleInsertLink}
-                            />
-                        </View>
-                    </ScrollView>
-                </View> */}
+                nestedScrollEnabled={true}>
 
                 <RichEditor
                     ref={richText}
                     placeholder="Start writing something awesome..."
                     style={styles.editor}
-                    initialContentHTML=""
+                    initialContentHTML={htmlContent}
                     onChange={(text) => setHtmlContent(text)}
                     editorStyle={{
                         backgroundColor: AppColor.ffffff,
@@ -562,13 +397,7 @@ const EditorScreen = ({navigation}) => {
                             }
                         `,
                     }}
-
-
                 />
-
-                {/* <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
-                    <GlobalText style={styles.submitText}>{AppString.common.submit}</GlobalText>
-                </TouchableOpacity> */}
             </ScrollView>
 
             <Modal visible={showLinkModal} transparent animationType="fade" onRequestClose={closeModal}>
@@ -687,4 +516,4 @@ const EditorScreen = ({navigation}) => {
     );
 };
 
-export default EditorScreen;
+export default DraftStoryScreen;

@@ -6,8 +6,24 @@ import RenderHTML, {
   HTMLElementModel,
   HTMLContentModel,
 } from "react-native-render-html";
-import { format } from "date-fns";
 import Video from "react-native-video";
+
+type Status = 'draft' | 'submit' | 'publish' | 'review';
+
+function getStatusColorAdvanced(status: Status): string {
+  switch (status.toLowerCase()) {
+    case 'draft':
+      return '#E74C3C';
+    case 'submit':
+      return '#3B82F6';
+    case 'publish':
+      return '#10B981';
+    case 'review':
+      return '#F59E0B';
+    default:
+      return '#6B7280';
+  }
+}
 
 // ✅ Clean & minimal Story Detail screen
 const StoryDetailScreen = ({ route }) => {
@@ -57,11 +73,15 @@ const StoryDetailScreen = ({ route }) => {
       {/* Meta info */}
       <View style={styles.metaContainer}>
         <GlobalText style={styles.metaText}>
-          Status: <GlobalText style={styles.metaValue}>{item.status || "Unknown"}</GlobalText>
+          Status: <GlobalText style={[styles.metaValue, {color: getStatusColorAdvanced(item.status)}]}>{item.status || "Unknown"}</GlobalText>
         </GlobalText>
         <GlobalText style={styles.metaText}>
           Created:{" "}
           <GlobalText style={styles.metaValue}>{item.createdAt}</GlobalText>
+        </GlobalText>
+        <GlobalText style={styles.metaText}>
+          Updated At:{" "}
+          <GlobalText style={styles.metaValue}>{item.updatedAt}</GlobalText>
         </GlobalText>
       </View>
 
