@@ -2,77 +2,85 @@ import axiosInstance from "../api/axiosInstance";
 import { Endpoints } from "../endpoints/endpoints";
 
 export interface PostStoryModal {
-    headLine: string;
-    description: string;
+  headLine: string;
+  description: string;
+  media?: MediaModal[];
+}
+
+export interface MediaModal {
+  mediaType: "Photo" | "Video",
+  caption: string,
+  shotTime: string,
+  filePath: string
 }
 
 export interface Story {
-    id: number;
-    storyCode: string;
-    reporterId: number;
-    headline: string;
-    description: string;
-    categoryId: number;
-    divisionId: number;
-    districtId: number;
-    statusId: number;
-    version: string;
+  id: number;
+  storyCode: string;
+  reporterId: number;
+  headline: string;
+  description: string;
+  categoryId: number;
+  divisionId: number;
+  districtId: number;
+  statusId: number;
+  version: string;
 
-    amendmentReason?: string | null;
-    verificationLevel?: number | null;
-    verificationNote?: string | null;
+  amendmentReason?: string | null;
+  verificationLevel?: number | null;
+  verificationNote?: string | null;
 
-    legalSensitivity?: boolean;
-    legalMandatory?: boolean;
-    legalMaskIdentity?: boolean;
-    legalDecision?: string | null;
+  legalSensitivity?: boolean;
+  legalMandatory?: boolean;
+  legalMaskIdentity?: boolean;
+  legalDecision?: string | null;
 
-    duplicateFlag?: boolean;
-    claimedBy?: number | null;
+  duplicateFlag?: boolean;
+  claimedBy?: number | null;
 
-    releasedAt?: string | null;
-    usedAt?: string | null;
-    archivalLock?: boolean;
-    createdAt?: string
-    updatedAt?: string
-    status?: string
+  releasedAt?: string | null;
+  usedAt?: string | null;
+  archivalLock?: boolean;
+  createdAt?: string
+  updatedAt?: string
+  status?: string
 }
 
 export interface PaginatedStories {
-    data: Story[];
-    page: number;
-    pageSize: number;
-    total: number;
-    totalPages: number;
+  data: Story[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 }
 
 
 export const postStory = async (payload: PostStoryModal, id?: number) => {
-    try {
-        const url = id
-            ? `${Endpoints.Stories.postStory}?storyId=${id}`
-            : Endpoints.Stories.postStory;
+  try {
+    const url = id
+      ? `${Endpoints.Stories.postStory}?storyId=${id}`
+      : Endpoints.Stories.postStory;
 
-        const response = await axiosInstance.post(url, payload);
-        return response.data;
-    } catch (error: any) {
-        console.log("postStory error:", error?.response?.data || error);
-        throw error;
-    }
+    const response = await axiosInstance.post(url, payload);
+    return response.data;
+  } catch (error: any) {
+    console.log("postStory error:", error?.response?.data || error);
+    throw error;
+  }
 };
 
 export const postDraft = async (payload: PostStoryModal, id?: number) => {
-    try {
-        const url = id
-            ? `${Endpoints.Stories.postDraft}?storyId=${id}`
-            : Endpoints.Stories.postDraft;
+  try {
+    const url = id
+      ? `${Endpoints.Stories.postDraft}?storyId=${id}`
+      : Endpoints.Stories.postDraft;
 
-        const response = await axiosInstance.post(url, payload);
-        return response.data;
-    } catch (error: any) {
-        console.log("postStory error:", error?.response?.data || error);
-        throw error;
-    }
+    const response = await axiosInstance.post(url, payload);
+    return response.data;
+  } catch (error: any) {
+    console.log("postStory error:", error?.response?.data || error);
+    throw error;
+  }
 };
 
 
