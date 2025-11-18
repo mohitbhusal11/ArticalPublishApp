@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Text,
     View,
@@ -19,6 +19,7 @@ import { AppColor } from "../../config/AppColor";
 import { AppImage } from "../../config/AppImage";
 import { MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
+import { getAssignments } from "../../services/calls/assignmentService";
 
 const customFontAction = "customFontPicker";
 
@@ -75,7 +76,6 @@ const EditorScreen = ({ navigation }) => {
         "Noto Sans"
     ]);
 
-    const [isAssignment, setIsAssignment] = useState(false);
     const [assignmentList] = useState([
         { id: 1, title: "City Report" },
         { id: 2, title: "Sports Event Coverage" },
@@ -84,12 +84,27 @@ const EditorScreen = ({ navigation }) => {
     const [selectedAssignment, setSelectedAssignment] = useState(null);
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
 
+    const fetchAssignments = async () => {
+        try {
+            const response = await getAssignments()
+            console.log(response);
 
-    const handleAddImage = async () => {
+        } catch (error) {
+            console.log("fetchAssignments error: ", error);
+
+        }
+    }
+
+    useEffect(() => {
+        fetchAssignments()
+    }, [])
+
+    const handleAttachments = async () => {
         try {
             const result = await launchImageLibrary({
-                mediaType: "photo",
+                mediaType: "mixed",
                 quality: 0.8,
+                selectionLimit: 0
             });
 
             if (result.assets && result.assets.length > 0) {
@@ -114,7 +129,7 @@ const EditorScreen = ({ navigation }) => {
             headLine: title.trim(),
             description: htmlContent.trim(),
             // media: mediaList,
-            assignmentId: isAssignment ? selectedAssignment?.id : null,
+            assignmentId: selectedAssignment ? selectedAssignment.id : null,
         };
         console.log("MediaList: ", mediaList);
 
@@ -140,7 +155,7 @@ const EditorScreen = ({ navigation }) => {
             headLine: title.trim(),
             description: htmlContent.trim(),
             // media: mediaList,
-            assignmentId: isAssignment ? selectedAssignment?.id : null,
+            assignmentId: selectedAssignment ? selectedAssignment?.id : null,
         };
         console.log("MediaList: ", mediaList);
 
@@ -543,18 +558,18 @@ const EditorScreen = ({ navigation }) => {
                     </GlobalText>
 
                     <TouchableOpacity
-                        onPress={handleAddImageUpload}
+                        onPress={handleAttachments}
                         style={styles.uploadBox}
                     >
                         <Image
-                            source={AppImage.image_placeholder}
+                            source={AppImage.attach_ic}
                             style={styles.uploadIcon}
                         />
-                        <Text style={styles.uploadText}>Click to upload images</Text>
-                        <Text style={styles.uploadSubText}>PNG / JPG (max 10MB)</Text>
+                        <Text style={styles.uploadText}>Upload Files</Text>
+                        <Text style={styles.uploadSubText}>Images, Videos, Documents (max 100MB)</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         onPress={handleAddVideoUpload}
                         style={styles.uploadBox}
                     >
@@ -564,7 +579,7 @@ const EditorScreen = ({ navigation }) => {
                         />
                         <Text style={styles.uploadText}>Click to upload videos</Text>
                         <Text style={styles.uploadSubText}>MP4 / MOV (max 100MB)</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                 </View>
                 {/* ---------------- END MEDIA ------------------ */}

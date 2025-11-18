@@ -21,4 +21,5 @@ export const AppImage = {
     submit_ic: require('../assets/images/submit_ic.png'),
     image_placeholder: require('../assets/images/image_placeholder.png'),
     video_placeholder: require('../assets/images/video_placeholder.png'),
+    attach_ic: require('../assets/images/attach_ic.png'),
 }

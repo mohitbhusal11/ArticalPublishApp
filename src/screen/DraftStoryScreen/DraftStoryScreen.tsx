@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Text,
     View,
@@ -20,6 +20,7 @@ import { AppImage } from "../../config/AppImage";
 import { MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
 import { styles } from "./style";
+import { getAssignments } from "../../services/calls/assignmentService";
 
 const customFontAction = "customFontPicker";
 
@@ -73,7 +74,6 @@ const DraftStoryScreen = ({ navigation, route }) => {
         "Helvetica",
         "Noto Sans"
     ]);
-    const [isAssignment, setIsAssignment] = useState(false);
     const [assignmentList] = useState([
         { id: 1, title: "City Report" },
         { id: 2, title: "Sports Event Coverage" },
@@ -83,6 +83,21 @@ const DraftStoryScreen = ({ navigation, route }) => {
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
 
     const [mediaList, setMediaList] = useState<MediaModal[]>(item?.mediaList ?? [])
+
+    const fetchAssignments = async () => {
+        try {
+            const response = await getAssignments()
+            console.log(response);
+
+        } catch (error) {
+            console.log("fetchAssignments error: ", error);
+
+        }
+    }
+
+    useEffect(() => {
+        fetchAssignments()
+    },[])
 
     const handleAttachments = async () => {
         try {
@@ -113,7 +128,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
             headLine: title.trim(),
             description: htmlContent.trim(),
             // media: mediaList,
-            assignmentId: isAssignment ? selectedAssignment?.id : null,
+            assignmentId: selectedAssignment ? selectedAssignment?.id : null,
         };
         console.log("MediaList: ", mediaList);
 
@@ -139,7 +154,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
             headLine: title.trim(),
             description: htmlContent.trim(),
             // media: mediaList,
-            assignmentId: isAssignment ? selectedAssignment?.id : null,
+            assignmentId: selectedAssignment ? selectedAssignment?.id : null,
         };
         console.log("MediaList: ", mediaList);
 
@@ -528,18 +543,18 @@ const DraftStoryScreen = ({ navigation, route }) => {
                     </GlobalText>
 
                     <TouchableOpacity
-                        onPress={handleAddImageUpload}
+                        onPress={handleAttachments}
                         style={styles.uploadBox}
                     >
                         <Image
-                            source={AppImage.image_placeholder}
+                            source={AppImage.attach_ic}
                             style={styles.uploadIcon}
                         />
-                        <Text style={styles.uploadText}>Click to upload images</Text>
-                        <Text style={styles.uploadSubText}>PNG / JPG (max 10MB)</Text>
+                        <Text style={styles.uploadText}>Upload Files</Text>
+                        <Text style={styles.uploadSubText}>Images, Videos, Documents (max 100MB)</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         onPress={handleAddVideoUpload}
                         style={styles.uploadBox}
                     >
@@ -549,7 +564,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
                         />
                         <Text style={styles.uploadText}>Click to upload videos</Text>
                         <Text style={styles.uploadSubText}>MP4 / MOV (max 100MB)</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                 </View>
                 {/* ---------------- END MEDIA ------------------ */}

@@ -23,5 +23,8 @@ export const Endpoints = {
     postStory: "stories",
     getStory: "stories",
     postDraft: "stories/draft",
+  },
+  Assignment: {
+    assignment: "assignments/myassignment",
   }
 };
