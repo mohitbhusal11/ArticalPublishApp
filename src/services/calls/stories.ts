@@ -5,6 +5,7 @@ export interface PostStoryModal {
   headLine: string;
   description: string;
   media?: MediaModal[];
+  assignmentId?: number | null;
 }
 
 export interface MediaModal {

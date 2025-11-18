@@ -11,7 +11,7 @@ import Video from "react-native-video";
 type Status = 'draft' | 'submit' | 'publish' | 'review';
 
 function getStatusColorAdvanced(status: Status): string {
-  switch (status.toLowerCase()) {
+  switch (status?.toLowerCase()) {
     case 'draft':
       return '#E74C3C';
     case 'submit':

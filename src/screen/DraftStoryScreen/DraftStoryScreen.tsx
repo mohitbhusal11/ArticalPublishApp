@@ -73,6 +73,14 @@ const DraftStoryScreen = ({ navigation, route }) => {
         "Helvetica",
         "Noto Sans"
     ]);
+    const [isAssignment, setIsAssignment] = useState(false);
+    const [assignmentList] = useState([
+        { id: 1, title: "City Report" },
+        { id: 2, title: "Sports Event Coverage" },
+        { id: 3, title: "Political Beat" },
+    ]);
+    const [selectedAssignment, setSelectedAssignment] = useState(null);
+    const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
 
     const [mediaList, setMediaList] = useState<MediaModal[]>(item?.mediaList ?? [])
 
@@ -104,7 +112,8 @@ const DraftStoryScreen = ({ navigation, route }) => {
         const finalPayload: PostStoryModal = {
             headLine: title.trim(),
             description: htmlContent.trim(),
-            // media: mediaList
+            // media: mediaList,
+            assignmentId: isAssignment ? selectedAssignment?.id : null,
         };
         console.log("MediaList: ", mediaList);
 
@@ -129,7 +138,8 @@ const DraftStoryScreen = ({ navigation, route }) => {
         const finalPayload: PostStoryModal = {
             headLine: title.trim(),
             description: htmlContent.trim(),
-            // media: mediaList
+            // media: mediaList,
+            assignmentId: isAssignment ? selectedAssignment?.id : null,
         };
         console.log("MediaList: ", mediaList);
 
@@ -334,7 +344,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
                     </View>
                 </View>
 
-                <Text style={styles.label}>{AppString.common.title}</Text>
+                {/* <Text style={styles.label}>{AppString.common.title}</Text> */}
                 <TextInput
                     maxLength={200}
                     placeholder="Enter your title..."
@@ -343,7 +353,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
                     style={styles.titleInput}
                     placeholderTextColor={AppColor.color_aaa}
                 />
-                <Text style={styles.title}>{AppString.common.description}</Text>
+                {/* <Text style={styles.title}>{AppString.common.description}</Text> */}
 
                 <View style={styles.toolbarWrapper}>
                     <ScrollView
@@ -409,26 +419,40 @@ const DraftStoryScreen = ({ navigation, route }) => {
             </View>
 
             <ScrollView
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[styles.scrollContent, { paddingBottom: 40 }]}
                 keyboardShouldPersistTaps="handled"
                 nestedScrollEnabled={true}>
 
-                <RichEditor
-                    ref={richText}
-                    placeholder="Start writing something awesome..."
-                    style={styles.editor}
-                    initialContentHTML={htmlContent}
-                    onChange={(text) => setHtmlContent(text)}
-                    editorStyle={{
-                        backgroundColor: AppColor.ffffff,
-                        color: AppColor.color_222,
-                        placeholderColor: AppColor.color_aaa,
-                        contentCSSText: `
-                            font-size: 16px;
-                            line-height: 24px;
-                            font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
-                            overflow-y: auto;
-                            padding: 10px;
+                <View style={{ height: 400, overflow: "hidden" }}>
+                    <RichEditor
+                        ref={richText}
+                        placeholder="Start writing something awesome..."
+                        initialContentHTML={htmlContent}
+                        androidLayerType={"hardware"}
+                        useContainer={false}
+                        style={{
+                            flex: 1,
+                            height: 400,
+                            backgroundColor: "#fff",
+                            borderWidth: 2,
+                            margin: 5,
+                            elevation: 2,
+                            borderRadius: 12,
+                        }}
+                        onChange={(text) => setHtmlContent(text)}
+                        editorStyle={{
+                            backgroundColor: AppColor.ffffff,
+                            color: AppColor.color_222,
+                            placeholderColor: AppColor.color_aaa,
+                            contentCSSText: `
+                            body {
+                                font-size: 16px;
+                                height: 100%;
+                                max-height: 500px;
+                                overflow-y: auto;   
+                                padding: 10px;
+                                font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
+                            }
                             img {
                                 max-width: 100%;
                                 height: auto;
@@ -436,8 +460,99 @@ const DraftStoryScreen = ({ navigation, route }) => {
                                 margin-vertical: 8px;
                             }
                         `,
-                    }}
-                />
+                        }}
+                    />
+                </View>
+
+                {/* -------------------- ASSIGNMENT SECTION -------------------- */}
+                <View style={styles.assignmentContainer}>
+
+                    {/* Toggle Yes / No */}
+                    <View style={styles.assignmentToggleRow}>
+                        <GlobalText style={styles.assignmentToggleText}>
+                            Is this story related to an assignment?
+                        </GlobalText>
+                        {selectedAssignment && <TouchableOpacity
+                            onPress={() => {
+                                setSelectedAssignment(null)
+                            }}
+                            style={styles.assignmentToggleBtn}>
+                            <Text style={styles.assignmentToggleLabel}>
+                                Clear
+                            </Text>
+                        </TouchableOpacity>
+                        }
+                    </View>
+
+                    <View>
+                        <TouchableOpacity
+                            onPress={() => setShowAssignmentDropdown(!showAssignmentDropdown)}
+                            style={styles.assignmentDropdownButton}
+                        >
+                            <Text style={styles.assignmentDropdownSelected}>
+                                {selectedAssignment ? selectedAssignment.title : "Choose assignment"}
+                            </Text>
+                            <Text style={styles.assignmentDropdownArrow}>⌄</Text>
+                        </TouchableOpacity>
+
+                        {showAssignmentDropdown && (
+                            <View style={styles.assignmentDropdownBox}>
+                                <ScrollView>
+                                    {assignmentList.map((item) => (
+                                        <TouchableOpacity
+                                            key={item.id}
+                                            style={styles.assignmentDropdownItem}
+                                            onPress={() => {
+                                                setSelectedAssignment(item);
+                                                setShowAssignmentDropdown(false);
+                                            }}
+                                        >
+                                            <Text style={styles.assignmentDropdownItemText}>
+                                                {item.title}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            </View>
+                        )}
+                    </View>
+
+                </View>
+                {/* ---------------- END ASSIGNMENT SECTION ------------------ */}
+
+                {/* -------------------- MEDIA ATTACHMENTS -------------------- */}
+                <View style={styles.mediaContainer}>
+
+                    <GlobalText style={styles.mediaHeader}>
+                        Media Attachments
+                    </GlobalText>
+
+                    <TouchableOpacity
+                        onPress={handleAddImageUpload}
+                        style={styles.uploadBox}
+                    >
+                        <Image
+                            source={AppImage.image_placeholder}
+                            style={styles.uploadIcon}
+                        />
+                        <Text style={styles.uploadText}>Click to upload images</Text>
+                        <Text style={styles.uploadSubText}>PNG / JPG (max 10MB)</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        onPress={handleAddVideoUpload}
+                        style={styles.uploadBox}
+                    >
+                        <Image
+                            source={AppImage.video_placeholder}
+                            style={styles.uploadIcon}
+                        />
+                        <Text style={styles.uploadText}>Click to upload videos</Text>
+                        <Text style={styles.uploadSubText}>MP4 / MOV (max 100MB)</Text>
+                    </TouchableOpacity>
+
+                </View>
+                {/* ---------------- END MEDIA ------------------ */}
             </ScrollView>
 
             <Modal visible={showLinkModal} transparent animationType="fade" onRequestClose={closeModal}>

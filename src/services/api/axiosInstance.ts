@@ -5,9 +5,9 @@ import { clearUserDetails } from "../../redux/slices/userSlice";
 import ToastUtils from "../../utils/toast";
 
 const baseURL = __DEV__
-  ? "http://172.168.0.14:7200/"
-   //: "http://103.85.92.210:5220/api/";
-   : "http://172.168.0.14:7200/";
+  ? "http://172.168.0.14:7200/api/v1.0/"
+  // ? "http://172.168.0.14:7200/"
+  : "http://172.168.0.14:7200/";
 
 
 export const imageBaseURL = __DEV__ ? "http://172.168.0.14:8089" : "https://assets.rajfacilitymanagement.com";
@@ -18,7 +18,7 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
     "X-Client-Type": "mobile",
-    "x-api-key" : "cyezieny2h"
+    "x-api-key": "cyezieny2h"
   },
 });
 
@@ -63,8 +63,8 @@ const handleApiError = async (error: AxiosError) => {
       ToastUtils.error({
         message: 'Log out from other device or contact IT support',
         title: 'Account active on another device',
-        duration: 5000, 
-        numberOfLines: 0 
+        duration: 5000,
+        numberOfLines: 0
       });
       break;
     case 500:
