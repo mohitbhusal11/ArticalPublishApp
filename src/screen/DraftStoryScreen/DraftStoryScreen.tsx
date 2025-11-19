@@ -17,7 +17,7 @@ import { AppString } from "../../strings";
 import GlobalText from "../../component/GlobalText";
 import { AppColor } from "../../config/AppColor";
 import { AppImage } from "../../config/AppImage";
-import { MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
+import { AttachmentModal, MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
 import { styles } from "./style";
 import { getAssignments } from "../../services/calls/assignmentService";
@@ -84,6 +84,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
 
     const [mediaList, setMediaList] = useState<MediaModal[]>(item?.mediaList ?? [])
+    const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>([])
 
     const fetchAssignments = async () => {
         try {
@@ -129,12 +130,13 @@ const DraftStoryScreen = ({ navigation, route }) => {
             headLine: title.trim(),
             description: htmlContent.trim(),
             media: mediaList,
+            attachment: attachmentList
         };
         console.log("MediaList: ", mediaList);
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postStory(finalPayload, item.id, selectedAssignment ? selectedAssignment.id : null)
+            const response = await postStory(finalPayload, { storyId: item.id, assignmentId: selectedAssignment?.id ?? undefined });
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
@@ -154,12 +156,13 @@ const DraftStoryScreen = ({ navigation, route }) => {
             headLine: title.trim(),
             description: htmlContent.trim(),
             media: mediaList,
+            attachment: attachmentList
         };
         console.log("MediaList: ", mediaList);
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postDraft(finalPayload, item.id, selectedAssignment ? selectedAssignment.id : null)
+            const response = await postDraft(finalPayload, { storyId: item.id, assignmentId: selectedAssignment?.id ?? undefined });
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()

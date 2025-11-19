@@ -5,7 +5,14 @@ export interface PostStoryModal {
   headLine: string;
   description: string;
   media?: MediaModal[];
-  assignmentId?: number | null;
+  attachment?: AttachmentModal[];
+}
+
+export interface AttachmentModal {
+  mediaType: string
+  caption: string,
+  shotTime: string,
+  filePath: string
 }
 
 export interface MediaModal {
@@ -56,13 +63,19 @@ export interface PaginatedStories {
 }
 
 
-export const postStory = async (payload: PostStoryModal, id?: number, assignmentId?: number) => {
-  try {
-    const url = id
-      ? `${Endpoints.Stories.postStory}?storyId=${id}`
-      : Endpoints.Stories.postStory;
+type StoiesParams = {
+  storyId?: number;
+  assignmentId?: number;
+}
 
-    const response = await axiosInstance.post(url, payload);
+export const postStory = async (payload: PostStoryModal, params?: StoiesParams) => {
+  try {
+    const response = await axiosInstance.post(Endpoints.Stories.postStory, payload, {
+      params: {
+        ...(params?.storyId && { storyId: params.storyId }),
+        ...(params?.assignmentId && { assignmentId: params.assignmentId }),
+      },
+    });
     return response.data;
   } catch (error: any) {
     console.log("postStory error:", error?.response?.data || error);
@@ -70,16 +83,18 @@ export const postStory = async (payload: PostStoryModal, id?: number, assignment
   }
 };
 
-export const postDraft = async (payload: PostStoryModal, id?: number, assignmentId?: number) => {
+export const postDraft = async (payload: PostStoryModal, params?: StoiesParams) => {
   try {
-    const url = id
-      ? `${Endpoints.Stories.postDraft}?storyId=${id}`
-      : Endpoints.Stories.postDraft;
 
-    const response = await axiosInstance.post(url, payload);
+    const response = await axiosInstance.post(Endpoints.Stories.postDraft, payload, {
+      params: {
+        ...(params?.storyId && { storyId: params.storyId }),
+        ...(params?.assignmentId && { assignmentId: params.assignmentId }),
+      },
+    });
     return response.data;
   } catch (error: any) {
-    console.log("postStory error:", error?.response?.data || error);
+    console.log("postDraft error:", error?.response?.data || error);
     throw error;
   }
 };

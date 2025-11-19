@@ -17,10 +17,9 @@ import { AppString } from "../../strings";
 import GlobalText from "../../component/GlobalText";
 import { AppColor } from "../../config/AppColor";
 import { AppImage } from "../../config/AppImage";
-import { MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
+import { AttachmentModal, MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
 import { getAssignments } from "../../services/calls/assignmentService";
-import { id } from "date-fns/locale";
 import { fileUpload } from "../../services/calls/imageUpload";
 
 const customFontAction = "customFontPicker";
@@ -51,7 +50,7 @@ const FontIcon = ({ tintColor }: { tintColor: string }) => (
 
 
 
-const EditorScreen = ({ navigation }) => {
+const EditorScreen = ({ navigation } : any) => {
     const richText = React.useRef<RichEditor>(null);
     const [title, setTitle] = useState("");
     const [htmlContent, setHtmlContent] = useState("");
@@ -62,6 +61,7 @@ const EditorScreen = ({ navigation }) => {
     const [rows, setRows] = useState("");
     const [cols, setCols] = useState("");
     const [mediaList, setMediaList] = useState<MediaModal[]>([])
+    const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>([])
 
     const [showFontModal, setShowFontModal] = useState(false);
     const [fonts] = useState([
@@ -131,12 +131,13 @@ const EditorScreen = ({ navigation }) => {
             headLine: title.trim(),
             description: htmlContent.trim(),
             media: mediaList,
+            attachment: attachmentList
         };
         console.log("MediaList: ", mediaList);
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postStory(finalPayload, undefined, selectedAssignment ? selectedAssignment.id : null)
+            const response = await postStory(finalPayload, { assignmentId: selectedAssignment?.id ?? undefined });
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
@@ -156,12 +157,13 @@ const EditorScreen = ({ navigation }) => {
             headLine: title.trim(),
             description: htmlContent.trim(),
             media: mediaList,
+            attachment: attachmentList
         };
         console.log("MediaList: ", mediaList);
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postDraft(finalPayload, undefined, selectedAssignment ? selectedAssignment.id : null)
+            const response = await postDraft(finalPayload, { assignmentId: selectedAssignment?.id ?? undefined });
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
