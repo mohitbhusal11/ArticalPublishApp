@@ -22,4 +22,6 @@ export const AppImage = {
     image_placeholder: require('../assets/images/image_placeholder.png'),
     video_placeholder: require('../assets/images/video_placeholder.png'),
     attach_ic: require('../assets/images/attach_ic.png'),
+    file_ic: require('../assets/images/file_ic.png'),
+    delete_ic: require('../assets/images/delete_ic.png'),
 }

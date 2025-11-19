@@ -14,7 +14,8 @@ export const Endpoints = {
     DeleteUser: "user"
   },
   IMAGE: {
-    fileUpload: "file-upload/multiple"
+    fileUpload: "file-upload/multiple",
+    deleteFile: "file-upload/delete"
   },
   Home: {
     dashboard: "user-dashboards/me"

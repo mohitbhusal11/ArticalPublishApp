@@ -9,10 +9,10 @@ export interface PostStoryModal {
 }
 
 export interface AttachmentModal {
-  mediaType: string
-  caption: string,
-  shotTime: string,
-  filePath: string
+  mediaType: string;
+  caption: string;
+  shotTime: string;
+  filePath: string;
 }
 
 export interface MediaModal {
@@ -52,7 +52,46 @@ export interface Story {
   createdAt?: string
   updatedAt?: string
   status?: string
+  attachment?: Attachment[]
+  media?: Media[]
 }
+
+export interface Media {
+  id: number;
+  mediaType?: string;
+  caption?: any;
+  rights?: any;
+  storyId?: number;
+  shotLocation?: any;
+  shotTime?: any;
+  filePath?: string;
+  isAttachment?: boolean;
+  provenanceCredential?: boolean;
+}
+
+export interface Attachment {
+  id: number;
+  mediaType?: string;
+  caption?: any;
+  rights?: any;
+  storyId?: number;
+  shotLocation?: any;
+  shotTime?: any;
+  filePath?: string;
+  isAttachment?: boolean;
+  provenanceCredential?: boolean;
+}
+
+//  "id": 23,
+//       "mediaType": "Photo",
+//       "caption": null,
+//       "rights": null,
+//       "storyId": 62,
+//       "shotLocation": null,
+//       "shotTime": null,
+//       "filePath": "35.jpg",
+//       "isAttachment": true,
+//       "provenanceCredential": false
 
 export interface PaginatedStories {
   data: Story[];

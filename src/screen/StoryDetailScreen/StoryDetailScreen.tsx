@@ -1,5 +1,5 @@
-import React from "react";
-import { View, ScrollView, useWindowDimensions, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, ScrollView, useWindowDimensions, StyleSheet, Image } from "react-native";
 import GlobalText from "../../component/GlobalText";
 import RenderHTML, {
   defaultSystemFonts,
@@ -7,6 +7,8 @@ import RenderHTML, {
   HTMLContentModel,
 } from "react-native-render-html";
 import Video from "react-native-video";
+import { AttachmentModal } from "../../services/calls/stories";
+import { AppImage } from "../../config/AppImage";
 
 type Status = 'draft' | 'submit' | 'publish' | 'review';
 
@@ -26,10 +28,11 @@ function getStatusColorAdvanced(status: Status): string {
 }
 
 // ✅ Clean & minimal Story Detail screen
-const StoryDetailScreen = ({ route }) => {
+const StoryDetailScreen = ({ route }: any) => {
   const { item } = route.params;
   const { width } = useWindowDimensions();
   console.log(item);
+  const [attachmentList] = useState<AttachmentModal[]>(item.attachment)
 
   // 🎥 Custom renderer for <video>
   const renderers = {
@@ -118,6 +121,46 @@ const StoryDetailScreen = ({ route }) => {
           computeEmbeddedMaxWidth={() => width - 40}
         />
       </View>
+
+      {attachmentList.length > 0 && (
+        <View style={styles.mediaContainer}>
+          <GlobalText style={styles.mediaHeader}>
+            Media Attachments
+          </GlobalText>
+          <View style={styles.listContainer}>
+            {attachmentList.map((item, index) => {
+              const fileName = item.filePath.split("/").pop() || "file";
+
+              const isImage = item.mediaType === "Image";
+              const isVideo = item.mediaType === "Video";
+              const isDoc = item.mediaType === "Document";
+
+              return (
+                <View key={index} style={styles.row}>
+                  <Image source={AppImage.file_ic} style={styles.fileIcon} />
+                  <GlobalText style={styles.fileName} numberOfLines={1}>
+                    {fileName}
+                  </GlobalText>
+                  {isImage && (
+                    <Image source={{ uri: item.filePath }} style={styles.imagePreview} />
+                  )}
+                  {isVideo && (
+                    <View style={styles.videoPreview}>
+                      <GlobalText style={styles.videoText}>Video</GlobalText>
+                    </View>
+                  )}
+                  {isDoc && (
+                    <View style={styles.docPreview}>
+                      <GlobalText style={styles.docText}>DOC</GlobalText>
+                    </View>
+                  )}
+
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -169,5 +212,78 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
     borderRadius: 10,
     marginVertical: 10,
+  },
+  mediaContainer: {
+    marginTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 16,
+    // marginHorizontal: 8,
+  },
+
+  mediaHeader: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#222",
+  },
+  listContainer: {
+    marginTop: 12,
+  },
+
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    borderBottomWidth: 0.5,
+    borderColor: "#ddd",
+  },
+
+  fileIcon: {
+    width: 22,
+    height: 22,
+    marginRight: 8,
+  },
+
+  fileName: {
+    flex: 1,
+    color: "#333",
+  },
+
+  // Image Preview
+  imagePreview: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    marginRight: 10,
+  },
+
+  // Video preview
+  videoPreview: {
+    width: 40,
+    height: 40,
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  videoText: {
+    color: "#fff",
+    fontSize: 10,
+  },
+
+  // Document preview
+  docPreview: {
+    width: 40,
+    height: 40,
+    backgroundColor: "#e9e9e9",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  docText: {
+    color: "#555",
+    fontSize: 10,
   },
 });

@@ -20,8 +20,10 @@ import { AppImage } from "../../config/AppImage";
 import { AttachmentModal, MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
 import { styles } from "./style";
-import { getAssignments } from "../../services/calls/assignmentService";
-import { fileUpload } from "../../services/calls/imageUpload";
+import { Assignment, getAssignments } from "../../services/calls/assignmentService";
+import { deleteFile, fileUpload } from "../../services/calls/imageUpload";
+import LottieView from "lottie-react-native";
+import { AppLottie } from "../../config/AppLottie";
 
 const customFontAction = "customFontPicker";
 
@@ -51,8 +53,10 @@ const FontIcon = ({ tintColor }: { tintColor: string }) => (
 
 
 
-const DraftStoryScreen = ({ navigation, route }) => {
+const DraftStoryScreen = ({ navigation, route }: any) => {
     const { item } = route.params;
+    console.log("Draft Screen itemData: ", item);
+    
     const richText = React.useRef<RichEditor>(null);
     const [title, setTitle] = useState(item.headline);
     const [htmlContent, setHtmlContent] = useState(item.description);
@@ -75,21 +79,18 @@ const DraftStoryScreen = ({ navigation, route }) => {
         "Helvetica",
         "Noto Sans"
     ]);
-    const [assignmentList] = useState([
-        { id: 1, title: "City Report" },
-        { id: 2, title: "Sports Event Coverage" },
-        { id: 3, title: "Political Beat" },
-    ]);
-    const [selectedAssignment, setSelectedAssignment] = useState(null);
+    const [assignmentList, setAssignmentList] = useState<Assignment[]>([]);
+    const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
-
+    const [loading, setLoading] = useState(false);
     const [mediaList, setMediaList] = useState<MediaModal[]>(item?.mediaList ?? [])
-    const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>([])
+    const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>(item.attachment)
 
     const fetchAssignments = async () => {
         try {
-            const response = await getAssignments()
+            const response = await getAssignments({ pageSize: 50, status: "Accepted" })
             console.log(response);
+            setAssignmentList(response.data)
 
         } catch (error) {
             console.log("fetchAssignments error: ", error);
@@ -103,21 +104,76 @@ const DraftStoryScreen = ({ navigation, route }) => {
 
     const handleAttachments = async () => {
         try {
+            setLoading(true);
             const result = await launchImageLibrary({
                 mediaType: "mixed",
+                selectionLimit: 0,
                 quality: 0.8,
             });
 
-            if (result.assets && result.assets.length > 0) {
-                const imageUri = result.assets[0].uri;
-                if (imageUri) {
-                    // Inserts the selected image into the editor
-                    richText.current?.insertImage(imageUri);
-                }
+            if (!result.assets || result.assets.length === 0) {
+                setLoading(false);
+                return;
             }
+
+            const uploadedItems: AttachmentModal[] = [];
+
+            for (const asset of result.assets) {
+                if (!asset.uri) continue;
+
+                const formData = new FormData();
+                const fileName = asset.fileName || `file_${Date.now()}`;
+                const fileType = asset.type || getMimeType(asset.fileName);
+                console.log("Uploading File:", fileName, "Type:", fileType, "URI:", asset.uri)
+                formData.append("file", {
+                    uri: asset.uri,
+                    type: asset.type || getMimeType(asset.fileName),
+                    name: asset.fileName || `file_${Date.now()}`,
+                } as any);
+
+                const uploadResponse = await fileUpload(formData);
+                console.log("Upload Response:", uploadResponse);
+                const uploadedUrl = uploadResponse?.files?.[0]?.url;
+
+                if (!uploadedUrl) continue;
+
+                let mediaType = "Document";
+                if (asset.type?.startsWith("image")) mediaType = "Image";
+                if (asset.type?.startsWith("video")) mediaType = "Video";
+
+                uploadedItems.push({
+                    mediaType,
+                    caption: "",
+                    shotTime: "",
+                    filePath: uploadedUrl,
+                });
+            }
+
+            setAttachmentList(prev => [...prev, ...uploadedItems]);
+
         } catch (error) {
-            console.warn("Error picking image:", error);
+            console.error("Attachment Upload Error:", error);
+            Alert.alert("Error", "Failed to upload attachments.");
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const getMimeType = (fileName?: string) => {
+        if (!fileName) return "application/octet-stream";
+
+        const ext = fileName.split(".").pop()?.toLowerCase();
+
+        const map: any = {
+            pdf: "application/pdf",
+            doc: "application/msword",
+            docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            xls: "application/vnd.ms-excel",
+            xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            txt: "text/plain",
+        };
+
+        return map[ext] || "application/octet-stream";
     };
 
     const handleSubmit = async () => {
@@ -174,6 +230,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
 
     const handleAddImageUpload = async () => {
         try {
+            setLoading(true);
             const result = await launchImageLibrary({
                 mediaType: "photo",
                 quality: 0.8,
@@ -214,11 +271,14 @@ const DraftStoryScreen = ({ navigation, route }) => {
         } catch (error) {
             console.error("Image Upload Error:", error);
             Alert.alert("Error", "Something went wrong while uploading the image.");
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleAddVideoUpload = async () => {
         try {
+            setLoading(true);
             const result = await launchImageLibrary({
                 mediaType: "video",
                 videoQuality: "medium",
@@ -260,6 +320,8 @@ const DraftStoryScreen = ({ navigation, route }) => {
         } catch (error) {
             console.error("Video Upload Error:", error);
             Alert.alert("Error", "Something went wrong while uploading the video.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -331,6 +393,25 @@ const DraftStoryScreen = ({ navigation, route }) => {
         }, 300);
     };
 
+    const handleDeleteAttachment = async (index: number) => {
+        try {
+            setLoading(true);
+            const fileToDelete: AttachmentModal = attachmentList[index];
+
+            console.log("Deleting File:", fileToDelete);
+
+            await deleteFile({ fileKey: fileToDelete.filePath });
+
+            setAttachmentList(prev => prev.filter((_, i) => i !== index));
+
+            console.log("Attachment removed successfully.");
+
+        } catch (error) {
+            Alert.alert("Delete Failed", "Unable to delete the file from server.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -484,9 +565,8 @@ const DraftStoryScreen = ({ navigation, route }) => {
                 {/* -------------------- ASSIGNMENT SECTION -------------------- */}
                 <View style={styles.assignmentContainer}>
 
-                    {/* Toggle Yes / No */}
-                    <View style={styles.assignmentToggleRow}>
-                        <GlobalText style={styles.assignmentToggleText}>
+                    <View style={styles.row}>
+                        <GlobalText style={styles.fileName} numberOfLines={1}>
                             Is this story related to an assignment?
                         </GlobalText>
                         {selectedAssignment && <TouchableOpacity
@@ -501,7 +581,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
                         }
                     </View>
 
-                    <View>
+                    {assignmentList && <View>
                         <TouchableOpacity
                             onPress={() => setShowAssignmentDropdown(!showAssignmentDropdown)}
                             style={styles.assignmentDropdownButton}
@@ -532,7 +612,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
                                 </ScrollView>
                             </View>
                         )}
-                    </View>
+                    </View>}
 
                 </View>
                 {/* ---------------- END ASSIGNMENT SECTION ------------------ */}
@@ -544,30 +624,49 @@ const DraftStoryScreen = ({ navigation, route }) => {
                         Media Attachments
                     </GlobalText>
 
-                    <TouchableOpacity
-                        onPress={handleAttachments}
-                        style={styles.uploadBox}
-                    >
-                        <Image
-                            source={AppImage.attach_ic}
-                            style={styles.uploadIcon}
-                        />
+                    <TouchableOpacity onPress={handleAttachments} style={styles.uploadBox}>
+                        <Image source={AppImage.attach_ic} style={styles.uploadIcon} />
                         <Text style={styles.uploadText}>Upload Files</Text>
                         <Text style={styles.uploadSubText}>Images, Videos, Documents (max 100MB)</Text>
                     </TouchableOpacity>
 
-                    {/* <TouchableOpacity
-                        onPress={handleAddVideoUpload}
-                        style={styles.uploadBox}
-                    >
-                        <Image
-                            source={AppImage.video_placeholder}
-                            style={styles.uploadIcon}
-                        />
-                        <Text style={styles.uploadText}>Click to upload videos</Text>
-                        <Text style={styles.uploadSubText}>MP4 / MOV (max 100MB)</Text>
-                    </TouchableOpacity> */}
+                    {attachmentList.length > 0 && (
+                        <View style={styles.listContainer}>
+                            {attachmentList.map((item, index) => {
+                                const fileName = item.filePath.split("/").pop() || "file";
 
+                                const isImage = item.mediaType === "Image";
+                                const isVideo = item.mediaType === "Video";
+                                const isDoc = item.mediaType === "Document";
+
+                                return (
+                                    <View key={index} style={styles.row}>
+                                        <Image source={AppImage.file_ic} style={styles.fileIcon} />
+                                        <Text style={styles.fileName} numberOfLines={1}>
+                                            {fileName}
+                                        </Text>
+                                        {isImage && (
+                                            <Image source={{ uri: item.filePath }} style={styles.imagePreview} />
+                                        )}
+                                        {isVideo && (
+                                            <View style={styles.videoPreview}>
+                                                <Text style={styles.videoText}>Video</Text>
+                                            </View>
+                                        )}
+                                        {isDoc && (
+                                            <View style={styles.docPreview}>
+                                                <Text style={styles.docText}>DOC</Text>
+                                            </View>
+                                        )}
+                                        <TouchableOpacity onPress={() => handleDeleteAttachment(index)}>
+                                            <Image source={AppImage.delete_ic} style={styles.deleteIcon} />
+                                        </TouchableOpacity>
+
+                                    </View>
+                                );
+                            })}
+                        </View>
+                    )}
                 </View>
                 {/* ---------------- END MEDIA ------------------ */}
             </ScrollView>
@@ -683,6 +782,17 @@ const DraftStoryScreen = ({ navigation, route }) => {
                     </View>
                 </View>
             </Modal>
+
+            {loading && (
+                <View style={styles.loaderOverlay}>
+                    <LottieView
+                        source={AppLottie.loader}
+                        autoPlay
+                        loop
+                        style={{ width: 120, height: 120 }}
+                    />
+                </View>
+            )}
 
         </SafeAreaView>
     );

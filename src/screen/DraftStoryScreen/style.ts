@@ -347,5 +347,82 @@ export const styles = StyleSheet.create({
         marginTop: 3,
     },
 
+    listContainer: {
+        marginTop: 12,
+    },
+
+    row: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 6,
+        borderBottomWidth: 0.5,
+        borderColor: "#ddd",
+    },
+
+    fileIcon: {
+        width: 22,
+        height: 22,
+        marginRight: 8,
+    },
+
+    fileName: {
+        flex: 1,
+        color: "#333",
+    },
+
+    // Image Preview
+    imagePreview: {
+        width: 40,
+        height: 40,
+        borderRadius: 6,
+        marginRight: 10,
+    },
+
+    // Video preview
+    videoPreview: {
+        width: 40,
+        height: 40,
+        backgroundColor: "#000",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 6,
+        marginRight: 10,
+    },
+    videoText: {
+        color: "#fff",
+        fontSize: 10,
+    },
+
+    // Document preview
+    docPreview: {
+        width: 40,
+        height: 40,
+        backgroundColor: "#e9e9e9",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 6,
+        marginRight: 10,
+    },
+    docText: {
+        color: "#555",
+        fontSize: 10,
+    },
+
+    deleteIcon: {
+        width: 20,
+        height: 20,
+        tintColor: "red",
+    },
+    loaderOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0,0,0,0.4)",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 999,
+    },
 
 });
