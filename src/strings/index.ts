@@ -63,6 +63,7 @@ export const AppString = {
     assignedBy: "Assigned By",
     accept: "Accept",
     submitStory: "Submit Story",
+    seeDetails: "See Details",
     description: "Description",
     title: "Title",
     draft: "Draft",

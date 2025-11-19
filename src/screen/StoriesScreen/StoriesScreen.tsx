@@ -88,18 +88,18 @@ const StoriesScreen = ({ navigation }: any) => {
 
     try {
       const query: any = {
-      page: pageNumber,
-      pageSize,
-      search,
-    };
+        page: pageNumber,
+        pageSize,
+        search,
+      };
 
-    if (status) {
-      query.status = status;
-    }
+      if (status) {
+        query.status = status;
+      }
 
-    console.log("API Payload:", query);
+      console.log("API Payload:", query);
 
-    const response = await getStories(query);
+      const response = await getStories(query);
 
       const newData = response.data ?? [];
       const total = response.total ?? 0;
@@ -240,7 +240,7 @@ const StoriesScreen = ({ navigation }: any) => {
             <ActivityIndicator size="small" style={{ marginVertical: 16 }} />
           ) : null
         }
-        ListEmptyComponent={
+        ListEmptyComponent={() =>
           !loading && (
             <GlobalText style={{ textAlign: "center", marginTop: 50 }}>
               No stories found

@@ -20,17 +20,36 @@ export interface Assignment {
   postedTo: string | null;
   statusId: number | null;
   createdAt: string;
+  deadlineAt: string;
   reporterStatusId: number;
   status: string;
   isAccepted: boolean;
   acceptedAt: string | null;
 }
 
+export interface UpdateAssignmentResponse {
+  message: string,
+  assignment : AssignmentUpdate
+}
+export interface AssignmentUpdate {
+  reporterId?: number;
+  assignmentId?: number;
+  acceptedAt?: number;
+  isAccepted?: boolean;
+  statusId?: number;
+
+} 
+
 export interface GetAssignmentsParams {
   page?: number;
   pageSize?: number;
   status?: "Pending" | "Accepted" | "Submited" | "Rejected";
   search?: string;
+}
+
+export interface UpdateAssignmentModal {
+  assignmentId: number;
+  isAccepted: boolean
 }
 
 export const getAssignments = async (params: GetAssignmentsParams = {}) => {
@@ -50,3 +69,13 @@ export const getAssignments = async (params: GetAssignmentsParams = {}) => {
     throw error;
   }
 };
+
+export const updateAssignment = async (payload: UpdateAssignmentModal) => {
+  try {
+    const response = await axiosInstance.post<UpdateAssignmentResponse>(Endpoints.Assignment.statusUpdate, payload);
+    return response.data;
+  } catch (error) {
+    console.log("getAssignments error:", error);
+    throw error;
+  }
+}; 

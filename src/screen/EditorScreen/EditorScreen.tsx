@@ -23,6 +23,7 @@ import { Assignment, getAssignments } from "../../services/calls/assignmentServi
 import { deleteFile, fileUpload } from "../../services/calls/imageUpload";
 import LottieView from "lottie-react-native";
 import { AppLottie } from "../../config/AppLottie";
+import { useRoute } from "@react-navigation/native";
 
 
 const customFontAction = "customFontPicker";
@@ -54,6 +55,8 @@ const FontIcon = ({ tintColor }: { tintColor: string }) => (
 
 
 const EditorScreen = ({ navigation }: any) => {
+    const route = useRoute<any>();
+    const item: Assignment | null = route.params ?? null;
     const richText = React.useRef<RichEditor>(null);
     const [title, setTitle] = useState("");
     const [htmlContent, setHtmlContent] = useState("");
@@ -80,7 +83,7 @@ const EditorScreen = ({ navigation }: any) => {
     ]);
 
     const [assignmentList, setAssignmentList] = useState<Assignment[]>([]);
-    const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
+    const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(item);
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -346,7 +349,7 @@ const EditorScreen = ({ navigation }: any) => {
         }
 
         let tableHTML = `<table border="1" style="border-collapse: collapse; width: 100%;"><tr>`;
-    
+
         for (let c = 1; c <= numCols; c++) {
             tableHTML += `<th>Header ${c}</th>`;
         }
@@ -573,7 +576,7 @@ const EditorScreen = ({ navigation }: any) => {
 
 
                 {/* -------------------- ASSIGNMENT SECTION -------------------- */}
-                <View style={styles.assignmentContainer}>
+                {assignmentList && <View style={styles.assignmentContainer}>
 
                     <View style={styles.row}>
                         <GlobalText style={styles.fileName} numberOfLines={1}>
@@ -624,7 +627,7 @@ const EditorScreen = ({ navigation }: any) => {
                         )}
                     </View>}
 
-                </View>
+                </View>}
                 {/* ---------------- END ASSIGNMENT SECTION ------------------ */}
 
                 {/* -------------------- MEDIA ATTACHMENTS -------------------- */}

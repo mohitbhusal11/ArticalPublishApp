@@ -80,7 +80,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
         "Noto Sans"
     ]);
     const [assignmentList, setAssignmentList] = useState<Assignment[]>([]);
-    const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
+    const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(item.title);
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
     const [mediaList, setMediaList] = useState<MediaModal[]>(item?.mediaList ?? [])
@@ -563,7 +563,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                 </View>
 
                 {/* -------------------- ASSIGNMENT SECTION -------------------- */}
-                <View style={styles.assignmentContainer}>
+                {assignmentList && <View style={styles.assignmentContainer}>
 
                     <View style={styles.row}>
                         <GlobalText style={styles.fileName} numberOfLines={1}>
@@ -614,7 +614,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                         )}
                     </View>}
 
-                </View>
+                </View>}
                 {/* ---------------- END ASSIGNMENT SECTION ------------------ */}
 
                 {/* -------------------- MEDIA ATTACHMENTS -------------------- */}

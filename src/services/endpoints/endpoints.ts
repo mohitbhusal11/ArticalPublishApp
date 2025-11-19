@@ -27,5 +27,6 @@ export const Endpoints = {
   },
   Assignment: {
     assignment: "assignments/myassignment",
+    statusUpdate: "assignments/updated-acceptance"
   }
 };
