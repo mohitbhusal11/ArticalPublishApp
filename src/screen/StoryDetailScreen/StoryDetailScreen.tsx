@@ -57,6 +57,26 @@ const StoryDetailScreen = ({ route }) => {
     }),
   };
 
+  const tagsStyles = {
+    img: {
+      width: "100%",
+      maxHeight: 200,
+      resizeMode: "contain",
+      borderRadius: 10,
+      marginVertical: 10,
+    },
+    video: {
+      width: "100%",
+      height: 200,
+      borderRadius: 10,
+      marginVertical: 10,
+      backgroundColor: "#000",
+    }
+  };
+
+
+
+
   const renderersProps = {
     img: {
       enableExperimentalPercentWidth: true,
@@ -73,7 +93,7 @@ const StoryDetailScreen = ({ route }) => {
       {/* Meta info */}
       <View style={styles.metaContainer}>
         <GlobalText style={styles.metaText}>
-          Status: <GlobalText style={[styles.metaValue, {color: getStatusColorAdvanced(item.status)}]}>{item.status || "Unknown"}</GlobalText>
+          Status: <GlobalText style={[styles.metaValue, { color: getStatusColorAdvanced(item.status) }]}>{item.status || "Unknown"}</GlobalText>
         </GlobalText>
         <GlobalText style={styles.metaText}>
           Created:{" "}
@@ -91,9 +111,11 @@ const StoryDetailScreen = ({ route }) => {
           contentWidth={width}
           source={{ html: item.description }}
           systemFonts={systemFonts}
+          tagsStyles={tagsStyles}
           renderers={renderers}
           renderersProps={renderersProps}
           customHTMLElementModels={customHTMLElementModels}
+          computeEmbeddedMaxWidth={() => width - 40}
         />
       </View>
     </ScrollView>

@@ -20,6 +20,8 @@ import { AppImage } from "../../config/AppImage";
 import { MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
 import { getAssignments } from "../../services/calls/assignmentService";
+import { id } from "date-fns/locale";
+import { fileUpload } from "../../services/calls/imageUpload";
 
 const customFontAction = "customFontPicker";
 
@@ -128,14 +130,13 @@ const EditorScreen = ({ navigation }) => {
         const finalPayload: PostStoryModal = {
             headLine: title.trim(),
             description: htmlContent.trim(),
-            // media: mediaList,
-            assignmentId: selectedAssignment ? selectedAssignment.id : null,
+            media: mediaList,
         };
         console.log("MediaList: ", mediaList);
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postStory(finalPayload)
+            const response = await postStory(finalPayload, undefined, selectedAssignment ? selectedAssignment.id : null)
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
@@ -154,14 +155,13 @@ const EditorScreen = ({ navigation }) => {
         const finalPayload: PostStoryModal = {
             headLine: title.trim(),
             description: htmlContent.trim(),
-            // media: mediaList,
-            assignmentId: selectedAssignment ? selectedAssignment?.id : null,
+            media: mediaList,
         };
         console.log("MediaList: ", mediaList);
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postDraft(finalPayload)
+            const response = await postDraft(finalPayload, undefined, selectedAssignment ? selectedAssignment.id : null)
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
@@ -190,16 +190,24 @@ const EditorScreen = ({ navigation }) => {
                 });
 
                 console.log("formData: ", formData);
+                const response = await fileUpload(formData);
+                console.log("Upload Response:", response);
+                const uploadedUrl = response?.files?.[0]?.url;
                 const mediaPayload: MediaModal = {
                     mediaType: 'Photo',
                     caption: '',
                     shotTime: '',
-                    filePath: asset.fileName || "upload.jpg"
+                    filePath: uploadedUrl || "upload.jpg"
                 }
                 setMediaList(prev => [...prev, mediaPayload])
 
-                const staticImageUrl = "https://raj-express-staging.s3.ap-south-1.amazonaws.com/images/02_svg_4e91631d67.png";
-                richText.current?.insertImage(staticImageUrl);
+                if (!uploadedUrl) {
+                    Alert.alert("Upload failed", "No Image URL returned.");
+                    return;
+                } else {
+                    richText.current?.insertImage(uploadedUrl);
+                }
+
 
             }
         } catch (error) {
@@ -229,40 +237,28 @@ const EditorScreen = ({ navigation }) => {
                 });
 
                 console.log("Uploading video...", formData);
-
+                const response = await fileUpload(formData);
+                console.log("Upload Response:", response);
+                const uploadedUrl = response?.files?.[0]?.url;
                 const mediaPayload: MediaModal = {
                     mediaType: 'Video',
                     caption: '',
                     shotTime: '',
-                    filePath: asset.fileName || "upload.jpg"
+                    filePath: uploadedUrl || "upload.mp4"
+                };
+                setMediaList(prev => [...prev, mediaPayload]);
+
+                if (!uploadedUrl) {
+                    Alert.alert("Upload failed", "No video URL returned.");
+                    return;
+                } else {
+                    richText.current?.insertVideo(uploadedUrl);
                 }
-                setMediaList(prev => [...prev, mediaPayload])
-
-                // const response = await fetch("https://your-api-endpoint.com/upload/video", {
-                //     method: "POST",
-                //     headers: {
-                //         "Content-Type": "multipart/form-data",
-                //     },
-                //     body: formData,
-                // });
-
-                // const data = await response.json();
-                // console.log("Upload Response:", data);
-
-                // if (response.ok && data.url) {
-                //     // Assuming API returns uploaded file URL as `data.url`
-                //     richText.current?.insertVideo(data.url);
-                // } else {
-                //     Alert.alert("Upload failed", "Could not upload the video.");
-                // }
-
-                const staticVideoUrl = "https://raj-express-staging.s3.ap-south-1.amazonaws.com/raj-express-staging/videos/0743dd55-37ae-4f69-a4f8-14cef534b0ba.webm";
-                richText.current?.insertVideo(staticVideoUrl);
 
             }
         } catch (error) {
-            console.error("Image Upload Error:", error);
-            Alert.alert("Error", "Something went wrong while uploading the image.");
+            console.error("Video Upload Error:", error);
+            Alert.alert("Error", "Something went wrong while uploading the video.");
         }
     };
 
@@ -470,11 +466,14 @@ const EditorScreen = ({ navigation }) => {
                                     padding: 10px;
                                     font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
                                 }
-                                img {
-                                    max-width: 100%;
-                                    height: auto;
+                                img, video {
+                                    max-width: 100% !important;
+                                    height: auto !important;
                                     border-radius: 8px;
-                                    margin-vertical: 8px;
+                                    margin: 8px 0;
+                                    display: block;
+                                    object-fit: contain !important;
+                                    max-height: 250px !important;
                                 }
                             `,
                         }}

@@ -56,7 +56,7 @@ export interface PaginatedStories {
 }
 
 
-export const postStory = async (payload: PostStoryModal, id?: number) => {
+export const postStory = async (payload: PostStoryModal, id?: number, assignmentId?: number) => {
   try {
     const url = id
       ? `${Endpoints.Stories.postStory}?storyId=${id}`
@@ -70,7 +70,7 @@ export const postStory = async (payload: PostStoryModal, id?: number) => {
   }
 };
 
-export const postDraft = async (payload: PostStoryModal, id?: number) => {
+export const postDraft = async (payload: PostStoryModal, id?: number, assignmentId?: number) => {
   try {
     const url = id
       ? `${Endpoints.Stories.postDraft}?storyId=${id}`

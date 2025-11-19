@@ -1,23 +1,26 @@
 import axiosInstance from "../api/axiosInstance";
 import { Endpoints } from "../endpoints/endpoints";
 
-interface ImageUploadResponse {
-    imageUrl: string
+interface UploadedFile {
+    url: string;
+    originalName: string;
+    savedAs: string;
+    size: number;
+    mimetype: string;
+    folder: string;
 }
 
-export const complaintRegisterUploadImage = async (photo: any, unitId: string) => {
+interface UploadResponse {
+    message: string;
+    files: UploadedFile[];
+}
+
+
+export const fileUpload = async (formData: FormData) => {
     try {
-        const formData = new FormData();
+        const url = Endpoints.IMAGE.fileUpload;
 
-        formData.append("file", {
-            uri: photo.uri,
-            type: photo.type || "image/jpeg",
-            name: photo.fileName || "photo.jpg",
-        });
-
-        const url = `${Endpoints.IMAGE.imageUploadComplaintRegister}?folderName=complaint&identity=${unitId}`;
-
-        const response = await axiosInstance.post<ImageUploadResponse>(url, formData, {
+        const response = await axiosInstance.post<UploadResponse>(url, formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },
@@ -25,7 +28,7 @@ export const complaintRegisterUploadImage = async (photo: any, unitId: string) =
 
         return response.data;
     } catch (error) {
-        console.error("Image upload failed:", error);
+        console.error("Upload failed:", error);
         throw error;
     }
 };
