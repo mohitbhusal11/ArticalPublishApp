@@ -24,6 +24,7 @@ import { Assignment, getAssignments } from "../../services/calls/assignmentServi
 import { deleteFile, fileUpload } from "../../services/calls/imageUpload";
 import LottieView from "lottie-react-native";
 import { AppLottie } from "../../config/AppLottie";
+import { normalizeAttachment, normalizeMedia } from "../../utils/normalizeFun";
 
 const customFontAction = "customFontPicker";
 
@@ -56,7 +57,7 @@ const FontIcon = ({ tintColor }: { tintColor: string }) => (
 const DraftStoryScreen = ({ navigation, route }: any) => {
     const { item } = route.params;
     console.log("Draft Screen itemData: ", item);
-    
+
     const richText = React.useRef<RichEditor>(null);
     const [title, setTitle] = useState(item.headline);
     const [htmlContent, setHtmlContent] = useState(item.description);
@@ -83,8 +84,16 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
     const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(item.title);
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [mediaList, setMediaList] = useState<MediaModal[]>(item?.mediaList ?? [])
-    const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>(item.attachment)
+    // const [mediaList, setMediaList] = useState<MediaModal[]>(item?.media ?? [])
+    const [mediaList, setMediaList] = useState<MediaModal[]>(
+        normalizeMedia(item?.media)
+    );
+
+    // const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>(item.attachment)
+    const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>(
+        normalizeAttachment(item?.attachment)
+    );
+
 
     const fetchAssignments = async () => {
         try {

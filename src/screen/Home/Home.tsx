@@ -12,10 +12,10 @@ import GlobalText from "../../component/GlobalText";
 import GlobalSafeArea from "../../component/GlobalSafeArea";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-import { imageBaseURL } from "../../services/api/axiosInstance";
 import { styles } from "./style";
 import { DashboardCategory, fetchDashboard } from "../../services/calls/dashboardService";
 import { useIsFocused } from "@react-navigation/native";
+import FastImage from "react-native-fast-image";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -28,7 +28,6 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [data, setData] = useState<DashboardCategory[]>([]);
   const [hasNotification, setHasNotification] = useState(true);
   const user = useSelector((state: RootState) => state.userDetails.details);
-  const imgUrl = imageBaseURL + user?.imgUrl
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -72,9 +71,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         navigation.navigate("AssignmentsScreen", { status: "Pending" });
         break;
       case "rejected_assignment":
-        console.log("I am here");
-        
         navigation.navigate("AssignmentsScreen", { status: "Rejected" });
+        break;
+      case "assigned_assignment":
+        navigation.navigate("AssignmentsScreen", { status: "All" });
         break;
       case "accepted_assignment":
         navigation.navigate("AssignmentsScreen", { status: "Accepted" });
@@ -120,11 +120,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           {hasNotification && <View style={styles.notificationDot} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={handleEditProfileClick} >
-          <Image
-            source={user?.imgUrl
-              ? { uri: imgUrl }
-              : AppImage.profile_placeholder_ic}
+          <FastImage
             style={styles.profileIcon}
+            source={{ uri: user?.imgUrl }}
+            resizeMode={FastImage.resizeMode.cover}
           />
         </TouchableOpacity>
       </View>
@@ -134,6 +133,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         keyExtractor={(item) => item.id.toString()}
         refreshing={refreshing}
         onRefresh={onRefresh}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 12 }}>
             <GlobalText style={styles.cardsTitle}>{item.title}</GlobalText>

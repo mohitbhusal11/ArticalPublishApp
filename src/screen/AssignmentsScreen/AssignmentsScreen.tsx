@@ -262,7 +262,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
               style={[styles.button, styles.declineBtn]}
               onPress={() => handleDecline(item.id)}
             >
-              <GlobalText style={styles.btnText}>{AppString.common.deadline}</GlobalText>
+              <GlobalText style={styles.btnText}>{AppString.common.decline}</GlobalText>
             </TouchableOpacity>
           </View>
         )}

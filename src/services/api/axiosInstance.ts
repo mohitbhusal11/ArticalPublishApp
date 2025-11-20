@@ -7,7 +7,7 @@ import ToastUtils from "../../utils/toast";
 const baseURL = __DEV__
   ? "http://172.168.0.14:7200/api/v1.0/"
   // ? "http://172.168.0.14:7200/"
-  : "http://172.168.0.14:7200/";
+  : "http://172.168.0.14:7200/api/v1.0/";
 
 
 export const imageBaseURL = __DEV__ ? "http://172.168.0.14:8089" : "https://assets.rajfacilitymanagement.com";

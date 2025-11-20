@@ -73,3 +73,48 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# --- React Native ---
+/android/.gradle
+/android/app/build/
+/android/build/
+/ios/Pods/
+ios/build/
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Android Studio ---
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+
+# --- Build Outputs ---
+*.apk       # Android app packages
+*.aab       # Android App Bundles
+*.aar       # Android Archives
+*.dex
+*.class
+*.jar
+*.keystore
+*.jks
+
+# --- Logs ---
+*.log
+
+# --- Misc ---
+.env
+dist/
+tmp/
+temp/
+
+# --- Metro / Cache ---
+.expo/
+.expo-shared/
+.cache/
+metro-cache/

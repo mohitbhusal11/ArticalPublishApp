@@ -92,13 +92,13 @@ const AssignmentDetailsScreen = () => {
         if (status === "pending") {
             return (
                 <View style={styles.actionRow}>
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={[styles.button, styles.declineBtn]}
                         onPress={() => handleDecline(assignment.id)}
                         disabled={loading}
                     >
                         <GlobalText style={styles.btnText}>Decline</GlobalText>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                     <TouchableOpacity
                         style={[styles.button, styles.acceptBtn]}
@@ -106,6 +106,15 @@ const AssignmentDetailsScreen = () => {
                         disabled={loading}
                     >
                         <GlobalText style={styles.btnText}>Accept</GlobalText>
+                    </TouchableOpacity>
+
+
+                    <TouchableOpacity
+                        style={[styles.button, styles.declineBtn]}
+                        onPress={() => handleDecline(assignment.id)}
+                        disabled={loading}
+                    >
+                        <GlobalText style={styles.btnText}>Decline</GlobalText>
                     </TouchableOpacity>
                 </View>
             );

@@ -60,6 +60,7 @@ export const AppString = {
     EnterConfirmPassword: "Enter Confirm Password",
     Save: "Save",
     deadline: "Deadline",
+    decline: "Decline",
     assignedBy: "Assigned By",
     accept: "Accept",
     submitStory: "Submit Story",
