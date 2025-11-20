@@ -37,6 +37,7 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#222",
     flex: 1,
+    marginEnd: 2
   },
   badge: {
     paddingHorizontal: 8,

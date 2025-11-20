@@ -22,7 +22,7 @@ export const Endpoints = {
   },
   Stories: {
     postStory: "stories",
-    getStory: "stories",
+    getStory: "stories/mystories",
     postDraft: "stories/draft",
   },
   Assignment: {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   TouchableOpacity,
@@ -14,7 +14,7 @@ import GlobalText from "../../component/GlobalText";
 import { styles } from "./style";
 import ToastUtils from "../../utils/toast";
 
-const filters = ["All", "Accepted", "Submited", "Pending", "Rejected"];
+const filters = ["All", "Accepted", "Submit", "Pending", "Rejected"];
 
 const AssignmentsScreen: React.FC = ({ navigation }: any) => {
   const route = useRoute<any>();
@@ -30,6 +30,9 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [statusTrigger, setStatusTrigger] = useState(0);
+  const filterListRef = useRef<FlatList>(null);
+
+
 
   useEffect(() => {
     if (isFocused) {
@@ -42,9 +45,57 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
     }
   }, [isFocused, incomingStatus]);
 
+
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     if (!incomingStatus) {
+  //       setStatus(undefined);
+  //     } else {
+  //       const normalized =
+  //         incomingStatus.toLowerCase() === "all"
+  //           ? undefined
+  //           : incomingStatus.toLowerCase();
+  //       setStatus(normalized);
+  //     }
+
+  //     navigation.setParams({ status: undefined }); // Clear it
+
+  //     setStatusTrigger((prev) => prev + 1);
+  //   }
+  // }, [isFocused]);
+
+  // useEffect(() => {
+  //   if (incomingStatus !== undefined) {
+  //     const normalized =
+  //       !incomingStatus || incomingStatus.toLowerCase() === "all"
+  //         ? undefined
+  //         : incomingStatus.toLowerCase();
+  //     setStatus(normalized);
+  //     setStatusTrigger((prev) => prev + 1);
+  //   }
+  // }, [incomingStatus]);
+
   useEffect(() => {
     resetAndFetch();
   }, [status, statusTrigger]);
+
+  useEffect(() => {
+    const index = filters.findIndex(f =>
+      (f.toLowerCase() === "all" && status === undefined) ||
+      status === f.toLowerCase()
+    );
+
+    if (index !== -1) {
+      setTimeout(() => {
+        filterListRef.current?.scrollToIndex({
+          index,
+          animated: true,
+          viewPosition: 0.5,
+        });
+      }, 100); // small delay to allow rendering
+    }
+  }, [status]);
+
 
   const resetAndFetch = () => {
     setPage(1);
@@ -169,7 +220,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
           return AppColor.color_F39C12;
         case "accepted":
           return AppColor.color_3498DB;
-        case "submited":
+        case "submit":
           return AppColor.color_27AE60;
         case "rejected":
           return AppColor.color_E82427;
@@ -185,13 +236,13 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
         onPress={() => handleSubmitStory(item)}
       >
         <View style={styles.headerRow}>
-          <GlobalText style={styles.title}>{item.title}</GlobalText>
+          <GlobalText numberOfLines={1} style={styles.title}>{item.title}</GlobalText>
           <View style={[styles.badge, { backgroundColor: getBadgeColor() }]}>
             <GlobalText style={styles.badgeText}>{item.status.toUpperCase()}</GlobalText>
           </View>
         </View>
 
-        <GlobalText style={styles.description}>{item.brief}</GlobalText>
+        <GlobalText numberOfLines={2} style={styles.description}>{item.brief}</GlobalText>
 
         <View style={styles.metaRow}>
           <GlobalText style={styles.metaText}>📅 {AppString.common.deadline}: {item.deadlineAt}</GlobalText>
@@ -255,6 +306,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
 
       <View style={{ marginTop: 10, marginBottom: 5, paddingVertical: 2 }}>
         <FlatList
+          ref={filterListRef}
           horizontal
           data={filters}
           keyExtractor={(item) => item}
@@ -295,6 +347,15 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
               </TouchableOpacity>
             );
           }}
+          onScrollToIndexFailed={(info) => {
+            setTimeout(() => {
+              filterListRef.current?.scrollToIndex({
+                index: info.index,
+                animated: true,
+              });
+            }, 300);
+          }}
+
         />
       </View>
 
