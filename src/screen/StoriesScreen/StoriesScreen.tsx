@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   TouchableOpacity,
@@ -27,12 +27,15 @@ function getStatusColorAdvanced(status?: string): string {
       return "#10B981";
     case "review":
       return "#F59E0B";
+    case "approved":
+      return "#6366F1";
     default:
       return "#6B7280";
   }
 }
 
-const filters = ["All", "Approved", "Review", "Draft", "Publish"];
+
+const filters = ["All", "Submit", "Approved", "Review", "Draft", "Publish"];
 
 const StoriesScreen = ({ navigation }: any) => {
   const route = useRoute<any>();
@@ -48,6 +51,7 @@ const StoriesScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [statusTrigger, setStatusTrigger] = useState(0);
+  const filterListRef = useRef<FlatList>(null);
 
 
   useEffect(() => {
@@ -61,9 +65,57 @@ const StoriesScreen = ({ navigation }: any) => {
     }
   }, [isFocused, incomingStatus]);
 
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     if (!incomingStatus) {
+  //       setStatus(undefined);
+  //     } else {
+  //       const normalized =
+  //         incomingStatus.toLowerCase() === "all"
+  //           ? undefined
+  //           : incomingStatus.toLowerCase();
+  //       setStatus(normalized);
+  //     }
+
+  //     navigation.setParams({ status: undefined }); // Clear it
+
+  //     setStatusTrigger((prev) => prev + 1);
+  //   }
+  // }, [isFocused]);
+
+  // useEffect(() => {
+  //   if (incomingStatus !== undefined) {
+  //     const normalized =
+  //       !incomingStatus || incomingStatus.toLowerCase() === "all"
+  //         ? undefined
+  //         : incomingStatus.toLowerCase();
+
+  //     setStatus(normalized);
+  //     setStatusTrigger((prev) => prev + 1);
+  //   }
+  // }, [incomingStatus]);
+
   useEffect(() => {
     resetAndFetch();
   }, [status, statusTrigger]);
+
+  useEffect(() => {
+    const index = filters.findIndex(f =>
+      (f.toLowerCase() === "all" && status === undefined) ||
+      status === f.toLowerCase()
+    );
+
+    if (index !== -1) {
+      setTimeout(() => {
+        filterListRef.current?.scrollToIndex({
+          index,
+          animated: true,
+          viewPosition: 0.5,
+        });
+      }, 100); // small delay to allow rendering
+    }
+  }, [status]);
+
 
   const resetAndFetch = () => {
     setPage(1);
@@ -88,18 +140,18 @@ const StoriesScreen = ({ navigation }: any) => {
 
     try {
       const query: any = {
-      page: pageNumber,
-      pageSize,
-      search,
-    };
+        page: pageNumber,
+        pageSize,
+        search,
+      };
 
-    if (status) {
-      query.status = status;
-    }
+      if (status) {
+        query.status = status;
+      }
 
-    console.log("API Payload:", query);
+      console.log("API Payload:", query);
 
-    const response = await getStories(query);
+      const response = await getStories(query);
 
       const newData = response.data ?? [];
       const total = response.total ?? 0;
@@ -186,6 +238,7 @@ const StoriesScreen = ({ navigation }: any) => {
 
       <View style={{ marginTop: 10, marginBottom: 5, paddingVertical: 2 }}>
         <FlatList
+          ref={filterListRef}
           horizontal
           data={filters}
           keyExtractor={(item) => item}
@@ -226,6 +279,15 @@ const StoriesScreen = ({ navigation }: any) => {
               </TouchableOpacity>
             );
           }}
+          onScrollToIndexFailed={(info) => {
+            setTimeout(() => {
+              filterListRef.current?.scrollToIndex({
+                index: info.index,
+                animated: true,
+              });
+            }, 300);
+          }}
+
         />
       </View>
 
@@ -240,7 +302,7 @@ const StoriesScreen = ({ navigation }: any) => {
             <ActivityIndicator size="small" style={{ marginVertical: 16 }} />
           ) : null
         }
-        ListEmptyComponent={
+        ListEmptyComponent={() =>
           !loading && (
             <GlobalText style={{ textAlign: "center", marginTop: 50 }}>
               No stories found

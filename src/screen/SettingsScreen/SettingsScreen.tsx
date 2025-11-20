@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
 import { AppString } from '../../strings'
 import { styles } from './style'
-import { Image, Pressable, ScrollView, TouchableOpacity, View } from 'react-native'
+import { Pressable, ScrollView, TouchableOpacity, View } from 'react-native'
 import { AppImage } from '../../config/AppImage'
 import { persistor, RootState, store } from '../../redux/store'
 import { useSelector } from 'react-redux'
 import { clearToken } from '../../redux/slices/authSlice'
 import { clearUserDetails } from '../../redux/slices/userSlice'
-import { imageBaseURL } from '../../services/api/axiosInstance'
 import { logout } from '../../services/calls/authService'
 import { deleteUserDetails } from '../../services/calls/userService'
 import ToastUtils from '../../utils/toast'
@@ -15,6 +14,7 @@ import GlobalSafeArea from '../../component/GlobalSafeArea'
 import GlobalText from '../../component/GlobalText'
 import SettingsRow from '../../component/SettingsRow'
 import ConfirmModal from '../../component/ConfirmModal'
+import FastImage from 'react-native-fast-image'
 
 const SettingsScreen = ({ navigation }: any) => {
   const user = useSelector((state: RootState) => state.userDetails.details);
@@ -23,11 +23,10 @@ const SettingsScreen = ({ navigation }: any) => {
   const [showDeleteUser, setShowDeleteUser] = useState(false);
 
   console.log(user);
-  
+
 
   console.log("userName: ", user?.userName);
   console.log("UserMobileNo: ", user?.mobileNo);
-  const imgUrl = imageBaseURL + user?.imgUrl
 
   const handlePushNotificationClick = () => {
 
@@ -50,7 +49,7 @@ const SettingsScreen = ({ navigation }: any) => {
       store.dispatch(clearUserDetails());
       await persistor.purge();
     } catch (error) {
-      console.log("error: ", error);      
+      console.log("error: ", error);
       setShowLogout(false);
     }
   }
@@ -82,9 +81,11 @@ const SettingsScreen = ({ navigation }: any) => {
 
         <Pressable onPress={handleEditProfileClick} style={styles.myProfileView} >
           <View style={styles.leftSideProfileCard} >
-            <Image style={styles.profileImage} source={user?.imgUrl
-              ? { uri: imgUrl }
-              : AppImage.profile_placeholder_ic} />
+            <FastImage
+              style={styles.profileImage}
+              source={{ uri: user?.imgUrl }}
+              resizeMode={FastImage.resizeMode.cover}
+            />
             <View style={styles.nameAndNumber} >
               {
                 user?.userName && <GlobalText formatNumber={false} style={styles.userNameText} >{user?.userName}</GlobalText>

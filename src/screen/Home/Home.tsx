@@ -12,23 +12,32 @@ import GlobalText from "../../component/GlobalText";
 import GlobalSafeArea from "../../component/GlobalSafeArea";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-import { imageBaseURL } from "../../services/api/axiosInstance";
 import { styles } from "./style";
 import { DashboardCategory, fetchDashboard } from "../../services/calls/dashboardService";
 import { useIsFocused } from "@react-navigation/native";
+import FastImage from "react-native-fast-image";
+
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good Morning";
+  if (hour < 18) return "Good Afternoon";
+  return "Good Evening";
+};
 
 const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [data, setData] = useState<DashboardCategory[]>([]);
   const [hasNotification, setHasNotification] = useState(true);
   const user = useSelector((state: RootState) => state.userDetails.details);
-  const imgUrl = imageBaseURL + user?.imgUrl
   const isFocused = useIsFocused();
+  const [refreshing, setRefreshing] = useState(false);
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+      await getDashboardData();
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleNotificationPress = () => {
@@ -38,10 +47,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const handleCardClicked = (redirectionScreen: string) => {
     console.log("redirectionScreen: ", redirectionScreen);
-    
+
     switch (redirectionScreen) {
       case "submitted_story":
-        navigation.navigate("StoriesScreen", { status: "All" });
+        navigation.navigate("StoriesScreen", { status: "Submit" });
         break;
       case "approved_story":
         navigation.navigate("StoriesScreen", { status: "Approved" });
@@ -56,16 +65,19 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
         navigation.navigate("StoriesScreen", { status: "Publish" });
         break;
       case "submitted_assignment":
-        navigation.navigate("AssignmentsScreen", { status: redirectionScreen });
+        navigation.navigate("AssignmentsScreen", { status: "Submit" });
         break;
-      case "review_assignment":
-        navigation.navigate("AssignmentsScreen", { status: redirectionScreen });
+      case "pending_assignment":
+        navigation.navigate("AssignmentsScreen", { status: "Pending" });
         break;
       case "rejected_assignment":
-        navigation.navigate("AssignmentsScreen", { filstatuster: redirectionScreen });
+        navigation.navigate("AssignmentsScreen", { status: "Rejected" });
         break;
-      case "approved_assignment":
-        navigation.navigate("AssignmentsScreen", { status: redirectionScreen });
+      case "assigned_assignment":
+        navigation.navigate("AssignmentsScreen", { status: "All" });
+        break;
+      case "accepted_assignment":
+        navigation.navigate("AssignmentsScreen", { status: "Accepted" });
         break;
       default:
         ToastUtils.info("This card doesn't have a redirection screen.");
@@ -108,11 +120,10 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
           {hasNotification && <View style={styles.notificationDot} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={handleEditProfileClick} >
-          <Image
-            source={user?.imgUrl
-              ? { uri: imgUrl }
-              : AppImage.profile_placeholder_ic}
+          <FastImage
             style={styles.profileIcon}
+            source={{ uri: user?.imgUrl }}
+            resizeMode={FastImage.resizeMode.cover}
           />
         </TouchableOpacity>
       </View>
@@ -120,6 +131,9 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       <FlatList
         data={data}
         keyExtractor={(item) => item.id.toString()}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 12 }}>
             <GlobalText style={styles.cardsTitle}>{item.title}</GlobalText>

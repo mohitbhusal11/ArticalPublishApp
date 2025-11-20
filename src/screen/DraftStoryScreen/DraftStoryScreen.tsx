@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Text,
     View,
@@ -17,9 +17,14 @@ import { AppString } from "../../strings";
 import GlobalText from "../../component/GlobalText";
 import { AppColor } from "../../config/AppColor";
 import { AppImage } from "../../config/AppImage";
-import { MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
+import { AttachmentModal, MediaModal, postDraft, postStory, PostStoryModal } from "../../services/calls/stories";
 import ToastUtils from "../../utils/toast";
 import { styles } from "./style";
+import { Assignment, getAssignments } from "../../services/calls/assignmentService";
+import { deleteFile, fileUpload } from "../../services/calls/imageUpload";
+import LottieView from "lottie-react-native";
+import { AppLottie } from "../../config/AppLottie";
+import { normalizeAttachment, normalizeMedia } from "../../utils/normalizeFun";
 
 const customFontAction = "customFontPicker";
 
@@ -49,8 +54,10 @@ const FontIcon = ({ tintColor }: { tintColor: string }) => (
 
 
 
-const DraftStoryScreen = ({ navigation, route }) => {
+const DraftStoryScreen = ({ navigation, route }: any) => {
     const { item } = route.params;
+    console.log("Draft Screen itemData: ", item);
+
     const richText = React.useRef<RichEditor>(null);
     const [title, setTitle] = useState(item.headline);
     const [htmlContent, setHtmlContent] = useState(item.description);
@@ -73,26 +80,109 @@ const DraftStoryScreen = ({ navigation, route }) => {
         "Helvetica",
         "Noto Sans"
     ]);
+    const [assignmentList, setAssignmentList] = useState<Assignment[]>([]);
+    const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(item.title);
+    const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
+    const [loading, setLoading] = useState(false);
+    // const [mediaList, setMediaList] = useState<MediaModal[]>(item?.media ?? [])
+    const [mediaList, setMediaList] = useState<MediaModal[]>(
+        normalizeMedia(item?.media)
+    );
 
-    const [mediaList, setMediaList] = useState<MediaModal[]>(item?.mediaList ?? [])
+    // const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>(item.attachment)
+    const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>(
+        normalizeAttachment(item?.attachment)
+    );
+
+
+    const fetchAssignments = async () => {
+        try {
+            const response = await getAssignments({ pageSize: 50, status: "Accepted" })
+            console.log(response);
+            setAssignmentList(response.data)
+
+        } catch (error) {
+            console.log("fetchAssignments error: ", error);
+
+        }
+    }
+
+    useEffect(() => {
+        fetchAssignments()
+    }, [])
 
     const handleAttachments = async () => {
         try {
+            setLoading(true);
             const result = await launchImageLibrary({
                 mediaType: "mixed",
+                selectionLimit: 0,
                 quality: 0.8,
             });
 
-            if (result.assets && result.assets.length > 0) {
-                const imageUri = result.assets[0].uri;
-                if (imageUri) {
-                    // Inserts the selected image into the editor
-                    richText.current?.insertImage(imageUri);
-                }
+            if (!result.assets || result.assets.length === 0) {
+                setLoading(false);
+                return;
             }
+
+            const uploadedItems: AttachmentModal[] = [];
+
+            for (const asset of result.assets) {
+                if (!asset.uri) continue;
+
+                const formData = new FormData();
+                const fileName = asset.fileName || `file_${Date.now()}`;
+                const fileType = asset.type || getMimeType(asset.fileName);
+                console.log("Uploading File:", fileName, "Type:", fileType, "URI:", asset.uri)
+                formData.append("file", {
+                    uri: asset.uri,
+                    type: asset.type || getMimeType(asset.fileName),
+                    name: asset.fileName || `file_${Date.now()}`,
+                } as any);
+
+                const uploadResponse = await fileUpload(formData);
+                console.log("Upload Response:", uploadResponse);
+                const uploadedUrl = uploadResponse?.files?.[0]?.url;
+
+                if (!uploadedUrl) continue;
+
+                let mediaType = "Document";
+                if (asset.type?.startsWith("image")) mediaType = "Image";
+                if (asset.type?.startsWith("video")) mediaType = "Video";
+
+                uploadedItems.push({
+                    mediaType,
+                    caption: "",
+                    shotTime: "",
+                    filePath: uploadedUrl,
+                });
+            }
+
+            setAttachmentList(prev => [...prev, ...uploadedItems]);
+
         } catch (error) {
-            console.warn("Error picking image:", error);
+            console.error("Attachment Upload Error:", error);
+            Alert.alert("Error", "Failed to upload attachments.");
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const getMimeType = (fileName?: string) => {
+        if (!fileName) return "application/octet-stream";
+
+        const ext = fileName.split(".").pop()?.toLowerCase();
+
+        const map: any = {
+            pdf: "application/pdf",
+            doc: "application/msword",
+            docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            xls: "application/vnd.ms-excel",
+            xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            txt: "text/plain",
+        };
+
+        return map[ext] || "application/octet-stream";
     };
 
     const handleSubmit = async () => {
@@ -104,13 +194,14 @@ const DraftStoryScreen = ({ navigation, route }) => {
         const finalPayload: PostStoryModal = {
             headLine: title.trim(),
             description: htmlContent.trim(),
-            // media: mediaList
+            media: mediaList,
+            attachment: attachmentList
         };
         console.log("MediaList: ", mediaList);
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postStory(finalPayload, item.id)
+            const response = await postStory(finalPayload, { storyId: item.id, assignmentId: selectedAssignment?.id ?? undefined });
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
@@ -129,13 +220,14 @@ const DraftStoryScreen = ({ navigation, route }) => {
         const finalPayload: PostStoryModal = {
             headLine: title.trim(),
             description: htmlContent.trim(),
-            // media: mediaList
+            media: mediaList,
+            attachment: attachmentList
         };
         console.log("MediaList: ", mediaList);
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postDraft(finalPayload, item.id)
+            const response = await postDraft(finalPayload, { storyId: item.id, assignmentId: selectedAssignment?.id ?? undefined });
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
@@ -147,6 +239,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
 
     const handleAddImageUpload = async () => {
         try {
+            setLoading(true);
             const result = await launchImageLibrary({
                 mediaType: "photo",
                 quality: 0.8,
@@ -164,26 +257,37 @@ const DraftStoryScreen = ({ navigation, route }) => {
                 });
 
                 console.log("formData: ", formData);
+                const response = await fileUpload(formData);
+                console.log("Upload Response:", response);
+                const uploadedUrl = response?.files?.[0]?.url;
                 const mediaPayload: MediaModal = {
                     mediaType: 'Photo',
                     caption: '',
                     shotTime: '',
-                    filePath: asset.fileName || "upload.jpg"
+                    filePath: uploadedUrl || "upload.jpg"
                 }
                 setMediaList(prev => [...prev, mediaPayload])
 
-                const staticImageUrl = "https://raj-express-staging.s3.ap-south-1.amazonaws.com/images/02_svg_4e91631d67.png";
-                richText.current?.insertImage(staticImageUrl);
+                if (!uploadedUrl) {
+                    Alert.alert("Upload failed", "No Image URL returned.");
+                    return;
+                } else {
+                    richText.current?.insertImage(uploadedUrl);
+                }
+
 
             }
         } catch (error) {
             console.error("Image Upload Error:", error);
             Alert.alert("Error", "Something went wrong while uploading the image.");
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleAddVideoUpload = async () => {
         try {
+            setLoading(true);
             const result = await launchImageLibrary({
                 mediaType: "video",
                 videoQuality: "medium",
@@ -203,39 +307,30 @@ const DraftStoryScreen = ({ navigation, route }) => {
                 });
 
                 console.log("Uploading video...", formData);
+                const response = await fileUpload(formData);
+                console.log("Upload Response:", response);
+                const uploadedUrl = response?.files?.[0]?.url;
                 const mediaPayload: MediaModal = {
                     mediaType: 'Video',
                     caption: '',
                     shotTime: '',
-                    filePath: asset.fileName || "upload.jpg"
+                    filePath: uploadedUrl || "upload.mp4"
+                };
+                setMediaList(prev => [...prev, mediaPayload]);
+
+                if (!uploadedUrl) {
+                    Alert.alert("Upload failed", "No video URL returned.");
+                    return;
+                } else {
+                    richText.current?.insertVideo(uploadedUrl);
                 }
-                setMediaList(prev => [...prev, mediaPayload])
-
-                // const response = await fetch("https://your-api-endpoint.com/upload/video", {
-                //     method: "POST",
-                //     headers: {
-                //         "Content-Type": "multipart/form-data",
-                //     },
-                //     body: formData,
-                // });
-
-                // const data = await response.json();
-                // console.log("Upload Response:", data);
-
-                // if (response.ok && data.url) {
-                //     // Assuming API returns uploaded file URL as `data.url`
-                //     richText.current?.insertVideo(data.url);
-                // } else {
-                //     Alert.alert("Upload failed", "Could not upload the video.");
-                // }
-
-                const staticVideoUrl = "https://raj-express-staging.s3.ap-south-1.amazonaws.com/raj-express-staging/videos/0743dd55-37ae-4f69-a4f8-14cef534b0ba.webm";
-                richText.current?.insertVideo(staticVideoUrl);
 
             }
         } catch (error) {
-            console.error("Image Upload Error:", error);
-            Alert.alert("Error", "Something went wrong while uploading the image.");
+            console.error("Video Upload Error:", error);
+            Alert.alert("Error", "Something went wrong while uploading the video.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -307,6 +402,25 @@ const DraftStoryScreen = ({ navigation, route }) => {
         }, 300);
     };
 
+    const handleDeleteAttachment = async (index: number) => {
+        try {
+            setLoading(true);
+            const fileToDelete: AttachmentModal = attachmentList[index];
+
+            console.log("Deleting File:", fileToDelete);
+
+            await deleteFile({ fileKey: fileToDelete.filePath });
+
+            setAttachmentList(prev => prev.filter((_, i) => i !== index));
+
+            console.log("Attachment removed successfully.");
+
+        } catch (error) {
+            Alert.alert("Delete Failed", "Unable to delete the file from server.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -334,7 +448,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
                     </View>
                 </View>
 
-                <Text style={styles.label}>{AppString.common.title}</Text>
+                {/* <Text style={styles.label}>{AppString.common.title}</Text> */}
                 <TextInput
                     maxLength={200}
                     placeholder="Enter your title..."
@@ -343,7 +457,7 @@ const DraftStoryScreen = ({ navigation, route }) => {
                     style={styles.titleInput}
                     placeholderTextColor={AppColor.color_aaa}
                 />
-                <Text style={styles.title}>{AppString.common.description}</Text>
+                {/* <Text style={styles.title}>{AppString.common.description}</Text> */}
 
                 <View style={styles.toolbarWrapper}>
                     <ScrollView
@@ -409,35 +523,161 @@ const DraftStoryScreen = ({ navigation, route }) => {
             </View>
 
             <ScrollView
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={[styles.scrollContent, { paddingBottom: 40 }]}
                 keyboardShouldPersistTaps="handled"
                 nestedScrollEnabled={true}>
 
-                <RichEditor
-                    ref={richText}
-                    placeholder="Start writing something awesome..."
-                    style={styles.editor}
-                    initialContentHTML={htmlContent}
-                    onChange={(text) => setHtmlContent(text)}
-                    editorStyle={{
-                        backgroundColor: AppColor.ffffff,
-                        color: AppColor.color_222,
-                        placeholderColor: AppColor.color_aaa,
-                        contentCSSText: `
-                            font-size: 16px;
-                            line-height: 24px;
-                            font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
-                            overflow-y: auto;
-                            padding: 10px;
-                            img {
-                                max-width: 100%;
-                                height: auto;
+                <View style={{ height: 400, overflow: "hidden" }}>
+                    <RichEditor
+                        ref={richText}
+                        placeholder="Start writing something awesome..."
+                        initialContentHTML={htmlContent}
+                        androidLayerType={"hardware"}
+                        useContainer={false}
+                        style={{
+                            flex: 1,
+                            height: 400,
+                            backgroundColor: "#fff",
+                            borderWidth: 2,
+                            margin: 5,
+                            elevation: 2,
+                            borderRadius: 12,
+                        }}
+                        onChange={(text) => setHtmlContent(text)}
+                        editorStyle={{
+                            backgroundColor: AppColor.ffffff,
+                            color: AppColor.color_222,
+                            placeholderColor: AppColor.color_aaa,
+                            contentCSSText: `
+                            body {
+                                font-size: 16px;
+                                height: 100%;
+                                max-height: 500px;
+                                overflow-y: auto;   
+                                padding: 10px;
+                                font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
+                            }
+                            img, video {
+                                max-width: 100% !important;
+                                height: auto !important;
                                 border-radius: 8px;
-                                margin-vertical: 8px;
+                                margin: 8px 0;
+                                display: block;
+                                object-fit: contain !important;
+                                max-height: 250px !important;
                             }
                         `,
-                    }}
-                />
+                        }}
+                    />
+                </View>
+
+                {/* -------------------- ASSIGNMENT SECTION -------------------- */}
+                {assignmentList && <View style={styles.assignmentContainer}>
+
+                    <View style={styles.row}>
+                        <GlobalText style={styles.fileName} numberOfLines={1}>
+                            Is this story related to an assignment?
+                        </GlobalText>
+                        {selectedAssignment && <TouchableOpacity
+                            onPress={() => {
+                                setSelectedAssignment(null)
+                            }}
+                            style={styles.assignmentToggleBtn}>
+                            <Text style={styles.assignmentToggleLabel}>
+                                Clear
+                            </Text>
+                        </TouchableOpacity>
+                        }
+                    </View>
+
+                    {assignmentList && <View>
+                        <TouchableOpacity
+                            onPress={() => setShowAssignmentDropdown(!showAssignmentDropdown)}
+                            style={styles.assignmentDropdownButton}
+                        >
+                            <Text style={styles.assignmentDropdownSelected}>
+                                {selectedAssignment ? selectedAssignment.title : "Choose assignment"}
+                            </Text>
+                            <Text style={styles.assignmentDropdownArrow}>⌄</Text>
+                        </TouchableOpacity>
+
+                        {showAssignmentDropdown && (
+                            <View style={styles.assignmentDropdownBox}>
+                                <ScrollView>
+                                    {assignmentList.map((item) => (
+                                        <TouchableOpacity
+                                            key={item.id}
+                                            style={styles.assignmentDropdownItem}
+                                            onPress={() => {
+                                                setSelectedAssignment(item);
+                                                setShowAssignmentDropdown(false);
+                                            }}
+                                        >
+                                            <Text style={styles.assignmentDropdownItemText}>
+                                                {item.title}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            </View>
+                        )}
+                    </View>}
+
+                </View>}
+                {/* ---------------- END ASSIGNMENT SECTION ------------------ */}
+
+                {/* -------------------- MEDIA ATTACHMENTS -------------------- */}
+                <View style={styles.mediaContainer}>
+
+                    <GlobalText style={styles.mediaHeader}>
+                        Media Attachments
+                    </GlobalText>
+
+                    <TouchableOpacity onPress={handleAttachments} style={styles.uploadBox}>
+                        <Image source={AppImage.attach_ic} style={styles.uploadIcon} />
+                        <Text style={styles.uploadText}>Upload Files</Text>
+                        <Text style={styles.uploadSubText}>Images, Videos, Documents (max 100MB)</Text>
+                    </TouchableOpacity>
+
+                    {attachmentList.length > 0 && (
+                        <View style={styles.listContainer}>
+                            {attachmentList.map((item, index) => {
+                                const fileName = item.filePath.split("/").pop() || "file";
+
+                                const isImage = item.mediaType === "Image";
+                                const isVideo = item.mediaType === "Video";
+                                const isDoc = item.mediaType === "Document";
+
+                                return (
+                                    <View key={index} style={styles.row}>
+                                        <Image source={AppImage.file_ic} style={styles.fileIcon} />
+                                        <Text style={styles.fileName} numberOfLines={1}>
+                                            {fileName}
+                                        </Text>
+                                        {isImage && (
+                                            <Image source={{ uri: item.filePath }} style={styles.imagePreview} />
+                                        )}
+                                        {isVideo && (
+                                            <View style={styles.videoPreview}>
+                                                <Text style={styles.videoText}>Video</Text>
+                                            </View>
+                                        )}
+                                        {isDoc && (
+                                            <View style={styles.docPreview}>
+                                                <Text style={styles.docText}>DOC</Text>
+                                            </View>
+                                        )}
+                                        <TouchableOpacity onPress={() => handleDeleteAttachment(index)}>
+                                            <Image source={AppImage.delete_ic} style={styles.deleteIcon} />
+                                        </TouchableOpacity>
+
+                                    </View>
+                                );
+                            })}
+                        </View>
+                    )}
+                </View>
+                {/* ---------------- END MEDIA ------------------ */}
             </ScrollView>
 
             <Modal visible={showLinkModal} transparent animationType="fade" onRequestClose={closeModal}>
@@ -551,6 +791,17 @@ const DraftStoryScreen = ({ navigation, route }) => {
                     </View>
                 </View>
             </Modal>
+
+            {loading && (
+                <View style={styles.loaderOverlay}>
+                    <LottieView
+                        source={AppLottie.loader}
+                        autoPlay
+                        loop
+                        style={{ width: 120, height: 120 }}
+                    />
+                </View>
+            )}
 
         </SafeAreaView>
     );
