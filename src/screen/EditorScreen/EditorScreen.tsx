@@ -803,7 +803,7 @@ const EditorScreen = ({ navigation }: any) => {
                         source={AppLottie.loader}
                         autoPlay
                         loop
-                        style={{ width: 120, height: 120 }}
+                        style={{ width: 50, height: 50 }}
                     />
                 </View>
             )}

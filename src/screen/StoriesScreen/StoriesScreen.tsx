@@ -12,6 +12,8 @@ import { styles } from "./style";
 import GlobalText from "../../component/GlobalText";
 import GlobalSafeArea from "../../component/GlobalSafeArea";
 import { AppColor } from "../../config/AppColor";
+import LottieView from "lottie-react-native";
+import { AppLottie } from "../../config/AppLottie";
 
 const stripHtml = (html: string): string => {
   return html.replace(/<[^>]+>/g, "").trim();
@@ -312,10 +314,14 @@ const StoriesScreen = ({ navigation }: any) => {
       />
 
       {loading && page === 1 && (
-        <ActivityIndicator
-          size="large"
-          style={{ position: "absolute", top: "50%", left: "50%" }}
-        />
+        <View style={styles.loaderOverlay}>
+          <LottieView
+            source={AppLottie.loader}
+            autoPlay
+            loop
+            style={{ width: 50, height: 50 }}
+          />
+        </View>
       )}
     </GlobalSafeArea>
   );

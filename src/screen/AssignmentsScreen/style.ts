@@ -89,4 +89,15 @@ export const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "600",
   },
+  loaderOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: AppColor.loaderOverlayColor,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
 });

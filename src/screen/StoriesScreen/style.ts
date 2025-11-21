@@ -92,4 +92,15 @@ export const styles = StyleSheet.create({
         fontWeight: "600",
         fontSize: 13,
     },
+    loaderOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(172, 172, 172, 0.4)",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 999,
+    },
 });

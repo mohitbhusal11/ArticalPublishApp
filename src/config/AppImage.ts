@@ -24,4 +24,6 @@ export const AppImage = {
     attach_ic: require('../assets/images/attach_ic.png'),
     file_ic: require('../assets/images/file_ic.png'),
     delete_ic: require('../assets/images/delete_ic.png'),
+    hide_password_ic: require('../assets/images/hide_password_ic.png'),
+    show_password_ic: require('../assets/images/show_password_ic.png'),
 }
