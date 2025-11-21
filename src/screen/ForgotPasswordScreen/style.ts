@@ -4,11 +4,7 @@ import { AppColor } from "../../config/AppColor";
 export const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "grey",
-    },
-    bgImage: {
-        flex: 1,
-        resizeMode: 'contain'
+        // backgroundColor: "grey",
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
@@ -19,9 +15,7 @@ export const styles = StyleSheet.create({
     contentBox: {
         backgroundColor: "white",
         flexDirection: "column",
-        borderTopLeftRadius: 15,
-        borderTopRightRadius: 15,
-        // height: 400,
+        flex: 1,
     },
     title: {
         fontSize: 18,

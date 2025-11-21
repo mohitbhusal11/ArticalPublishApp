@@ -13,6 +13,8 @@ import { useIsFocused, useRoute } from "@react-navigation/native";
 import GlobalText from "../../component/GlobalText";
 import { styles } from "./style";
 import ToastUtils from "../../utils/toast";
+import LottieView from "lottie-react-native";
+import { AppLottie } from "../../config/AppLottie";
 
 const filters = ["All", "Accepted", "Submit", "Pending", "Rejected"];
 
@@ -382,10 +384,14 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
         }
       />
       {loading && page === 1 && (
-        <ActivityIndicator
-          size="large"
-          style={{ position: "absolute", top: "50%", left: "50%" }}
-        />
+        <View style={styles.loaderOverlay}>
+          <LottieView
+            source={AppLottie.loader}
+            autoPlay
+            loop
+            style={{ width: 50, height: 50 }}
+          />
+        </View>
       )}
     </View>
   );

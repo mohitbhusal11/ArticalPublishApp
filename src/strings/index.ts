@@ -6,6 +6,7 @@ export const AppString = {
     enterYourCredentials: "Enter Your  Credentials",
     forgotPasswordTitle: "Forgot Password",
     userID: "User Id",
+    userName: "User Name",
     enterNumber: "Enter Register Mobile Number",
     password: "Password",
     enterOtp: "Enter OTP",
@@ -69,5 +70,6 @@ export const AppString = {
     title: "Title",
     draft: "Draft",
     clear: "Clear",
+    signIn : "Sign In ",
   },
 };

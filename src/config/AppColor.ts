@@ -113,6 +113,8 @@ export const AppColor = {
   color_BDC3C7: "#BDC3C7",
   color_F8F9FB: "#F8F9FB",
 
+  loaderOverlayColor: "rgba(172, 172, 172, 0.4)"
+
 
   
 }
