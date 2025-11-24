@@ -25,6 +25,16 @@ import { deleteFile, fileUpload } from "../../services/calls/imageUpload";
 import LottieView from "lottie-react-native";
 import { AppLottie } from "../../config/AppLottie";
 import { normalizeAttachment, normalizeMedia } from "../../utils/normalizeFun";
+import { pick, types } from "@react-native-documents/picker";
+
+const BLOCKED_EXTENSIONS = [
+    '.php', '.exe', '.env', '.sh', '.bat', '.cmd', '.msi',
+    '.js', '.ts', '.py', '.rb', '.jar', '.apk'
+];
+
+const MAX_FILE_SIZE_MB = 20; // your limit 
+const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 
 const customFontAction = "customFontPicker";
 
@@ -111,79 +121,143 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
         fetchAssignments()
     }, [])
 
+    // const handleAttachments = async () => {
+    //     try {
+    //         setLoading(true);
+    //         const result = await launchImageLibrary({
+    //             mediaType: "mixed",
+    //             selectionLimit: 0,
+    //             quality: 0.8,
+    //         });
+
+    //         if (!result.assets || result.assets.length === 0) {
+    //             setLoading(false);
+    //             return;
+    //         }
+
+    //         const uploadedItems: AttachmentModal[] = [];
+
+    //         for (const asset of result.assets) {
+    //             if (!asset.uri) continue;
+
+    //             const formData = new FormData();
+    //             const fileName = asset.fileName || `file_${Date.now()}`;
+    //             const fileType = asset.type || getMimeType(asset.fileName);
+    //             console.log("Uploading File:", fileName, "Type:", fileType, "URI:", asset.uri)
+    //             formData.append("file", {
+    //                 uri: asset.uri,
+    //                 type: asset.type || getMimeType(asset.fileName),
+    //                 name: asset.fileName || `file_${Date.now()}`,
+    //             } as any);
+
+    //             const uploadResponse = await fileUpload(formData);
+    //             console.log("Upload Response:", uploadResponse);
+    //             const uploadedUrl = uploadResponse?.files?.[0]?.url;
+
+    //             if (!uploadedUrl) continue;
+
+    //             let mediaType = "Document";
+    //             if (asset.type?.startsWith("image")) mediaType = "Image";
+    //             if (asset.type?.startsWith("video")) mediaType = "Video";
+
+    //             uploadedItems.push({
+    //                 mediaType,
+    //                 caption: "",
+    //                 shotTime: "",
+    //                 filePath: uploadedUrl,
+    //             });
+    //         }
+
+    //         setAttachmentList(prev => [...prev, ...uploadedItems]);
+
+    //     } catch (error) {
+    //         console.error("Attachment Upload Error:", error);
+    //         Alert.alert("Error", "Failed to upload attachments.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const handleAttachments = async () => {
         try {
             setLoading(true);
-            const result = await launchImageLibrary({
-                mediaType: "mixed",
-                selectionLimit: 0,
-                quality: 0.8,
-            });
 
-            if (!result.assets || result.assets.length === 0) {
-                setLoading(false);
-                return;
-            }
+            const results = await pick({
+                type: [types.allFiles],
+            });
 
             const uploadedItems: AttachmentModal[] = [];
 
-            for (const asset of result.assets) {
-                if (!asset.uri) continue;
+            for (const file of results) {
+                console.log('Picked file:', file.uri, file.name, file.type, file.size);
+
+                const fileExt = file.name?.substring(file.name.lastIndexOf('.')).toLowerCase();
+                if (BLOCKED_EXTENSIONS.includes(fileExt)) {
+                    Alert.alert("Unsupported File", `Files of type ${fileExt} are not allowed.`);
+                    continue;
+                }
+
+                if (file.size && file.size > MAX_FILE_SIZE) {
+                    Alert.alert(
+                        "File Too Large",
+                        `The file "${file.name}" exceeds ${MAX_FILE_SIZE_MB} MB limit.`
+                    );
+                    continue; // skip uploading this file
+                }
 
                 const formData = new FormData();
-                const fileName = asset.fileName || `file_${Date.now()}`;
-                const fileType = asset.type || getMimeType(asset.fileName);
-                console.log("Uploading File:", fileName, "Type:", fileType, "URI:", asset.uri)
-                formData.append("file", {
-                    uri: asset.uri,
-                    type: asset.type || getMimeType(asset.fileName),
-                    name: asset.fileName || `file_${Date.now()}`,
+                formData.append('file', {
+                    uri: file.uri,
+                    name: file.name,
+                    type: file.type,
                 } as any);
 
                 const uploadResponse = await fileUpload(formData);
-                console.log("Upload Response:", uploadResponse);
                 const uploadedUrl = uploadResponse?.files?.[0]?.url;
-
                 if (!uploadedUrl) continue;
 
-                let mediaType = "Document";
-                if (asset.type?.startsWith("image")) mediaType = "Image";
-                if (asset.type?.startsWith("video")) mediaType = "Video";
+                let mediaType = 'Document';
+                if (file.type?.startsWith('image')) mediaType = 'Image';
+                if (file.type?.startsWith('video')) mediaType = 'Video';
 
                 uploadedItems.push({
                     mediaType,
-                    caption: "",
-                    shotTime: "",
+                    caption: '',
+                    shotTime: '',
                     filePath: uploadedUrl,
                 });
             }
 
             setAttachmentList(prev => [...prev, ...uploadedItems]);
-
-        } catch (error) {
-            console.error("Attachment Upload Error:", error);
-            Alert.alert("Error", "Failed to upload attachments.");
+        } catch (err: any) {
+            // new package throws a cancel error similar to old API
+            if (err?.code === 'CANCELLED' || err?.message?.includes('canceled')) {
+                // user cancelled — ignore
+            } else {
+                console.error('Attachment Upload Error:', err);
+                Alert.alert('Error', 'Failed to upload attachments.');
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    const getMimeType = (fileName?: string) => {
-        if (!fileName) return "application/octet-stream";
+    // const getMimeType = (fileName?: string) => {
+    //     if (!fileName) return "application/octet-stream";
 
-        const ext = fileName.split(".").pop()?.toLowerCase();
+    //     const ext = fileName.split(".").pop()?.toLowerCase();
 
-        const map: any = {
-            pdf: "application/pdf",
-            doc: "application/msword",
-            docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            xls: "application/vnd.ms-excel",
-            xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            txt: "text/plain",
-        };
+    //     const map: any = {
+    //         pdf: "application/pdf",
+    //         doc: "application/msword",
+    //         docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    //         xls: "application/vnd.ms-excel",
+    //         xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    //         txt: "text/plain",
+    //     };
 
-        return map[ext] || "application/octet-stream";
-    };
+    //     return map[ext] || "application/octet-stream";
+    // };
 
     const handleSubmit = async () => {
         if (!title.trim() || !htmlContent.trim()) {
@@ -417,6 +491,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
 
         } catch (error) {
             Alert.alert("Delete Failed", "Unable to delete the file from server.");
+            console.log(error);
         } finally {
             setLoading(false);
         }

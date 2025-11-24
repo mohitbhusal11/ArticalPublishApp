@@ -49,6 +49,9 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
     console.log("redirectionScreen: ", redirectionScreen);
 
     switch (redirectionScreen) {
+      case "all_story":
+        navigation.navigate("StoriesScreen", { status: "All" });
+        break;
       case "submitted_story":
         navigation.navigate("StoriesScreen", { status: "Submit" });
         break;
