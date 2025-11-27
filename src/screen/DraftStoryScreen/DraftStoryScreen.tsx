@@ -34,9 +34,8 @@ const BLOCKED_EXTENSIONS = [
     '.js', '.ts', '.py', '.rb', '.jar', '.apk'
 ];
 
-const MAX_FILE_SIZE_MB = 20; // your limit 
+const MAX_FILE_SIZE_MB = 20;
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
-
 
 const customFontAction = "customFontPicker";
 
@@ -58,7 +57,6 @@ const handleHead5 = ({ tintColor }: { tintColor: string }) => (
 const handleHead6 = ({ tintColor }: { tintColor: string }) => (
     <Text style={[styles.iconStyle, { color: tintColor }]}>H6</Text>
 );
-
 
 const FontIcon = ({ tintColor }: { tintColor: string }) => (
     <Text style={[styles.iconStyle, { color: tintColor }]}>Aa</Text>
@@ -109,7 +107,6 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
     const [currentMode, setCurrentMode] = useState<'text' | 'background'>('text');
     const [textColor, setTextColor] = useState('#000000');
     const [bgColor, setBgColor] = useState('#ffffff');
-
 
     const fetchAssignments = async () => {
         try {

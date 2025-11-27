@@ -34,9 +34,8 @@ const BLOCKED_EXTENSIONS = [
     '.js', '.ts', '.py', '.rb', '.jar', '.apk'
 ];
 
-const MAX_FILE_SIZE_MB = 20; // your limit 
+const MAX_FILE_SIZE_MB = 20;
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
-
 
 const customFontAction = "customFontPicker";
 
