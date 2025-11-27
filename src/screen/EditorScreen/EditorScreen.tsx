@@ -26,6 +26,7 @@ import { AppLottie } from "../../config/AppLottie";
 import { useRoute } from "@react-navigation/native";
 import { pick, types } from '@react-native-documents/picker';
 import FontSizePicker from "../../component/FontSizePicker";
+import ColorPickerModal from "../../component/ColorPickerModal";
 
 
 const BLOCKED_EXTENSIONS = [
@@ -58,29 +59,9 @@ const handleHead6 = ({ tintColor }: { tintColor: string }) => (
     <Text style={[styles.iconStyle, { color: tintColor }]}>H6</Text>
 );
 
-
 const FontIcon = ({ tintColor }: { tintColor: string }) => (
     <Text style={[styles.iconStyle, { color: tintColor }]}>Aa</Text>
 );
-
-
-const pxSizes = [
-    8, 10, 12, 14, 16, 18, 20, 22, 24,
-    26, 28, 30, 32, 34, 36, 40, 48, 56, 64, 72
-];
-
-const mapPxToHtmlLevel = (px) => {
-    if (px <= 10) return 1;
-    if (px <= 12) return 2;
-    if (px <= 16) return 3;
-    if (px <= 20) return 4;
-    if (px <= 24) return 5;
-    if (px <= 32) return 6;
-    return 7;
-};
-
-
-
 
 const EditorScreen = ({ navigation }: any) => {
     const route = useRoute<any>();
@@ -115,6 +96,11 @@ const EditorScreen = ({ navigation }: any) => {
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showPicker, setShowPicker] = useState(false);
+
+    const [colorModalVisible, setColorModalVisible] = useState(false);
+    const [currentMode, setCurrentMode] = useState<'text' | 'background'>('text');
+    const [textColor, setTextColor] = useState('#000000');
+    const [bgColor, setBgColor] = useState('#ffffff');
 
     const fetchAssignments = async () => {
         try {
@@ -450,6 +436,21 @@ const EditorScreen = ({ navigation }: any) => {
         );
     };
 
+    const openColorPicker = (mode: 'text' | 'background') => {
+        setCurrentMode(mode);
+        setColorModalVisible(true);
+    };
+
+    const handleSelectColor = (color: string) => {
+        if (currentMode === 'text') {
+            richText.current?.setForeColor(color);
+            setTextColor(color);
+        } else {
+            richText.current?.setHiliteColor(color);
+            setBgColor(color);
+        }
+        setColorModalVisible(false);
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -500,10 +501,19 @@ const EditorScreen = ({ navigation }: any) => {
                                 <Text style={styles.customToolText}>Aa</Text>
                             </TouchableOpacity>
 
+                            <TouchableOpacity onPress={() => openColorPicker('text')}
+                                style={styles.customToolButton}>
+                                <Text style={[styles.customToolText, { color: textColor}]}>A</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => openColorPicker('background')} style={styles.customToolButton}>
+                                <Text style={[styles.customToolText,{backgroundColor: bgColor, paddingHorizontal: 4 }]}>▨</Text>
+                            </TouchableOpacity>
+
                             <TouchableOpacity
                                 style={styles.customToolButton}
                                 onPress={handleInsertTable}>
-                                <Text style={styles.customToolText}>▦</Text>
+                                <Text style={[styles.customToolText,{fontSize: 20}]}>▦</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -536,8 +546,11 @@ const EditorScreen = ({ navigation }: any) => {
                                     actions.alignLeft,
                                     actions.alignCenter,
                                     actions.alignRight,
+                                    actions.alignFull,
                                     actions.undo,
                                     actions.redo,
+                                    actions.line,
+                                    actions.blockquote,
                                 ]}
                                 iconMap={{
                                     [actions.heading1]: handleHead1,
@@ -843,6 +856,12 @@ const EditorScreen = ({ navigation }: any) => {
                 onSelect={(px) => applyFontSize(px)}
             />
 
+            <ColorPickerModal
+                visible={colorModalVisible}
+                onClose={() => setColorModalVisible(false)}
+                onSelectColor={handleSelectColor}
+                mode={currentMode}
+            />
 
             {loading && (
                 <View style={styles.loaderOverlay}>

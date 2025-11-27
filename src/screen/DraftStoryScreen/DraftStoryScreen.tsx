@@ -27,6 +27,7 @@ import { AppLottie } from "../../config/AppLottie";
 import { normalizeAttachment, normalizeMedia } from "../../utils/normalizeFun";
 import { pick, types } from "@react-native-documents/picker";
 import FontSizePickerSimple from "../../component/FontSizePicker";
+import ColorPickerModal from "../../component/ColorPickerModal";
 
 const BLOCKED_EXTENSIONS = [
     '.php', '.exe', '.env', '.sh', '.bat', '.cmd', '.msi',
@@ -103,6 +104,11 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
     );
 
     const [showPicker, setShowPicker] = useState(false);
+
+    const [colorModalVisible, setColorModalVisible] = useState(false);
+    const [currentMode, setCurrentMode] = useState<'text' | 'background'>('text');
+    const [textColor, setTextColor] = useState('#000000');
+    const [bgColor, setBgColor] = useState('#ffffff');
 
 
     const fetchAssignments = async () => {
@@ -439,6 +445,22 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
         );
     };
 
+    const openColorPicker = (mode: 'text' | 'background') => {
+        setCurrentMode(mode);
+        setColorModalVisible(true);
+    };
+
+    const handleSelectColor = (color: string) => {
+        if (currentMode === 'text') {
+            richText.current?.setForeColor(color);
+            setTextColor(color);
+        } else {
+            richText.current?.setHiliteColor(color);
+            setBgColor(color);
+        }
+        setColorModalVisible(false);
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.topbarcontainer} >
@@ -488,6 +510,15 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                                 <Text style={styles.customToolText}>Aa</Text>
                             </TouchableOpacity>
 
+                            <TouchableOpacity onPress={() => openColorPicker('text')}
+                                style={styles.customToolButton}>
+                                <Text style={[styles.customToolText, { color: textColor }]}>A</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => openColorPicker('background')} style={styles.customToolButton}>
+                                <Text style={[styles.customToolText, { backgroundColor: bgColor, paddingHorizontal: 4 }]}>▨</Text>
+                            </TouchableOpacity>
+
                             <TouchableOpacity
                                 style={styles.customToolButton}
                                 onPress={handleInsertTable}>
@@ -524,8 +555,11 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                                     actions.alignLeft,
                                     actions.alignCenter,
                                     actions.alignRight,
+                                    actions.alignFull,
                                     actions.undo,
                                     actions.redo,
+                                    actions.line,
+                                    actions.blockquote,
                                 ]}
                                 iconMap={{
                                     [actions.heading1]: handleHead1,
@@ -819,6 +853,13 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                 visible={showPicker}
                 onClose={() => setShowPicker(false)}
                 onSelect={(px) => applyFontSize(px)}
+            />
+
+            <ColorPickerModal
+                visible={colorModalVisible}
+                onClose={() => setColorModalVisible(false)}
+                onSelectColor={handleSelectColor}
+                mode={currentMode}
             />
 
             {loading && (
