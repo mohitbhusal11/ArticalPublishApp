@@ -30,7 +30,7 @@ const ChangePasswordScreen = ({ navigation }: any) => {
 
   const handleChangePassword = async () => {
     try {
-        console.log("userName change password: ", user?.userName);
+      console.log("userName change password: ", user?.userName);
       const res = await changePassword(user?.userName, newPassword, oldPassword);
       console.log("Change Password success:", res);
       if (res?.result) {

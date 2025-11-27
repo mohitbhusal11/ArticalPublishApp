@@ -13,7 +13,7 @@ const ResetPasswordScreen = ({ route, navigation }: any) => {
   const { userId } = route.params;
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  
+
   const [hasMinLength, setHasMinLength] = useState(false)
   const [hasUppercase, setHasUppercase] = useState(false)
   const [hasLowercase, setHasLowercase] = useState(false)
@@ -57,99 +57,99 @@ const ResetPasswordScreen = ({ route, navigation }: any) => {
 
   return (
     <GlobalSafeArea style={styles.safeArea}>
-        <ImageBackground source={AppImage.onboardingBg} style={styles.bgImage}>
-          <View style={styles.overlay}>
-            <View style={styles.contentBox}>
-              <Image style={styles.logoIC} source={AppImage.rajexpresslogo} />
+      <ImageBackground source={AppImage.onboardingBg} style={styles.bgImage}>
+        <View style={styles.overlay}>
+          <View style={styles.contentBox}>
+            <Image style={styles.logoIC} source={AppImage.rajexpresslogo} />
 
-              <View style={styles.titileWithLines}>
-                <Image
-                  style={styles.colorLine}
-                  source={AppImage.gradient_line_left_to_right}
-                />
-                <GlobalText style={styles.title}>
-                  {AppString.common.resetPasswordTitle}
-                </GlobalText>
-                <Image
-                  style={styles.colorLine}
-                  source={AppImage.gradient_line_left_to_right}
-                />
-              </View>
+            <View style={styles.titileWithLines}>
+              <Image
+                style={styles.colorLine}
+                source={AppImage.gradient_line_left_to_right}
+              />
+              <GlobalText style={styles.title}>
+                {AppString.common.resetPasswordTitle}
+              </GlobalText>
+              <Image
+                style={styles.colorLine}
+                source={AppImage.gradient_line_left_to_right}
+              />
+            </View>
 
-              <View style={styles.credientialsBox}>
-                <GlobalText style={styles.fieldTitle}>
-                  {AppString.common.enterNewPassword}
-                </GlobalText>
-                <View style={styles.inputContainer}>
-                  <View style={styles.inputfieldContainer}>
-                    <TextInput
-                      secureTextEntry
-                      value={newPassword}
-                      onChangeText={setNewPassword}
-                      style={[styles.inputField, { borderRadius: 12 }]}
-                      placeholder={AppString.common.enterNewPassword}
-                    />
-                  </View>
-                </View>
-
-                <GlobalText style={[styles.fieldTitle, { marginTop: 16 }]}>
-                  {AppString.common.confirmNewPassword}
-                </GlobalText>
-                <View style={styles.inputContainer}>
-                  <View style={styles.inputfieldContainer}>
-                    <TextInput
-                      secureTextEntry
-                      value={confirmPassword}
-                      onChangeText={setConfirmPassword}
-                      style={[styles.inputField, { borderRadius: 12 }]}
-                      placeholder={AppString.common.confirmNewPassword}
-                    />
-                  </View>
-                </View>
-
-                <GlobalText style={{ marginTop: 16, fontSize: 13 }}>
-                  {AppString.common.newPasswordMustContain}
-                </GlobalText>
-                <View style={{ marginTop: 4 }}>
-                  <GlobalText
-                    style={{ color: hasMinLength ? "green" : "red", fontSize: 12 }}
-                  >
-                    {AppString.common.atLeast8Characters}
-                  </GlobalText>
-                  <GlobalText
-                    style={{ color: hasUppercase ? "green" : "red", fontSize: 12 }}
-                  >
-                    {AppString.common.atLeast1UppercaseCharacter}
-                  </GlobalText>
-                  <GlobalText
-                    style={{ color: hasLowercase ? "green" : "red", fontSize: 12 }}
-                  >
-                    {AppString.common.atLeast1LowercaseCharacter}
-                  </GlobalText>
-                  <GlobalText
-                    style={{ color: hasNumberOrSpecial ? "green" : "red", fontSize: 12 }}
-                  >
-                    {AppString.common.atLeast1NumberOrSpecialCharacter}
-                  </GlobalText>
+            <View style={styles.credientialsBox}>
+              <GlobalText style={styles.fieldTitle}>
+                {AppString.common.enterNewPassword}
+              </GlobalText>
+              <View style={styles.inputContainer}>
+                <View style={styles.inputfieldContainer}>
+                  <TextInput
+                    secureTextEntry
+                    value={newPassword}
+                    onChangeText={setNewPassword}
+                    style={[styles.inputField, { borderRadius: 12 }]}
+                    placeholder={AppString.common.enterNewPassword}
+                  />
                 </View>
               </View>
 
-              <View style={styles.buttonWrapper}>
-                <GlobalButton
-                  onPress={handleSave}
-                  disabled={!isButtonEnabled}
-                  style={[
-                    styles.button,
-                    { opacity: !isButtonEnabled ? 0.6 : 1 },
-                  ]}
+              <GlobalText style={[styles.fieldTitle, { marginTop: 16 }]}>
+                {AppString.common.confirmNewPassword}
+              </GlobalText>
+              <View style={styles.inputContainer}>
+                <View style={styles.inputfieldContainer}>
+                  <TextInput
+                    secureTextEntry
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    style={[styles.inputField, { borderRadius: 12 }]}
+                    placeholder={AppString.common.confirmNewPassword}
+                  />
+                </View>
+              </View>
+
+              <GlobalText style={{ marginTop: 16, fontSize: 13 }}>
+                {AppString.common.newPasswordMustContain}
+              </GlobalText>
+              <View style={{ marginTop: 4 }}>
+                <GlobalText
+                  style={{ color: hasMinLength ? "green" : "red", fontSize: 12 }}
                 >
-                  <GlobalText style={styles.buttonText}>Save</GlobalText>
-                </GlobalButton>
+                  {AppString.common.atLeast8Characters}
+                </GlobalText>
+                <GlobalText
+                  style={{ color: hasUppercase ? "green" : "red", fontSize: 12 }}
+                >
+                  {AppString.common.atLeast1UppercaseCharacter}
+                </GlobalText>
+                <GlobalText
+                  style={{ color: hasLowercase ? "green" : "red", fontSize: 12 }}
+                >
+                  {AppString.common.atLeast1LowercaseCharacter}
+                </GlobalText>
+                <GlobalText
+                  style={{ color: hasNumberOrSpecial ? "green" : "red", fontSize: 12 }}
+                >
+                  {AppString.common.atLeast1NumberOrSpecialCharacter}
+                </GlobalText>
               </View>
             </View>
+
+            <View style={styles.buttonWrapper}>
+              <GlobalButton
+                onPress={handleSave}
+                disabled={!isButtonEnabled}
+                style={[
+                  styles.button,
+                  { opacity: !isButtonEnabled ? 0.6 : 1 },
+                ]}
+              >
+                <GlobalText style={styles.buttonText}>Save</GlobalText>
+              </GlobalButton>
+            </View>
           </View>
-        </ImageBackground>
-      </GlobalSafeArea>
+        </View>
+      </ImageBackground>
+    </GlobalSafeArea>
   )
 }
 
