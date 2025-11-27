@@ -26,6 +26,7 @@ import LottieView from "lottie-react-native";
 import { AppLottie } from "../../config/AppLottie";
 import { normalizeAttachment, normalizeMedia } from "../../utils/normalizeFun";
 import { pick, types } from "@react-native-documents/picker";
+import FontSizePickerSimple from "../../component/FontSizePicker";
 
 const BLOCKED_EXTENSIONS = [
     '.php', '.exe', '.env', '.sh', '.bat', '.cmd', '.msi',
@@ -94,15 +95,14 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
     const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(item.title);
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
-    // const [mediaList, setMediaList] = useState<MediaModal[]>(item?.media ?? [])
     const [mediaList, setMediaList] = useState<MediaModal[]>(
         normalizeMedia(item?.media)
     );
-
-    // const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>(item.attachment)
     const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>(
         normalizeAttachment(item?.attachment)
     );
+
+    const [showPicker, setShowPicker] = useState(false);
 
 
     const fetchAssignments = async () => {
@@ -120,63 +120,6 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
     useEffect(() => {
         fetchAssignments()
     }, [])
-
-    // const handleAttachments = async () => {
-    //     try {
-    //         setLoading(true);
-    //         const result = await launchImageLibrary({
-    //             mediaType: "mixed",
-    //             selectionLimit: 0,
-    //             quality: 0.8,
-    //         });
-
-    //         if (!result.assets || result.assets.length === 0) {
-    //             setLoading(false);
-    //             return;
-    //         }
-
-    //         const uploadedItems: AttachmentModal[] = [];
-
-    //         for (const asset of result.assets) {
-    //             if (!asset.uri) continue;
-
-    //             const formData = new FormData();
-    //             const fileName = asset.fileName || `file_${Date.now()}`;
-    //             const fileType = asset.type || getMimeType(asset.fileName);
-    //             console.log("Uploading File:", fileName, "Type:", fileType, "URI:", asset.uri)
-    //             formData.append("file", {
-    //                 uri: asset.uri,
-    //                 type: asset.type || getMimeType(asset.fileName),
-    //                 name: asset.fileName || `file_${Date.now()}`,
-    //             } as any);
-
-    //             const uploadResponse = await fileUpload(formData);
-    //             console.log("Upload Response:", uploadResponse);
-    //             const uploadedUrl = uploadResponse?.files?.[0]?.url;
-
-    //             if (!uploadedUrl) continue;
-
-    //             let mediaType = "Document";
-    //             if (asset.type?.startsWith("image")) mediaType = "Image";
-    //             if (asset.type?.startsWith("video")) mediaType = "Video";
-
-    //             uploadedItems.push({
-    //                 mediaType,
-    //                 caption: "",
-    //                 shotTime: "",
-    //                 filePath: uploadedUrl,
-    //             });
-    //         }
-
-    //         setAttachmentList(prev => [...prev, ...uploadedItems]);
-
-    //     } catch (error) {
-    //         console.error("Attachment Upload Error:", error);
-    //         Alert.alert("Error", "Failed to upload attachments.");
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
 
     const handleAttachments = async () => {
         try {
@@ -241,23 +184,6 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
             setLoading(false);
         }
     };
-
-    // const getMimeType = (fileName?: string) => {
-    //     if (!fileName) return "application/octet-stream";
-
-    //     const ext = fileName.split(".").pop()?.toLowerCase();
-
-    //     const map: any = {
-    //         pdf: "application/pdf",
-    //         doc: "application/msword",
-    //         docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    //         xls: "application/vnd.ms-excel",
-    //         xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    //         txt: "text/plain",
-    //     };
-
-    //     return map[ext] || "application/octet-stream";
-    // };
 
     const handleSubmit = async () => {
         if (!title.trim() || !htmlContent.trim()) {
@@ -452,7 +378,6 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
         setShowTableModal(false);
     };
 
-
     const insertLink = () => {
         if (linkTitle && linkUrl) {
             richText.current?.insertLink(linkTitle, linkUrl);
@@ -495,6 +420,23 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleFontSize = () => {
+        setShowPicker(true);
+    };
+
+    const applyFontSize = (px) => {
+        richText.current?.commandDOM(
+            `document.execCommand("fontSize", false, "7");
+         var fontElements = document.getElementsByTagName('font');
+         for (var i = 0; i < fontElements.length; i++) {
+             if (fontElements[i].size === "7") {
+                 fontElements[i].removeAttribute("size");
+                 fontElements[i].style.fontSize = "${px}px";
+             }
+         }`
+        );
     };
 
     return (
@@ -550,6 +492,12 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                                 style={styles.customToolButton}
                                 onPress={handleInsertTable}>
                                 <Text style={styles.customToolText}>▦</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.customToolButton}
+                                onPress={handleFontSize}>
+                                <Text style={styles.customToolText}>A+</Text>
                             </TouchableOpacity>
 
                             <RichToolbar
@@ -866,6 +814,12 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                     </View>
                 </View>
             </Modal>
+
+            <FontSizePickerSimple
+                visible={showPicker}
+                onClose={() => setShowPicker(false)}
+                onSelect={(px) => applyFontSize(px)}
+            />
 
             {loading && (
                 <View style={styles.loaderOverlay}>
