@@ -502,17 +502,23 @@ const EditorScreen = ({ navigation }: any) => {
 
                             <TouchableOpacity onPress={() => openColorPicker('text')}
                                 style={styles.customToolButton}>
-                                <Text style={[styles.customToolText, { color: textColor}]}>A</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={[styles.customToolText, { padding: 0, margin: 0 }]}>A</Text>
+                                    <View style={[styles.colorBlock, { backgroundColor: textColor }]} />
+                                </View>
                             </TouchableOpacity>
 
                             <TouchableOpacity onPress={() => openColorPicker('background')} style={styles.customToolButton}>
-                                <Text style={[styles.customToolText,{backgroundColor: bgColor, paddingHorizontal: 4 }]}>▨</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={[styles.customToolText, { padding: 0, margin: 0, fontSize: 20 }]}>▨</Text>
+                                    <View style={[styles.colorBlock, { backgroundColor: bgColor }]} />
+                                </View>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 style={styles.customToolButton}
                                 onPress={handleInsertTable}>
-                                <Text style={[styles.customToolText,{fontSize: 20}]}>▦</Text>
+                                <Text style={[styles.customToolText, { fontSize: 20 }]}>▦</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity

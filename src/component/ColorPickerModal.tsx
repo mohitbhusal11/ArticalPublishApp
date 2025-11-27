@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   View,
@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  TextInput,
 } from 'react-native';
 
 interface ColorPickerModalProps {
@@ -17,7 +18,7 @@ interface ColorPickerModalProps {
 }
 
 const DEFAULT_COLORS = [
-  '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFA500', '#FFFF00', '#800080',
+  '#000000', '#ffffff', '#FF0000', '#00FF00', '#0000FF', '#FFA500', '#FFFF00', '#800080',
 ];
 
 const ColorPickerModal: React.FC<ColorPickerModalProps> = ({
@@ -27,6 +28,20 @@ const ColorPickerModal: React.FC<ColorPickerModalProps> = ({
   mode,
   colors = DEFAULT_COLORS,
 }) => {
+  const [customColor, setCustomColor] = useState('');
+
+  const handleCustomColorSelect = () => {
+    // Validate hex color format
+    const hexRegex = /^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/;
+    if (hexRegex.test(customColor)) {
+      onSelectColor(customColor);
+      setCustomColor('');
+      onClose();
+    } else {
+      alert('Please enter a valid hex color, e.g., #FF0000');
+    }
+  };
+
   return (
     <Modal
       visible={visible}
@@ -40,6 +55,7 @@ const ColorPickerModal: React.FC<ColorPickerModalProps> = ({
             {mode === 'text' ? 'Select Text Color' : 'Select Background Color'}
           </Text>
 
+          {/* Color grid */}
           <FlatList
             data={colors}
             keyExtractor={(item) => item}
@@ -51,6 +67,22 @@ const ColorPickerModal: React.FC<ColorPickerModalProps> = ({
               />
             )}
           />
+
+          {/* Custom color input */}
+          <View style={styles.customColorContainer}>
+            <TextInput
+              placeholder="#RRGGBB"
+              style={styles.colorInput}
+              value={customColor}
+              onChangeText={setCustomColor}
+            />
+            <TouchableOpacity
+              style={styles.applyButton}
+              onPress={handleCustomColorSelect}
+            >
+              <Text style={{ color: '#fff' }}>Apply</Text>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity style={styles.modalCloseButton} onPress={onClose}>
             <Text style={{ color: '#fff' }}>Close</Text>
@@ -70,7 +102,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: 250,
-    backgroundColor: '#fff',
+    backgroundColor: '#cac8c8ff',
     borderRadius: 8,
     padding: 15,
     alignItems: 'center',
@@ -90,6 +122,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563eb',
     paddingVertical: 8,
     paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  customColorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  colorInput: {
+    borderWidth: 1,
+    borderColor: '#888',
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    flex: 1,
+    marginRight: 5,
+  },
+  applyButton: {
+    backgroundColor: '#2563eb',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 5,
   },
 });

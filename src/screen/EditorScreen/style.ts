@@ -424,6 +424,14 @@ export const styles = StyleSheet.create({
         alignItems: "center",
         zIndex: 999,
     },
+    colorBlock: {
+        width: 10,
+        height: 10,
+        marginLeft: 4,
+        borderRadius: 2,
+        borderWidth: 1,
+        borderColor: '#ccc',
+    }
 
 
 

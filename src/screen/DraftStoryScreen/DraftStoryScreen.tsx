@@ -62,8 +62,6 @@ const FontIcon = ({ tintColor }: { tintColor: string }) => (
     <Text style={[styles.iconStyle, { color: tintColor }]}>Aa</Text>
 );
 
-
-
 const DraftStoryScreen = ({ navigation, route }: any) => {
     const { item } = route.params;
     console.log("Draft Screen itemData: ", item);
