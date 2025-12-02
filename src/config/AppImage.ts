@@ -19,4 +19,11 @@ export const AppImage = {
     setting_row_logout_ic: require('../assets/images/setting_row_logout_ic.png'),
     notification: require('../assets/images/notification.png'),
     submit_ic: require('../assets/images/submit_ic.png'),
+    image_placeholder: require('../assets/images/image_placeholder.png'),
+    video_placeholder: require('../assets/images/video_placeholder.png'),
+    attach_ic: require('../assets/images/attach_ic.png'),
+    file_ic: require('../assets/images/file_ic.png'),
+    delete_ic: require('../assets/images/delete_ic.png'),
+    hide_password_ic: require('../assets/images/hide_password_ic.png'),
+    show_password_ic: require('../assets/images/show_password_ic.png'),
 }

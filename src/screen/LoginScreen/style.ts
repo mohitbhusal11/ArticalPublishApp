@@ -4,12 +4,13 @@ import { AppColor } from "../../config/AppColor";
 export const styles = StyleSheet.create({
     overlay: {
         flex: 1, // remove absoluteFillObject
-        backgroundColor: "rgba(12, 29, 58, 0.6)",
+        // backgroundColor: "rgba(12, 29, 58, 0.6)",
     },
 
     scrollContainer: {
         flexGrow: 2,
         justifyContent: "flex-end", // center vertically (not bottom)
+        backgroundColor: AppColor.color0A2C59
     },
     safeArea: {
         flex: 1,
@@ -23,8 +24,9 @@ export const styles = StyleSheet.create({
     contentBox: {
         backgroundColor: "white",
         flexDirection: "column",
-        borderTopLeftRadius: 15,
-        borderTopRightRadius: 15,
+        // borderTopLeftRadius: 15,
+        // borderTopRightRadius: 15,
+        flex: 1
         // height: 400,
     },
     title: {
@@ -117,6 +119,17 @@ export const styles = StyleSheet.create({
         borderTopLeftRadius: 12,
         borderBottomLeftRadius: 12,
     },
+    hideShowPasswordContainer: {
+        backgroundColor: AppColor.ffffff,
+        width: 60,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderTopRightRadius: 12,
+        borderWidth: 1,
+        borderBottomRightRadius: 12,
+        borderColor: AppColor.color_D7D7D7,
+    },
     inputfieldContainer: {
         flex: 1,
         backgroundColor: 'white'
@@ -125,9 +138,7 @@ export const styles = StyleSheet.create({
         flex: 1,
         borderColor: AppColor.color_D7D7D7,
         borderWidth: 1,
-        borderTopRightRadius: 12,
-        borderBottomRightRadius: 12,
-        color: AppColor.mainColor
+        color: AppColor.c000000
     },
     otherOthers: {
         flexDirection: 'row',
@@ -158,5 +169,16 @@ export const styles = StyleSheet.create({
         fontSize: 12,
         color: AppColor.mainColor,
         fontWeight: 500
-    }
+    },
+    loaderOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: AppColor.loaderOverlayColor,
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 999,
+    },
 });

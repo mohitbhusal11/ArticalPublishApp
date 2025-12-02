@@ -14,9 +14,19 @@ export const Endpoints = {
     DeleteUser: "user"
   },
   IMAGE: {
-    imageUploadComplaintRegister: "images/upload"
+    fileUpload: "file-upload/multiple",
+    deleteFile: "file-upload/delete"
   },
   Home: {
     dashboard: "user-dashboards/me"
+  },
+  Stories: {
+    postStory: "stories",
+    getStory: "stories/mystories",
+    postDraft: "stories/draft",
+  },
+  Assignment: {
+    assignment: "assignments/myassignment",
+    statusUpdate: "assignments/updated-acceptance"
   }
 };

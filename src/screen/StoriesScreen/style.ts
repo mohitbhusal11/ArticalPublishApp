@@ -1,0 +1,106 @@
+import { StyleSheet } from "react-native";
+import { AppColor } from "../../config/AppColor";
+
+export const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#F9FAFB",
+        padding: 16,
+    },
+    createButton: {
+        backgroundColor: AppColor.mainColor,
+        height: 50,
+        borderRadius: 10,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 16,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    createButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    searchInput: {
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        paddingHorizontal: 15,
+        height: 45,
+        borderWidth: 1,
+        borderColor: "#E0E0E0",
+        marginBottom: 16,
+        fontSize: 15,
+        color: "#333",
+    },
+    card: {
+        backgroundColor: AppColor.ffffff,
+        borderRadius: 12,
+        padding: 15,
+        marginBottom: 12,
+        marginHorizontal: 4,
+        elevation: 1,
+    },
+    cardHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#222",
+        flex: 1,
+        marginRight: 8,
+    },
+    statusBadge: {
+        width: 70,
+        paddingHorizontal: 2,
+        paddingVertical: 4,
+        borderRadius: 6,
+        marginRight: 8,
+    },
+    statusText: {
+        color: AppColor.ffffff,
+        fontSize: 11,
+        fontWeight: "600",
+        textAlign: 'center',
+    },
+    editText: {
+        color: "#4A90E2",
+        fontWeight: "600",
+    },
+    description: {
+        color: "#555",
+        fontSize: 14,
+        marginTop: 6,
+        marginBottom: 10,
+    },
+    cardFooter: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    date: {
+        color: "#999",
+        fontSize: 12,
+    },
+    deleteText: {
+        color: "#E74C3C",
+        fontWeight: "600",
+        fontSize: 13,
+    },
+    loaderOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(172, 172, 172, 0.4)",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 999,
+    },
+});

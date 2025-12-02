@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { AppImage } from "../config/AppImage";
 import { AppColor } from "../config/AppColor";
 import GlobalText from "./GlobalText";
@@ -34,27 +34,20 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
       <GlobalText numberOfLines={1} style={styles.title}>{title}</GlobalText>
       <View style={styles.row}>
         <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
-          {/* <Image source={typeof icon === "string" ? { uri: icon } : icon} style={styles.icon} resizeMode="contain" /> */}
+          {/* <Image source={{ uri: icon }} style={styles.icon} resizeMode="contain" /> */}
           <FastImage
             style={styles.icon}
-            source={
-              typeof icon === "string" ? 
-              {
-              uri: icon,
-              headers: { Authorization: 'someAuthToken' },
-              priority: FastImage.priority.normal,
-            } : icon
-          }
+            source={{ uri: icon }}
             resizeMode={FastImage.resizeMode.contain}
-            tintColor={AppColor.mainColor}
           />
+
         </View>
 
         <View style={styles.textContainer}>
           <GlobalText style={styles.count}>{count}</GlobalText>
-          <GlobalText style={[styles.discount, { color: discountColor }]}>
+          {/* <GlobalText style={[styles.discount, { color: discountColor }]}>
             {discount >= 0 ? "↑" : "↓"}  {discount}%
-          </GlobalText>
+          </GlobalText> */}
         </View>
       </View>
     </TouchableOpacity>
