@@ -28,6 +28,7 @@ import { normalizeAttachment, normalizeMedia } from "../../utils/normalizeFun";
 import { pick, types } from "@react-native-documents/picker";
 import FontSizePickerSimple from "../../component/FontSizePicker";
 import ColorPickerModal from "../../component/ColorPickerModal";
+import ImagePicker from 'react-native-image-crop-picker';
 
 const BLOCKED_EXTENSIONS = [
     '.php', '.exe', '.env', '.sh', '.bat', '.cmd', '.msi',
@@ -238,46 +239,96 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
         }
     };
 
+    // const handleAddImageUpload = async () => {
+    //     try {
+    //         setLoading(true);
+    //         const result = await launchImageLibrary({
+    //             mediaType: "photo",
+    //             quality: 0.8,
+    //         });
+
+    //         if (result.assets && result.assets.length > 0) {
+    //             const asset = result.assets[0];
+    //             if (!asset.uri) return;
+
+    //             const formData = new FormData();
+    //             formData.append("image", {
+    //                 uri: asset.uri,
+    //                 type: asset.type || "image/jpeg",
+    //                 name: asset.fileName || "upload.jpg",
+    //             });
+
+    //             console.log("formData: ", formData);
+    //             const response = await fileUpload(formData);
+    //             console.log("Upload Response:", response);
+    //             const uploadedUrl = response?.files?.[0]?.url;
+    //             const mediaPayload: MediaModal = {
+    //                 mediaType: 'Photo',
+    //                 caption: '',
+    //                 shotTime: '',
+    //                 filePath: uploadedUrl || "upload.jpg"
+    //             }
+    //             setMediaList(prev => [...prev, mediaPayload])
+
+    //             if (!uploadedUrl) {
+    //                 Alert.alert("Upload failed", "No Image URL returned.");
+    //                 return;
+    //             } else {
+    //                 richText.current?.insertImage(uploadedUrl);
+    //             }
+
+
+    //         }
+    //     } catch (error) {
+    //         console.error("Image Upload Error:", error);
+    //         Alert.alert("Error", "Something went wrong while uploading the image.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
     const handleAddImageUpload = async () => {
         try {
             setLoading(true);
-            const result = await launchImageLibrary({
-                mediaType: "photo",
-                quality: 0.8,
+
+            const image = await ImagePicker.openPicker({
+                width: 400,
+                height: 200,
+                cropping: true,
+                compressImageQuality: 0.8,
+                mediaType: 'photo',
+                freeStyleCropEnabled: true
             });
 
-            if (result.assets && result.assets.length > 0) {
-                const asset = result.assets[0];
-                if (!asset.uri) return;
+            if (!image.path) return;
 
-                const formData = new FormData();
-                formData.append("image", {
-                    uri: asset.uri,
-                    type: asset.type || "image/jpeg",
-                    name: asset.fileName || "upload.jpg",
-                });
+            const formData = new FormData();
+            formData.append("image", {
+                uri: image.path,
+                type: image.mime || "image/jpeg",
+                name: image.filename || "upload.jpg",
+            });
 
-                console.log("formData: ", formData);
-                const response = await fileUpload(formData);
-                console.log("Upload Response:", response);
-                const uploadedUrl = response?.files?.[0]?.url;
-                const mediaPayload: MediaModal = {
-                    mediaType: 'Photo',
-                    caption: '',
-                    shotTime: '',
-                    filePath: uploadedUrl || "upload.jpg"
-                }
-                setMediaList(prev => [...prev, mediaPayload])
+            console.log("formData: ", formData);
+            const response = await fileUpload(formData);
+            console.log("Upload Response:", response);
 
-                if (!uploadedUrl) {
-                    Alert.alert("Upload failed", "No Image URL returned.");
-                    return;
-                } else {
-                    richText.current?.insertImage(uploadedUrl);
-                }
-
-
+            const uploadedUrl = response?.files?.[0]?.url;
+            const mediaPayload: MediaModal = {
+                mediaType: 'Photo',
+                caption: '',
+                shotTime: '',
+                filePath: uploadedUrl || "upload.jpg"
             }
+            setMediaList(prev => [...prev, mediaPayload]);
+
+            if (!uploadedUrl) {
+                Alert.alert("Upload failed", "No Image URL returned.");
+                return;
+            } else {
+                richText.current?.insertImage(uploadedUrl);
+            }
+
         } catch (error) {
             console.error("Image Upload Error:", error);
             Alert.alert("Error", "Something went wrong while uploading the image.");
