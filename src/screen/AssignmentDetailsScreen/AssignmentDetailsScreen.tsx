@@ -19,7 +19,6 @@ const AssignmentDetailsScreen = () => {
     const [loading, setLoading] = useState(false);
     const [assignment, setAssignment] = useState<Assignment>(item);
 
-    // ---------------------- BADGE COLOR ----------------------
     const getBadgeColor = () => {
         switch (assignment.status.toLowerCase()) {
             case "pending":
@@ -35,7 +34,6 @@ const AssignmentDetailsScreen = () => {
         }
     };
 
-    // ---------------------- ACCEPT ----------------------
     const handleAccept = async (id: number) => {
         setLoading(true);
         try {
@@ -60,7 +58,6 @@ const AssignmentDetailsScreen = () => {
         }
     };
 
-    // ---------------------- DECLINE ----------------------
     const handleDecline = async (id: number) => {
         setLoading(true);
         try {
@@ -85,20 +82,12 @@ const AssignmentDetailsScreen = () => {
         }
     };
 
-    // ---------------------- ACTION BUTTONS ----------------------
     const renderActions = () => {
         const status = assignment.status.toLowerCase();
 
         if (status === "pending") {
             return (
                 <View style={styles.actionRow}>
-                    {/* <TouchableOpacity
-                        style={[styles.button, styles.declineBtn]}
-                        onPress={() => handleDecline(assignment.id)}
-                        disabled={loading}
-                    >
-                        <GlobalText style={styles.btnText}>Decline</GlobalText>
-                    </TouchableOpacity> */}
 
                     <TouchableOpacity
                         style={[styles.button, styles.acceptBtn]}
@@ -156,10 +145,9 @@ const AssignmentDetailsScreen = () => {
 
     return (
         <ScrollView style={styles.container}>
-            {/* TITLE */}
+
             <GlobalText style={styles.title}>{assignment.title}</GlobalText>
 
-            {/* MAIN CARD */}
             <View style={styles.card}>
                 <Row label="Assignment Code" value={assignment.assignmentCode} />
                 <Row label="Posted By" value={assignment.proposedBy || "N/A"} />
@@ -168,7 +156,6 @@ const AssignmentDetailsScreen = () => {
                 <Row label="Geo Location" value={assignment.geoLocation || "Not Provided"} />
                 <Row label="Created At" value={assignment.createdAt} />
 
-                {/* STATUS as Badge */}
                 <Row
                     label="Status"
                     value={assignment.status}
@@ -177,13 +164,11 @@ const AssignmentDetailsScreen = () => {
                 />
             </View>
 
-            {/* BRIEF */}
             <View style={styles.briefCard}>
                 <GlobalText style={styles.sectionTitle}>Brief</GlobalText>
                 <GlobalText style={styles.briefText}>{assignment.brief}</GlobalText>
             </View>
 
-            {/* ACTION BUTTONS */}
             {renderActions()}
         </ScrollView>
     );
@@ -191,7 +176,6 @@ const AssignmentDetailsScreen = () => {
 
 export default AssignmentDetailsScreen;
 
-// ---------------------- ROW COMPONENT ----------------------
 const Row = ({ label, value, isStatus = false, statusColor = AppColor.mainColor }) => {
     return (
         <View style={styles.rowContainer}>
@@ -214,4 +198,3 @@ const Row = ({ label, value, isStatus = false, statusColor = AppColor.mainColor 
         </View>
     );
 };
-

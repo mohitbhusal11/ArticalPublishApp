@@ -27,7 +27,7 @@ const GlobalButton: React.FC<GlobalButtonProps> = ({
           alignItems: "center",
           backgroundColor: disabled ? "#9E9E9E" : AppColor.mainColor,
         },
-        style, // external styles can override
+        style,
       ]}
     >
       {children}

@@ -33,13 +33,11 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
     >
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          {/* Title */}
+          
           <GlobalText style={styles.title}>{title}</GlobalText>
 
-          {/* Message */}
           <GlobalText style={styles.message}>{message}</GlobalText>
 
-          {/* Buttons */}
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.confirmBtn} onPress={onConfirm}>
               <GlobalText style={styles.confirmText}>Confirm</GlobalText>

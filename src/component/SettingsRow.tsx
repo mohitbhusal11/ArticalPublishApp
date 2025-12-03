@@ -37,14 +37,12 @@ const SettingsRow: React.FC<SettingsRowProps> = ({
       activeOpacity={0.8}
       onPress={onPress}
     >
-      {/* Icon */}
       {icon && (
         <View style={styles.iconWrapper}>
           <Image source={icon} style={styles.icon} resizeMode="contain" />
         </View>
       )}
 
-      {/* Text section */}
       <View style={styles.textWrapper}>
         {title ? (
           <GlobalText numberOfLines={2} style={styles.title}>
@@ -58,7 +56,6 @@ const SettingsRow: React.FC<SettingsRowProps> = ({
         ) : null}
       </View>
 
-      {/* Switch */}
       {showSwitch && (
         <View style={styles.switchWrapper}>
           <Switch
@@ -102,8 +99,8 @@ const styles = StyleSheet.create({
 
   textWrapper: {
     flex: 1,
-    minWidth: 0,          // 🔥 prevents overflowing due to long text
-    flexShrink: 1,        // 🔥 allows wrapping instead of pushing out switch
+    minWidth: 0,
+    flexShrink: 1,
     flexDirection: "column",
   },
 
@@ -123,6 +120,6 @@ const styles = StyleSheet.create({
 
   switchWrapper: {
     marginLeft: 10,
-    flexShrink: 0,       // 🔥 prevents the switch from shrinking or overflowing
+    flexShrink: 0,
   }
 });

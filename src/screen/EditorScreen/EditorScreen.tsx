@@ -142,7 +142,7 @@ const EditorScreen = ({ navigation }: any) => {
                         "File Too Large",
                         `The file "${file.name}" exceeds ${MAX_FILE_SIZE_MB} MB limit.`
                     );
-                    continue; // skip uploading this file
+                    continue;
                 }
 
                 const formData = new FormData();
@@ -170,9 +170,7 @@ const EditorScreen = ({ navigation }: any) => {
 
             setAttachmentList(prev => [...prev, ...uploadedItems]);
         } catch (err: any) {
-            // new package throws a cancel error similar to old API
             if (err?.code === 'CANCELLED' || err?.message?.includes('canceled')) {
-                // user cancelled — ignore
             } else {
                 console.error('Attachment Upload Error:', err);
                 Alert.alert('Error', 'Failed to upload attachments.');
