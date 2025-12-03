@@ -34,8 +34,6 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
   const [statusTrigger, setStatusTrigger] = useState(0);
   const filterListRef = useRef<FlatList>(null);
 
-
-
   useEffect(() => {
     if (isFocused) {
       const normalized =
@@ -46,36 +44,6 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
       setStatusTrigger((prev) => prev + 1);
     }
   }, [isFocused, incomingStatus]);
-
-
-  // useEffect(() => {
-  //   if (isFocused) {
-  //     if (!incomingStatus) {
-  //       setStatus(undefined);
-  //     } else {
-  //       const normalized =
-  //         incomingStatus.toLowerCase() === "all"
-  //           ? undefined
-  //           : incomingStatus.toLowerCase();
-  //       setStatus(normalized);
-  //     }
-
-  //     navigation.setParams({ status: undefined }); // Clear it
-
-  //     setStatusTrigger((prev) => prev + 1);
-  //   }
-  // }, [isFocused]);
-
-  // useEffect(() => {
-  //   if (incomingStatus !== undefined) {
-  //     const normalized =
-  //       !incomingStatus || incomingStatus.toLowerCase() === "all"
-  //         ? undefined
-  //         : incomingStatus.toLowerCase();
-  //     setStatus(normalized);
-  //     setStatusTrigger((prev) => prev + 1);
-  //   }
-  // }, [incomingStatus]);
 
   useEffect(() => {
     resetAndFetch();
@@ -94,7 +62,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
           animated: true,
           viewPosition: 0.5,
         });
-      }, 100); // small delay to allow rendering
+      }, 100);
     }
   }, [status]);
 
@@ -194,7 +162,6 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
       const response = await updateAssignment(payload);
       console.log("Decline Response:", response);
 
-      // setAssignments((prev) => prev.filter((a) => a.id !== id));
       setAssignments((prev) =>
         prev.map((a) =>
           a.id === id ? { ...a, status: "rejected" } : a
@@ -248,7 +215,6 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
 
         <View style={styles.metaRow}>
           <GlobalText style={styles.metaText}>📅 {AppString.common.deadline}: {item.deadlineAt}</GlobalText>
-          {/* <GlobalText style={styles.metaText}>🧑‍💼 {AppString.common.assignedBy}: {item.assignedBy}</GlobalText> */}
         </View>
 
 
@@ -268,15 +234,6 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
             </TouchableOpacity>
           </View>
         )}
-
-        {/* {item.status.toLowerCase() === "accepted" && (
-          <TouchableOpacity
-            style={[styles.button, styles.submitBtn]}
-            onPress={() => handleSubmitStory(item)}
-          >
-            <GlobalText style={styles.btnText}>{AppString.common.seeDetails}</GlobalText>
-          </TouchableOpacity>
-        )} */}
 
         <TouchableOpacity
           style={[styles.button, styles.submitBtn]}
