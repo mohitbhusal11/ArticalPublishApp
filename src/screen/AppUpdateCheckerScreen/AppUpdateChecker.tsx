@@ -17,13 +17,10 @@ const AppUpdateChecker = ({ onForceUpdate }: { onForceUpdate: (value: boolean) =
         }
  
         const data = doc.data();
-        console.log('🔥 Firestore data:', data);
  
         if (data?.versionCode && currentVersionCode < data.versionCode) {
-          console.log('🚨 Update required!');
           onForceUpdate(true);
         } else {
-          console.log('✅ App is up to date.');
           onForceUpdate(false);
         }
       } catch (error) {

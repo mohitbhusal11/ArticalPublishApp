@@ -239,54 +239,6 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
         }
     };
 
-    // const handleAddImageUpload = async () => {
-    //     try {
-    //         setLoading(true);
-    //         const result = await launchImageLibrary({
-    //             mediaType: "photo",
-    //             quality: 0.8,
-    //         });
-
-    //         if (result.assets && result.assets.length > 0) {
-    //             const asset = result.assets[0];
-    //             if (!asset.uri) return;
-
-    //             const formData = new FormData();
-    //             formData.append("image", {
-    //                 uri: asset.uri,
-    //                 type: asset.type || "image/jpeg",
-    //                 name: asset.fileName || "upload.jpg",
-    //             });
-
-    //             console.log("formData: ", formData);
-    //             const response = await fileUpload(formData);
-    //             console.log("Upload Response:", response);
-    //             const uploadedUrl = response?.files?.[0]?.url;
-    //             const mediaPayload: MediaModal = {
-    //                 mediaType: 'Photo',
-    //                 caption: '',
-    //                 shotTime: '',
-    //                 filePath: uploadedUrl || "upload.jpg"
-    //             }
-    //             setMediaList(prev => [...prev, mediaPayload])
-
-    //             if (!uploadedUrl) {
-    //                 Alert.alert("Upload failed", "No Image URL returned.");
-    //                 return;
-    //             } else {
-    //                 richText.current?.insertImage(uploadedUrl);
-    //             }
-
-
-    //         }
-    //     } catch (error) {
-    //         console.error("Image Upload Error:", error);
-    //         Alert.alert("Error", "Something went wrong while uploading the image.");
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
     const handleAddImageUpload = async () => {
         try {
             setLoading(true);
@@ -533,7 +485,6 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                     </View>
                 </View>
 
-                {/* <Text style={styles.label}>{AppString.common.title}</Text> */}
                 <TextInput
                     maxLength={200}
                     placeholder="Enter your title..."
@@ -542,7 +493,6 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                     style={styles.titleInput}
                     placeholderTextColor={AppColor.color_aaa}
                 />
-                {/* <Text style={styles.title}>{AppString.common.description}</Text> */}
 
                 <View style={styles.toolbarWrapper}>
                     <ScrollView
@@ -674,7 +624,6 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                     />
                 </View>
 
-                {/* -------------------- ASSIGNMENT SECTION -------------------- */}
                 {assignmentList && <View style={styles.assignmentContainer}>
 
                     <View style={styles.row}>
@@ -727,9 +676,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                     </View>}
 
                 </View>}
-                {/* ---------------- END ASSIGNMENT SECTION ------------------ */}
 
-                {/* -------------------- MEDIA ATTACHMENTS -------------------- */}
                 <View style={styles.mediaContainer}>
 
                     <GlobalText style={styles.mediaHeader}>
