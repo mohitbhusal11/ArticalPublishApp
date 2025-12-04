@@ -50,6 +50,9 @@ export const AppColor = {
   color_5E5E5E: "#5E5E5E",
   color_ddd: "#ddd",
   color_f2f2f2: "#f2f2f2",
+  color_111111: "#111111",
+  color_999999: "#999999",
+  color_666666: "#666666",
   color_477CD7: "#477CD7",
   color_767676: "#767676",
   color_EEEEEE: "#EEEEEE",
@@ -113,8 +116,12 @@ export const AppColor = {
   color_BDC3C7: "#BDC3C7",
   color_F8F9FB: "#F8F9FB",
 
-  loaderOverlayColor: "rgba(46, 46, 46, 0.4)"
+  loaderOverlayColor: "rgba(46, 46, 46, 0.4)",
 
+  color_6B7280: "#6B7280",
+  color_E74C3C: "#E74C3C",
+  color_3B82F6: "#3B82F6",
+  color_10B981: "#10B981",
+  color_F59E0B: "#F59E0B",
 
-  
 }

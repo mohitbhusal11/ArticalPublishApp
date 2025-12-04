@@ -71,5 +71,11 @@ export const AppString = {
     draft: "Draft",
     clear: "Clear",
     signIn : "Sign In ",
+    status: "Status",
+    created: "Created",
+    updated: "Updated",
+    media: "Media",
+    video: "Video",
+    doc: "Doc",
   },
 };

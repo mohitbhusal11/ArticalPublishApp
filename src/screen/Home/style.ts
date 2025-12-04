@@ -53,8 +53,9 @@ export const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#EAF2FF",
     resizeMode: "contain",
+    borderWidth: 2,
+    borderColor: AppColor.mainColor
   },
   row: {
     justifyContent: "space-between",

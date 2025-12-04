@@ -22,6 +22,14 @@ export const styles = StyleSheet.create({
         borderRadius: 12,
         overflow: 'hidden'
     },
+    profileIcon: {
+        width: 100,
+        height: 100,
+        borderRadius: 150,
+        resizeMode: "cover",
+        borderWidth: 2,
+        borderColor: AppColor.mainColor
+    },
 
     editProfileText: {
         backgroundColor: AppColor.mainColor,
