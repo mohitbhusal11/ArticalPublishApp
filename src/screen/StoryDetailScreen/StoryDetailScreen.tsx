@@ -9,32 +9,34 @@ import RenderHTML, {
 import Video from "react-native-video";
 import { AttachmentModal } from "../../services/calls/stories";
 import { AppImage } from "../../config/AppImage";
+import { AppColor } from "../../config/AppColor";
+import { AppString } from "../../strings";
 
 type Status = 'draft' | 'submit' | 'publish' | 'review';
 
 function getStatusColorAdvanced(status: Status): string {
   switch (status?.toLowerCase()) {
     case 'draft':
-      return '#E74C3C';
+      return AppColor.color_E74C3C;
     case 'submit':
-      return '#3B82F6';
+      return AppColor.color_3B82F6;
     case 'publish':
-      return '#10B981';
+      return AppColor.color_10B981;
     case 'review':
-      return '#F59E0B';
+      return AppColor.color_F59E0B;
     default:
-      return '#6B7280';
+      return AppColor.color_6B7280;
   }
 }
 
-// ✅ Clean & minimal Story Detail screen
 const StoryDetailScreen = ({ route }: any) => {
   const { item } = route.params;
+  console.log("Story description:", item.description);
+
   const { width } = useWindowDimensions();
   console.log(item);
   const [attachmentList] = useState<AttachmentModal[]>(item.attachment)
 
-  // 🎥 Custom renderer for <video>
   const renderers = {
     video: ({ tnode }: any) => {
       const src = tnode?.attributes?.src;
@@ -52,7 +54,6 @@ const StoryDetailScreen = ({ route }: any) => {
     },
   };
 
-  // ✅ Define custom model for <video>
   const customHTMLElementModels = {
     video: HTMLElementModel.fromCustomModel({
       tagName: "video",
@@ -60,7 +61,7 @@ const StoryDetailScreen = ({ route }: any) => {
     }),
   };
 
-  const tagsStyles = {
+  const tagsStyles: Record<string, any> = {
     img: {
       width: "100%",
       maxHeight: 200,
@@ -73,12 +74,9 @@ const StoryDetailScreen = ({ route }: any) => {
       height: 200,
       borderRadius: 10,
       marginVertical: 10,
-      backgroundColor: "#000",
+      backgroundColor: AppColor.color_000,
     }
   };
-
-
-
 
   const renderersProps = {
     img: {
@@ -90,25 +88,22 @@ const StoryDetailScreen = ({ route }: any) => {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Headline */}
       <GlobalText style={styles.headline}>{item.headline}</GlobalText>
 
-      {/* Meta info */}
       <View style={styles.metaContainer}>
         <GlobalText style={styles.metaText}>
-          Status: <GlobalText style={[styles.metaValue, { color: getStatusColorAdvanced(item.status) }]}>{item.status || "Unknown"}</GlobalText>
+          {AppString.common.status}: <GlobalText style={[styles.metaValue, { color: getStatusColorAdvanced(item.status) }]}>{item.status || "Unknown"}</GlobalText>
         </GlobalText>
         <GlobalText style={styles.metaText}>
-          Created:{" "}
+          {AppString.common.created}:{" "}
           <GlobalText style={styles.metaValue}>{item.createdAt}</GlobalText>
         </GlobalText>
         <GlobalText style={styles.metaText}>
-          Updated At:{" "}
+          {AppString.common.updated}:{" "}
           <GlobalText style={styles.metaValue}>{item.updatedAt}</GlobalText>
         </GlobalText>
       </View>
 
-      {/* Description HTML */}
       <View style={styles.htmlContainer}>
         <RenderHTML
           contentWidth={width}
@@ -125,7 +120,7 @@ const StoryDetailScreen = ({ route }: any) => {
       {attachmentList.length > 0 && (
         <View style={styles.mediaContainer}>
           <GlobalText style={styles.mediaHeader}>
-            Media Attachments
+            {AppString.common.media}:
           </GlobalText>
           <View style={styles.listContainer}>
             {attachmentList.map((item, index) => {
@@ -146,12 +141,12 @@ const StoryDetailScreen = ({ route }: any) => {
                   )}
                   {isVideo && (
                     <View style={styles.videoPreview}>
-                      <GlobalText style={styles.videoText}>Video</GlobalText>
+                      <GlobalText style={styles.videoText}>{AppString.common.video}</GlobalText>
                     </View>
                   )}
                   {isDoc && (
                     <View style={styles.docPreview}>
-                      <GlobalText style={styles.docText}>DOC</GlobalText>
+                      <GlobalText style={styles.docText}>{AppString.common.doc}</GlobalText>
                     </View>
                   )}
 
@@ -171,37 +166,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: AppColor.color_F5F5F5,
   },
   headline: {
     fontSize: 22,
     fontWeight: "700",
     marginBottom: 8,
-    color: "#111",
+    color: AppColor.color_111111,
   },
   metaContainer: {
     marginBottom: 16,
-    backgroundColor: "#FFF",
+    backgroundColor: AppColor.color_ffffff,
     padding: 10,
     borderRadius: 12,
-    shadowColor: "#000",
+    shadowColor: AppColor.color_000,
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
   },
   metaText: {
     fontSize: 14,
-    color: "#666",
+    color: AppColor.color_666666,
   },
   metaValue: {
     fontWeight: "600",
-    color: "#000",
+    color: AppColor.c000000,
   },
   htmlContainer: {
-    backgroundColor: "#FFF",
+    backgroundColor: AppColor.color_ffffff,
     padding: 12,
     borderRadius: 12,
-    shadowColor: "#000",
+    shadowColor: AppColor.color_000,
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
@@ -209,7 +204,7 @@ const styles = StyleSheet.create({
   video: {
     width: "100%",
     height: 220,
-    backgroundColor: "#000",
+    backgroundColor: AppColor.color_000,
     borderRadius: 10,
     marginVertical: 10,
   },
@@ -217,14 +212,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingBottom: 40,
     paddingHorizontal: 16,
-    // marginHorizontal: 8,
   },
 
   mediaHeader: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 12,
-    color: "#222",
+    color: AppColor.color_222,
   },
   listContainer: {
     marginTop: 12,
@@ -235,7 +229,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 6,
     borderBottomWidth: 0.5,
-    borderColor: "#ddd",
+    borderColor: AppColor.color_DDDDDD,
   },
 
   fileIcon: {
@@ -246,10 +240,9 @@ const styles = StyleSheet.create({
 
   fileName: {
     flex: 1,
-    color: "#333",
+    color: AppColor.color_333333,
   },
 
-  // Image Preview
   imagePreview: {
     width: 40,
     height: 40,
@@ -257,33 +250,31 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
 
-  // Video preview
   videoPreview: {
     width: 40,
     height: 40,
-    backgroundColor: "#000",
+    backgroundColor: AppColor.color_000,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 6,
     marginRight: 10,
   },
   videoText: {
-    color: "#fff",
+    color: AppColor.color_FFFFFF,
     fontSize: 10,
   },
 
-  // Document preview
   docPreview: {
     width: 40,
     height: 40,
-    backgroundColor: "#e9e9e9",
+    backgroundColor: AppColor.color_E9E9E9,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 6,
     marginRight: 10,
   },
   docText: {
-    color: "#555",
+    color: AppColor.color_555555,
     fontSize: 10,
   },
 });

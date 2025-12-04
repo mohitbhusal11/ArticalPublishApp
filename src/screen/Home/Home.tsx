@@ -41,8 +41,9 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   const handleNotificationPress = () => {
-    ToastUtils.info("Notifications clicked!");
+    // ToastUtils.info("Notifications clicked!");
     setHasNotification(false);
+    navigation.navigate("NotificationsScreen");
   };
 
   const handleCardClicked = (redirectionScreen: string) => {
