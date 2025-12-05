@@ -11,6 +11,7 @@ import { AttachmentModal } from "../../services/calls/stories";
 import { AppImage } from "../../config/AppImage";
 import { AppColor } from "../../config/AppColor";
 import { AppString } from "../../strings";
+import { RichEditor } from "react-native-pell-rich-editor";
 
 type Status = 'draft' | 'submit' | 'publish' | 'review';
 
@@ -36,6 +37,7 @@ const StoryDetailScreen = ({ route }: any) => {
   const { width } = useWindowDimensions();
   console.log(item);
   const [attachmentList] = useState<AttachmentModal[]>(item.attachment)
+  const richText = React.useRef<RichEditor>(null);
 
   const renderers = {
     video: ({ tnode }: any) => {
@@ -105,7 +107,7 @@ const StoryDetailScreen = ({ route }: any) => {
       </View>
 
       <View style={styles.htmlContainer}>
-        <RenderHTML
+        {/* <RenderHTML
           contentWidth={width}
           source={{ html: item.description }}
           systemFonts={systemFonts}
@@ -114,6 +116,47 @@ const StoryDetailScreen = ({ route }: any) => {
           renderersProps={renderersProps}
           customHTMLElementModels={customHTMLElementModels}
           computeEmbeddedMaxWidth={() => width - 40}
+        /> */}
+        <RichEditor
+          ref={richText}
+          placeholder="Start writing something awesome..."
+          initialContentHTML={item.description}
+          androidLayerType={"hardware"}
+          useContainer={false}
+          disabled={true}
+          style={{
+            flex: 1,
+            height: 500,
+            backgroundColor: "#fff",
+            borderWidth: 2,
+            margin: 5,
+            elevation: 2,
+            borderRadius: 12,
+          }}
+          editorStyle={{
+            backgroundColor: AppColor.ffffff,
+            color: AppColor.color_222,
+            placeholderColor: AppColor.color_aaa,
+            contentCSSText: `
+                  body {
+                      font-size: 16px;
+                      height: 100%;
+                      max-height: 500px;
+                      overflow-y: auto;   
+                      padding: 10px;
+                      font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
+                  }
+                  img, video {
+                      max-width: 100% !important;
+                      height: auto !important;
+                      border-radius: 8px;
+                      margin: 8px 0;
+                      display: block;
+                      object-fit: contain !important;
+                      max-height: 250px !important;
+                  }
+              `,
+          }}
         />
       </View>
 
