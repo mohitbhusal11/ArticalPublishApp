@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { createRef, useEffect, useState } from 'react';
 import { ActivityIndicator, BackHandler, Image, Linking, StatusBar, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -12,6 +12,12 @@ import { persistor, store } from './src/redux/store';
 import { AppColor } from './src/config/AppColor';
 import { registerNotificationListeners } from './src/notifications/NotificationService';
 import AppUpdateChecker from './src/screen/AppUpdateCheckerScreen/AppUpdateChecker';
+import LoaderModal, { LoaderModalRef } from './src/component/LoaderModal';
+
+export const loaderRef = createRef<LoaderModalRef>();
+
+export const showLoader = () => loaderRef.current?.show();
+export const hideLoader = () => loaderRef.current?.hide();
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -125,6 +131,7 @@ function App() {
                 <MainNavigation />
               )}
               <Toast />
+              <LoaderModal ref={loaderRef} />
             </NavigationContainer>
           </PersistGate>
         </Provider>

@@ -28,6 +28,7 @@ import { pick, types } from '@react-native-documents/picker';
 import FontSizePicker from "../../component/FontSizePicker";
 import ColorPickerModal from "../../component/ColorPickerModal";
 import ImagePicker from 'react-native-image-crop-picker';
+import { hideLoader, showLoader } from "../../../App";
 
 
 const BLOCKED_EXTENSIONS = [
@@ -94,7 +95,6 @@ const EditorScreen = ({ navigation }: any) => {
     const [assignmentList, setAssignmentList] = useState<Assignment[]>([]);
     const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(item);
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [showPicker, setShowPicker] = useState(false);
 
     const [colorModalVisible, setColorModalVisible] = useState(false);
@@ -120,8 +120,7 @@ const EditorScreen = ({ navigation }: any) => {
 
     const handleAttachments = async () => {
         try {
-            setLoading(true);
-
+            showLoader()
             const results = await pick({
                 type: [types.allFiles],
             });
@@ -176,7 +175,7 @@ const EditorScreen = ({ navigation }: any) => {
                 Alert.alert('Error', 'Failed to upload attachments.');
             }
         } finally {
-            setLoading(false);
+            hideLoader()
         }
     };
 
@@ -232,63 +231,14 @@ const EditorScreen = ({ navigation }: any) => {
         }
     };
 
-    // const handleAddImageUpload = async () => {
-    //     try {
-    //         setLoading(true);
-    //         const result = await launchImageLibrary({
-    //             mediaType: "photo",
-    //             quality: 0.8,
-    //         });
-
-    //         if (result.assets && result.assets.length > 0) {
-    //             const asset = result.assets[0];
-    //             if (!asset.uri) return;
-
-    //             const formData = new FormData();
-    //             formData.append("image", {
-    //                 uri: asset.uri,
-    //                 type: asset.type || "image/jpeg",
-    //                 name: asset.fileName || "upload.jpg",
-    //             });
-
-    //             console.log("formData: ", formData);
-    //             const response = await fileUpload(formData);
-    //             console.log("Upload Response:", response);
-    //             const uploadedUrl = response?.files?.[0]?.url;
-    //             const mediaPayload: MediaModal = {
-    //                 mediaType: 'Photo',
-    //                 caption: '',
-    //                 shotTime: '',
-    //                 filePath: uploadedUrl || "upload.jpg"
-    //             }
-    //             setMediaList(prev => [...prev, mediaPayload])
-
-    //             if (!uploadedUrl) {
-    //                 Alert.alert("Upload failed", "No Image URL returned.");
-    //                 return;
-    //             } else {
-    //                 richText.current?.insertImage(uploadedUrl);
-    //             }
-
-
-    //         }
-    //     } catch (error) {
-    //         console.error("Image Upload Error:", error);
-    //         Alert.alert("Error", "Something went wrong while uploading the image.");
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
     const handleAddImageUpload = async () => {
         try {
-            setLoading(true);
-
+            showLoader()
             // Open image library with cropping enabled
             const image = await ImagePicker.openPicker({
-                width: 400,       // crop width
-                height: 200,      // crop height
-                cropping: true,   // enable cropping
+                width: 400,
+                height: 200,
+                cropping: true,
                 compressImageQuality: 0.8,
                 mediaType: 'photo',
                 freeStyleCropEnabled: true
@@ -327,13 +277,13 @@ const EditorScreen = ({ navigation }: any) => {
             console.error("Image Upload Error:", error);
             Alert.alert("Error", "Something went wrong while uploading the image.");
         } finally {
-            setLoading(false);
+            hideLoader()
         }
     };
 
     const handleAddVideoUpload = async () => {
         try {
-            setLoading(true);
+            showLoader()
             const result = await launchImageLibrary({
                 mediaType: "video",
                 videoQuality: "medium",
@@ -376,7 +326,7 @@ const EditorScreen = ({ navigation }: any) => {
             console.error("Video Upload Error:", error);
             Alert.alert("Error", "Something went wrong while uploading the video.");
         } finally {
-            setLoading(false);
+            hideLoader()
         }
     };
 
@@ -449,7 +399,7 @@ const EditorScreen = ({ navigation }: any) => {
 
     const handleDeleteAttachment = async (index: number) => {
         try {
-            setLoading(true);
+            showLoader()
             const fileToDelete: AttachmentModal = attachmentList[index];
 
             console.log("Deleting File:", fileToDelete);
@@ -464,7 +414,7 @@ const EditorScreen = ({ navigation }: any) => {
             Alert.alert("Delete Failed", "Unable to delete the file from server.");
             console.log(error);
         } finally {
-            setLoading(false);
+            hideLoader()
         }
     };
 
@@ -917,17 +867,6 @@ const EditorScreen = ({ navigation }: any) => {
                 onSelectColor={handleSelectColor}
                 mode={currentMode}
             />
-
-            {loading && (
-                <View style={styles.loaderOverlay}>
-                    <LottieView
-                        source={AppLottie.loader}
-                        autoPlay
-                        loop
-                        style={{ width: 50, height: 50 }}
-                    />
-                </View>
-            )}
 
         </SafeAreaView>
     );
