@@ -8,6 +8,7 @@ import { forgotPassword, verifyOtp } from '../../services/calls/authService'
 import GlobalSafeArea from '../../component/GlobalSafeArea'
 import GlobalText from '../../component/GlobalText'
 import GlobalButton from '../../component/GlobalButton'
+import { hideLoader, showLoader } from '../../../App'
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
   const [userId, setUserID] = useState("")
@@ -15,7 +16,6 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
   const [mobileNumberText, setMobileNumberText] = useState("")
   const [showOtp, setShowOtp] = useState(false)
   const [buttonName, setButtonName] = useState<'Send OTP' | 'Resend'>('Send OTP')
-  const [loading, setLoading] = useState(false)
   const [timer, setTimer] = useState(0)
   const minutes = Math.floor(timer / 60);
   const seconds = timer % 60;
@@ -57,8 +57,8 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
   }
 
   const sendOtp = async () => {
-    setLoading(true);
     try {
+      showLoader()
       const res = await forgotPassword(userId);
       console.log("send OTP Response success:", res);
       ToastUtils.success(res.messageUser)
@@ -69,14 +69,14 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       console.log("send OTP Response error:", error);
       ToastUtils.error(`"Error" ${error?.response?.data?.message || "send OTP failed"}`);
     } finally {
-      setLoading(false);
+      hideLoader()
     }
   };
 
   const verifyOTP = async () => {
     if (userId.trim().length > 5 && otp.trim().length === 6) {
-      setLoading(true);
       try {
+        showLoader()
         const res = await verifyOtp(userId, otp);
         console.log("verifyOTP success:", res);
         if (res?.result) {
@@ -90,7 +90,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
         console.log("verify OTP error:", error);
         ToastUtils.error(`"Error" ${error?.response?.data?.message || "verify OTP failed"}`);
       } finally {
-        setLoading(false);
+        hideLoader()
       }
     }
   };
@@ -152,10 +152,10 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
         <View style={styles.buttonWrapper}>
           <GlobalButton
             onPress={handleOnClick}
-            disabled={!isButtonEnabled || loading}
+            disabled={!isButtonEnabled}
             style={[
               styles.button,
-              { opacity: !isButtonEnabled || loading ? 0.6 : 1 },
+              { opacity: !isButtonEnabled ? 0.6 : 1 },
             ]}
           >
             <GlobalText style={styles.buttonText}>

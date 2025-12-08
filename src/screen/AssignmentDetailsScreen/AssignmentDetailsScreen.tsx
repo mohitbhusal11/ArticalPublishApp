@@ -10,13 +10,13 @@ import {
 } from "../../services/calls/assignmentService";
 import ToastUtils from "../../utils/toast";
 import { AppColor } from "../../config/AppColor";
+import { hideLoader, showLoader } from "../../../App";
 
 const AssignmentDetailsScreen = () => {
     const route = useRoute<any>();
     const navigation = useNavigation<any>();
     const item: Assignment = route.params;
 
-    const [loading, setLoading] = useState(false);
     const [assignment, setAssignment] = useState<Assignment>(item);
 
     const getBadgeColor = () => {
@@ -35,8 +35,8 @@ const AssignmentDetailsScreen = () => {
     };
 
     const handleAccept = async (id: number) => {
-        setLoading(true);
         try {
+            showLoader()
             const payload: UpdateAssignmentModal = {
                 assignmentId: id,
                 isAccepted: true,
@@ -54,13 +54,13 @@ const AssignmentDetailsScreen = () => {
         } catch (error) {
             ToastUtils.error("Failed to accept assignment");
         } finally {
-            setLoading(false);
+            hideLoader()
         }
     };
 
     const handleDecline = async (id: number) => {
-        setLoading(true);
         try {
+            showLoader()
             const payload: UpdateAssignmentModal = {
                 assignmentId: id,
                 isAccepted: false,
@@ -78,7 +78,7 @@ const AssignmentDetailsScreen = () => {
         } catch (error) {
             ToastUtils.error("Failed to decline assignment");
         } finally {
-            setLoading(false);
+            hideLoader()
         }
     };
 
@@ -92,7 +92,6 @@ const AssignmentDetailsScreen = () => {
                     <TouchableOpacity
                         style={[styles.button, styles.acceptBtn]}
                         onPress={() => handleAccept(assignment.id)}
-                        disabled={loading}
                     >
                         <GlobalText style={styles.btnText}>Accept</GlobalText>
                     </TouchableOpacity>
@@ -101,7 +100,6 @@ const AssignmentDetailsScreen = () => {
                     <TouchableOpacity
                         style={[styles.button, styles.declineBtn]}
                         onPress={() => handleDecline(assignment.id)}
-                        disabled={loading}
                     >
                         <GlobalText style={styles.btnText}>Decline</GlobalText>
                     </TouchableOpacity>

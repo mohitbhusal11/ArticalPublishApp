@@ -23,12 +23,12 @@ import GlobalText from '../../component/GlobalText';
 import GlobalButton from '../../component/GlobalButton';
 import LottieView from 'lottie-react-native';
 import { AppLottie } from '../../config/AppLottie';
+import { hideLoader, showLoader } from '../../../App';
 
 const LoginScreen = () => {
   const dispatch = useDispatch();
   const [userId, setUserID] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [deviceId, setDeviceId] = useState('');
   const [showPassword, setShowPassword] = useState(false)
 
@@ -65,15 +65,13 @@ const LoginScreen = () => {
   const handleOnClick = async () => {
     if (!validateInputs()) return;
     try {
-      setLoading(true);
+      showLoader()
       const res = await dispatch<any>(login(userId, password, 'fcmToken', deviceId));
       ToastUtils.success('Login successful! response: ', res);
-      setLoading(false);
     } catch (error) {
       console.log('Login error:', error);
-      setLoading(false);
     } finally {
-      setLoading(false);
+      hideLoader()
     }
   };
 
@@ -144,10 +142,10 @@ const LoginScreen = () => {
           <View style={styles.buttonWrapper}>
             <GlobalButton
               onPress={handleOnClick}
-              disabled={!isButtonEnabled || loading}
+              disabled={!isButtonEnabled}
               style={[
                 styles.button,
-                { opacity: !isButtonEnabled || loading ? 0.6 : 1 },
+                { opacity: !isButtonEnabled ? 0.6 : 1 },
               ]}
             >
               <GlobalText style={styles.buttonText}>
@@ -163,16 +161,6 @@ const LoginScreen = () => {
             style={{ height: 250 }}
           />
         </View>
-        {loading && (
-          <View style={styles.loaderOverlay}>
-            <LottieView
-              source={AppLottie.loader}
-              autoPlay
-              loop
-              style={{ width: 50, height: 50 }}
-            />
-          </View>
-        )}
       </ScrollView>
     </GlobalSafeArea>
   )

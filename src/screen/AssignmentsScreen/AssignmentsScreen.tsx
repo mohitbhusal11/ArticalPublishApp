@@ -13,8 +13,7 @@ import { useIsFocused, useRoute } from "@react-navigation/native";
 import GlobalText from "../../component/GlobalText";
 import { styles } from "./style";
 import ToastUtils from "../../utils/toast";
-import LottieView from "lottie-react-native";
-import { AppLottie } from "../../config/AppLottie";
+import { hideLoader, showLoader } from "../../../App";
 
 const filters = ["All", "Accepted", "Submit", "Pending", "Rejected"];
 
@@ -29,7 +28,6 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
   const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [statusTrigger, setStatusTrigger] = useState(0);
   const filterListRef = useRef<FlatList>(null);
@@ -83,10 +81,10 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
   }, [search]);
 
   const fetchAssignment = async (pageNumber: number, isLoadMore = false) => {
-    if (loading || loadingMore) return;
+    if (loadingMore) return;
 
     if (isLoadMore) setLoadingMore(true);
-    else setLoading(true);
+    else showLoader();
 
     try {
       const query: any = {
@@ -114,7 +112,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
     } catch (error) {
       console.log("Fetch error:", error);
     } finally {
-      setLoading(false);
+      hideLoader()
       setLoadingMore(false);
     }
   };
@@ -127,8 +125,9 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
   };
 
   const handleAccept = async (id: number) => {
-    setLoading(true);
+
     try {
+      showLoader()
       const payload: UpdateAssignmentModal = {
         assignmentId: id,
         isAccepted: true,
@@ -145,14 +144,14 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
       console.log("Accept error:", error);
       ToastUtils.error("Failed to accept assignment");
     } finally {
-      setLoading(false);
+      hideLoader()
     }
   };
 
 
   const handleDecline = async (id: number) => {
     try {
-      setLoading(true);
+      showLoader()
 
       const payload: UpdateAssignmentModal = {
         assignmentId: id,
@@ -173,7 +172,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
       console.log("Decline error:", error);
       ToastUtils.error("Failed to decline assignment");
     } finally {
-      setLoading(false);
+      hideLoader()
     }
   };
 
@@ -333,23 +332,11 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
           ) : null
         }
         ListEmptyComponent={() =>
-          !loading && (
-            <GlobalText style={{ textAlign: "center", marginTop: 50 }}>
-              No Assignment found
-            </GlobalText>
-          )
+          <GlobalText style={{ textAlign: "center", marginTop: 50 }}>
+            No Assignment found
+          </GlobalText>
         }
       />
-      {loading && page === 1 && (
-        <View style={styles.loaderOverlay}>
-          <LottieView
-            source={AppLottie.loader}
-            autoPlay
-            loop
-            style={{ width: 50, height: 50 }}
-          />
-        </View>
-      )}
     </View>
   );
 };
