@@ -12,8 +12,7 @@ import { styles } from "./style";
 import GlobalText from "../../component/GlobalText";
 import GlobalSafeArea from "../../component/GlobalSafeArea";
 import { AppColor } from "../../config/AppColor";
-import LottieView from "lottie-react-native";
-import { AppLottie } from "../../config/AppLottie";
+import { hideLoader, showLoader } from "../../../App";
 
 const stripHtml = (html: string): string => {
   return html.replace(/<[^>]+>/g, "").trim();
@@ -48,9 +47,8 @@ const StoriesScreen = ({ navigation }: any) => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState(incomingStatus);
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(20);
+  const [pageSize] = useState(25);
   const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [statusTrigger, setStatusTrigger] = useState(0);
   const filterListRef = useRef<FlatList>(null);
@@ -66,36 +64,6 @@ const StoriesScreen = ({ navigation }: any) => {
       setStatusTrigger((prev) => prev + 1);
     }
   }, [isFocused, incomingStatus]);
-
-  // useEffect(() => {
-  //   if (isFocused) {
-  //     if (!incomingStatus) {
-  //       setStatus(undefined);
-  //     } else {
-  //       const normalized =
-  //         incomingStatus.toLowerCase() === "all"
-  //           ? undefined
-  //           : incomingStatus.toLowerCase();
-  //       setStatus(normalized);
-  //     }
-
-  //     navigation.setParams({ status: undefined }); // Clear it
-
-  //     setStatusTrigger((prev) => prev + 1);
-  //   }
-  // }, [isFocused]);
-
-  // useEffect(() => {
-  //   if (incomingStatus !== undefined) {
-  //     const normalized =
-  //       !incomingStatus || incomingStatus.toLowerCase() === "all"
-  //         ? undefined
-  //         : incomingStatus.toLowerCase();
-
-  //     setStatus(normalized);
-  //     setStatusTrigger((prev) => prev + 1);
-  //   }
-  // }, [incomingStatus]);
 
   useEffect(() => {
     resetAndFetch();
@@ -114,7 +82,7 @@ const StoriesScreen = ({ navigation }: any) => {
           animated: true,
           viewPosition: 0.5,
         });
-      }, 100); // small delay to allow rendering
+      }, 100);
     }
   }, [status]);
 
@@ -135,10 +103,10 @@ const StoriesScreen = ({ navigation }: any) => {
   }, [search]);
 
   const fetchStories = async (pageNumber: number, isLoadMore = false) => {
-    if (loading || loadingMore) return;
+    if (loadingMore) return;
 
     if (isLoadMore) setLoadingMore(true);
-    else setLoading(true);
+    else showLoader();
 
     try {
       const query: any = {
@@ -166,7 +134,7 @@ const StoriesScreen = ({ navigation }: any) => {
     } catch (error) {
       console.log("Fetch error:", error);
     } finally {
-      setLoading(false);
+      hideLoader();
       setLoadingMore(false);
     }
   };
@@ -305,24 +273,11 @@ const StoriesScreen = ({ navigation }: any) => {
           ) : null
         }
         ListEmptyComponent={() =>
-          !loading && (
-            <GlobalText style={{ textAlign: "center", marginTop: 50 }}>
-              No stories found
-            </GlobalText>
-          )
+          <GlobalText style={{ textAlign: "center", marginTop: 50 }}>
+            No stories found
+          </GlobalText>
         }
       />
-
-      {loading && page === 1 && (
-        <View style={styles.loaderOverlay}>
-          <LottieView
-            source={AppLottie.loader}
-            autoPlay
-            loop
-            style={{ width: 50, height: 50 }}
-          />
-        </View>
-      )}
     </GlobalSafeArea>
   );
 };

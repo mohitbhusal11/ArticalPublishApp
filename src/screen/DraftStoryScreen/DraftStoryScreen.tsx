@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 import { launchImageLibrary } from "react-native-image-picker";
-
 import { AppString } from "../../strings";
 import GlobalText from "../../component/GlobalText";
 import { AppColor } from "../../config/AppColor";
@@ -22,13 +21,12 @@ import ToastUtils from "../../utils/toast";
 import { styles } from "./style";
 import { Assignment, getAssignments } from "../../services/calls/assignmentService";
 import { deleteFile, fileUpload } from "../../services/calls/imageUpload";
-import LottieView from "lottie-react-native";
-import { AppLottie } from "../../config/AppLottie";
 import { normalizeAttachment, normalizeMedia } from "../../utils/normalizeFun";
 import { pick, types } from "@react-native-documents/picker";
 import FontSizePickerSimple from "../../component/FontSizePicker";
 import ColorPickerModal from "../../component/ColorPickerModal";
 import ImagePicker from 'react-native-image-crop-picker';
+import { hideLoader, showLoader } from "../../../App";
 
 const BLOCKED_EXTENSIONS = [
     '.php', '.exe', '.env', '.sh', '.bat', '.cmd', '.msi',
@@ -92,7 +90,6 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
     const [assignmentList, setAssignmentList] = useState<Assignment[]>([]);
     const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(item.title);
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [mediaList, setMediaList] = useState<MediaModal[]>(
         normalizeMedia(item?.media)
     );
@@ -125,8 +122,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
 
     const handleAttachments = async () => {
         try {
-            setLoading(true);
-
+            showLoader()
             const results = await pick({
                 type: [types.allFiles],
             });
@@ -147,7 +143,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                         "File Too Large",
                         `The file "${file.name}" exceeds ${MAX_FILE_SIZE_MB} MB limit.`
                     );
-                    continue; // skip uploading this file
+                    continue;
                 }
 
                 const formData = new FormData();
@@ -183,7 +179,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                 Alert.alert('Error', 'Failed to upload attachments.');
             }
         } finally {
-            setLoading(false);
+            hideLoader()
         }
     };
 
@@ -241,8 +237,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
 
     const handleAddImageUpload = async () => {
         try {
-            setLoading(true);
-
+            showLoader()
             const image = await ImagePicker.openPicker({
                 width: 400,
                 height: 200,
@@ -285,13 +280,13 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
             console.error("Image Upload Error:", error);
             Alert.alert("Error", "Something went wrong while uploading the image.");
         } finally {
-            setLoading(false);
+            hideLoader()
         }
     };
 
     const handleAddVideoUpload = async () => {
         try {
-            setLoading(true);
+            showLoader()
             const result = await launchImageLibrary({
                 mediaType: "video",
                 videoQuality: "medium",
@@ -334,7 +329,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
             console.error("Video Upload Error:", error);
             Alert.alert("Error", "Something went wrong while uploading the video.");
         } finally {
-            setLoading(false);
+            hideLoader()
         }
     };
 
@@ -407,7 +402,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
 
     const handleDeleteAttachment = async (index: number) => {
         try {
-            setLoading(true);
+            showLoader()
             const fileToDelete: AttachmentModal = attachmentList[index];
 
             console.log("Deleting File:", fileToDelete);
@@ -422,7 +417,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
             Alert.alert("Delete Failed", "Unable to delete the file from server.");
             console.log(error);
         } finally {
-            setLoading(false);
+            hideLoader()
         }
     };
 
@@ -854,18 +849,6 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                 onSelectColor={handleSelectColor}
                 mode={currentMode}
             />
-
-            {loading && (
-                <View style={styles.loaderOverlay}>
-                    <LottieView
-                        source={AppLottie.loader}
-                        autoPlay
-                        loop
-                        style={{ width: 50, height: 50 }}
-                    />
-                </View>
-            )}
-
         </SafeAreaView>
     );
 };
