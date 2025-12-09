@@ -48,7 +48,7 @@ const StoriesScreen = ({ navigation }: any) => {
   const [status, setStatus] = useState(incomingStatus);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(25);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [statusTrigger, setStatusTrigger] = useState(0);
   const filterListRef = useRef<FlatList>(null);
@@ -90,7 +90,7 @@ const StoriesScreen = ({ navigation }: any) => {
   const resetAndFetch = () => {
     setPage(1);
     setStories([]);
-    setHasMore(true);
+    setHasMore(false);
     fetchStories(1, false);
   };
 
@@ -266,7 +266,7 @@ const StoriesScreen = ({ navigation }: any) => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderCard}
         onEndReached={loadMore}
-        onEndReachedThreshold={0.2}
+        onEndReachedThreshold={0.5}
         ListFooterComponent={
           loadingMore ? (
             <ActivityIndicator size="small" style={{ marginVertical: 16 }} />

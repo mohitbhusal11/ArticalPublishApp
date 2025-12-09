@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 150,
     borderWidth: 1,
-    borderColor: AppColor.c000000,
+    borderColor: AppColor.mainColor,
     justifyContent: "center",
     alignItems: "center",
     padding: 8,
@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
   icon: {
     width: 20,
     height: 20,
+    tintColor: AppColor.mainColor
   },
 
   textWrapper: {

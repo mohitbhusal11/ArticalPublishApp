@@ -40,6 +40,8 @@ export const styles = StyleSheet.create({
         height: 36,
         borderRadius: 150,
         resizeMode: 'cover',
+        borderWidth: 1,
+        borderColor: AppColor.mainColor
     },
     nameAndNumber: {
         flexGrow: 1,

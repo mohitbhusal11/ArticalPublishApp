@@ -16,6 +16,7 @@ import { styles } from "./style";
 import { DashboardCategory, fetchDashboard } from "../../services/calls/dashboardService";
 import { useIsFocused } from "@react-navigation/native";
 import FastImage from "react-native-fast-image";
+import { hideLoader, showLoader } from "../../../App";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -100,11 +101,14 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
       setData(data.payload);
     } catch (err) {
       console.error("Error loading dashboard:", err);
+    } finally {
+      hideLoader()
     }
   };
 
   useEffect(() => {
     if (isFocused) {
+      showLoader()
       getDashboardData();
     }
   }, [isFocused]);
