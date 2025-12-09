@@ -27,7 +27,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
   const [status, setStatus] = useState(incomingStatus);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [statusTrigger, setStatusTrigger] = useState(0);
   const filterListRef = useRef<FlatList>(null);
@@ -68,7 +68,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
   const resetAndFetch = () => {
     setPage(1);
     setAssignments([]);
-    setHasMore(true);
+    setHasMore(false);
     fetchAssignment(1, false);
   };
 
@@ -325,7 +325,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
         renderItem={renderCard}
         contentContainerStyle={{ paddingBottom: 40 }}
         onEndReached={loadMore}
-        onEndReachedThreshold={0.2}
+        onEndReachedThreshold={0.5}
         ListFooterComponent={
           loadingMore ? (
             <ActivityIndicator size="small" style={{ marginVertical: 16 }} />
