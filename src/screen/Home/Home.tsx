@@ -108,7 +108,7 @@ const Home: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   useEffect(() => {
     if (isFocused) {
-      showLoader()
+      // showLoader()
       getDashboardData();
     }
   }, [isFocused]);

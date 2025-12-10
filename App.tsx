@@ -40,10 +40,10 @@ function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView
-        style={[styles.mainContainer, { backgroundColor: isDarkMode ? AppColor.c000000 : AppColor.ffffff }]}
+        style={[styles.mainContainer, { backgroundColor: isDarkMode ? AppColor.mainColor : AppColor.mainColor }]}
         edges={['top', 'bottom', 'left', 'right']}
       >
-        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+        <StatusBar barStyle={isDarkMode ? 'light-content' : 'light-content'} />
         <Provider store={store}>
           <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
             <NavigationContainer>
