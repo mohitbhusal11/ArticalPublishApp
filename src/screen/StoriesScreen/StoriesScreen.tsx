@@ -106,7 +106,7 @@ const StoriesScreen = ({ navigation }: any) => {
     if (loadingMore) return;
 
     if (isLoadMore) setLoadingMore(true);
-    else showLoader();
+    // else showLoader();
 
     try {
       const query: any = {
