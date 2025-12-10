@@ -84,7 +84,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
     if (loadingMore) return;
 
     if (isLoadMore) setLoadingMore(true);
-    else showLoader();
+    // else showLoader();
 
     try {
       const query: any = {
@@ -127,7 +127,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
   const handleAccept = async (id: number) => {
 
     try {
-      showLoader()
+      // showLoader()
       const payload: UpdateAssignmentModal = {
         assignmentId: id,
         isAccepted: true,
@@ -151,7 +151,7 @@ const AssignmentsScreen: React.FC = ({ navigation }: any) => {
 
   const handleDecline = async (id: number) => {
     try {
-      showLoader()
+      // showLoader()
 
       const payload: UpdateAssignmentModal = {
         assignmentId: id,
