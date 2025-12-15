@@ -77,5 +77,7 @@ export const AppString = {
     media: "Media",
     video: "Video",
     doc: "Doc",
+    newUpdate: "New Update",
+    cancelNewUpdate: "Cancel New Update"
   },
 };
