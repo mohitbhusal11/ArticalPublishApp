@@ -1,17 +1,14 @@
 import React, { useState } from "react";
-import { View, ScrollView, useWindowDimensions, StyleSheet, Image } from "react-native";
+import { View, ScrollView, Image } from "react-native";
 import GlobalText from "../../component/GlobalText";
-import RenderHTML, {
-  defaultSystemFonts,
-  HTMLElementModel,
-  HTMLContentModel,
-} from "react-native-render-html";
-import Video from "react-native-video";
 import { AttachmentModal } from "../../services/calls/stories";
 import { AppImage } from "../../config/AppImage";
 import { AppColor } from "../../config/AppColor";
 import { AppString } from "../../strings";
 import { RichEditor } from "react-native-pell-rich-editor";
+import GlobalButton from "../../component/GlobalButton";
+import { styles } from "./style";
+import Editor from "../../component/EditorComponent/Editor";
 
 type Status = 'draft' | 'submit' | 'publish' | 'review';
 
@@ -34,89 +31,18 @@ const StoryDetailScreen = ({ route }: any) => {
   const { item } = route.params;
   console.log("Story description:", item.description);
 
-  const { width } = useWindowDimensions();
   console.log(item);
   const [attachmentList] = useState<AttachmentModal[]>(item.attachment)
   const richText = React.useRef<RichEditor>(null);
+  const [showNewUpdate, setShowNewUpdate] = useState(false)
 
-  const renderers = {
-    video: ({ tnode }: any) => {
-      const src = tnode?.attributes?.src;
-      const poster = tnode?.attributes?.poster;
-      if (!src) return null;
-      return (
-        <Video
-          source={{ uri: src }}
-          poster={poster}
-          controls
-          resizeMode="contain"
-          style={styles.video}
-        />
-      );
-    },
-  };
+  const [editorState, setEditorState] = useState(null);
 
-  const customHTMLElementModels = {
-    video: HTMLElementModel.fromCustomModel({
-      tagName: "video",
-      contentModel: HTMLContentModel.block,
-    }),
-  };
+  const renderNewUpdate = () => {
+    return (
 
-  const tagsStyles: Record<string, any> = {
-    img: {
-      width: "100%",
-      maxHeight: 200,
-      resizeMode: "contain",
-      borderRadius: 10,
-      marginVertical: 10,
-    },
-    video: {
-      width: "100%",
-      height: 200,
-      borderRadius: 10,
-      marginVertical: 10,
-      backgroundColor: AppColor.color_000,
-    }
-  };
-
-  const renderersProps = {
-    img: {
-      enableExperimentalPercentWidth: true,
-    },
-  };
-
-  const systemFonts = [...defaultSystemFonts, "System"];
-
-  return (
-    <ScrollView style={styles.container}>
-      <GlobalText style={styles.headline}>{item.headline}</GlobalText>
-
-      <View style={styles.metaContainer}>
-        <GlobalText style={styles.metaText}>
-          {AppString.common.status}: <GlobalText style={[styles.metaValue, { color: getStatusColorAdvanced(item.status) }]}>{item.status || "Unknown"}</GlobalText>
-        </GlobalText>
-        <GlobalText style={styles.metaText}>
-          {AppString.common.created}:{" "}
-          <GlobalText style={styles.metaValue}>{item.createdAt}</GlobalText>
-        </GlobalText>
-        <GlobalText style={styles.metaText}>
-          {AppString.common.updated}:{" "}
-          <GlobalText style={styles.metaValue}>{item.updatedAt}</GlobalText>
-        </GlobalText>
-      </View>
-
-      <View style={styles.htmlContainer}>
-        {/* <RenderHTML
-          contentWidth={width}
-          source={{ html: item.description }}
-          systemFonts={systemFonts}
-          tagsStyles={tagsStyles}
-          renderers={renderers}
-          renderersProps={renderersProps}
-          customHTMLElementModels={customHTMLElementModels}
-          computeEmbeddedMaxWidth={() => width - 40}
-        /> */}
+      <View style={[styles.htmlContainer, { marginVertical: 24 }]}>
+        <GlobalText style={{ fontSize: 16, fontWeight: 600, color: AppColor.mainColor }} >last update date: {new Date().toDateString()} </GlobalText>
         <RichEditor
           ref={richText}
           placeholder="Start writing something awesome..."
@@ -159,6 +85,85 @@ const StoryDetailScreen = ({ route }: any) => {
           }}
         />
       </View>
+    )
+  }
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
+      <GlobalText style={styles.headline}>{item.headline}</GlobalText>
+
+      <View style={styles.metaContainer}>
+        <GlobalText style={styles.metaText}>
+          {AppString.common.status}: <GlobalText style={[styles.metaValue, { color: getStatusColorAdvanced(item.status) }]}>{item.status || "Unknown"}</GlobalText>
+        </GlobalText>
+        <GlobalText style={styles.metaText}>
+          {AppString.common.created}:{" "}
+          <GlobalText style={styles.metaValue}>{item.createdAt}</GlobalText>
+        </GlobalText>
+        <GlobalText style={styles.metaText}>
+          {AppString.common.updated}:{" "}
+          <GlobalText style={styles.metaValue}>{item.updatedAt}</GlobalText>
+        </GlobalText>
+      </View>
+
+      {/* <GlobalButton style={{ marginBottom: 10, padding: 12 }} onPress={() => setShowNewUpdate(!showNewUpdate)}><GlobalText style={{ color: AppColor.ffffff }} >{showNewUpdate ? AppString.common.cancelNewUpdate : AppString.common.newUpdate}</GlobalText></GlobalButton> */}
+
+      {
+        showNewUpdate &&
+        <View style={{ marginVertical: 24, backgroundColor: AppColor.color_9A9A9A }} >
+          <Editor
+            initialTitle=""
+            initialHtml=""
+          />
+        </View>
+      }
+
+      <View style={styles.htmlContainer}>
+        <RichEditor
+          ref={richText}
+          placeholder="Start writing something awesome..."
+          initialContentHTML={item.description}
+          androidLayerType={"hardware"}
+          useContainer={false}
+          disabled={true}
+          scrollEnabled={false}
+          style={{
+            flex: 1,
+            height: 500,
+            backgroundColor: "#fff",
+            borderWidth: 2,
+            margin: 5,
+            elevation: 2,
+            borderRadius: 12,
+          }}
+          editorStyle={{
+            backgroundColor: AppColor.ffffff,
+            color: AppColor.color_222,
+            placeholderColor: AppColor.color_aaa,
+            contentCSSText: `
+                  body {
+                      font-size: 16px;
+                      height: 100%;
+                      max-height: 500px;
+                      overflow-y: auto;   
+                      padding: 10px;
+                      font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
+                  }
+                  img, video {
+                      max-width: 100% !important;
+                      height: auto !important;
+                      border-radius: 8px;
+                      margin: 8px 0;
+                      display: block;
+                      object-fit: contain !important;
+                      max-height: 250px !important;
+                  }
+              `,
+          }}
+        />
+      </View>
+
+      {/* {renderNewUpdate()} */}
 
       {attachmentList.length > 0 && (
         <View style={styles.mediaContainer}>
@@ -204,120 +209,3 @@ const StoryDetailScreen = ({ route }: any) => {
 };
 
 export default StoryDetailScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: AppColor.color_F5F5F5,
-  },
-  headline: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 8,
-    color: AppColor.color_111111,
-  },
-  metaContainer: {
-    marginBottom: 16,
-    backgroundColor: AppColor.color_ffffff,
-    padding: 10,
-    borderRadius: 12,
-    shadowColor: AppColor.color_000,
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  metaText: {
-    fontSize: 14,
-    color: AppColor.color_666666,
-  },
-  metaValue: {
-    fontWeight: "600",
-    color: AppColor.c000000,
-  },
-  htmlContainer: {
-    backgroundColor: AppColor.color_ffffff,
-    padding: 12,
-    borderRadius: 12,
-    shadowColor: AppColor.color_000,
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  video: {
-    width: "100%",
-    height: 220,
-    backgroundColor: AppColor.color_000,
-    borderRadius: 10,
-    marginVertical: 10,
-  },
-  mediaContainer: {
-    marginTop: 20,
-    paddingBottom: 40,
-    paddingHorizontal: 16,
-  },
-
-  mediaHeader: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 12,
-    color: AppColor.color_222,
-  },
-  listContainer: {
-    marginTop: 12,
-  },
-
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 6,
-    borderBottomWidth: 0.5,
-    borderColor: AppColor.color_DDDDDD,
-  },
-
-  fileIcon: {
-    width: 22,
-    height: 22,
-    marginRight: 8,
-  },
-
-  fileName: {
-    flex: 1,
-    color: AppColor.color_333333,
-  },
-
-  imagePreview: {
-    width: 40,
-    height: 40,
-    borderRadius: 6,
-    marginRight: 10,
-  },
-
-  videoPreview: {
-    width: 40,
-    height: 40,
-    backgroundColor: AppColor.color_000,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 6,
-    marginRight: 10,
-  },
-  videoText: {
-    color: AppColor.color_FFFFFF,
-    fontSize: 10,
-  },
-
-  docPreview: {
-    width: 40,
-    height: 40,
-    backgroundColor: AppColor.color_E9E9E9,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 6,
-    marginRight: 10,
-  },
-  docText: {
-    color: AppColor.color_555555,
-    fontSize: 10,
-  },
-});
