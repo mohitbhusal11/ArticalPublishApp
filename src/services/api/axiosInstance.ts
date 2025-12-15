@@ -5,8 +5,8 @@ import { clearUserDetails } from "../../redux/slices/userSlice";
 import ToastUtils from "../../utils/toast";
 
 const baseURL = __DEV__
-  ? "http://103.85.92.210:7200/api/v1.0"
-  : "http://103.85.92.210:7200/api/v1.0";
+  ? "http://103.85.92.212:7200/api/v1.0/"
+  : "http://103.85.92.212:7200/api/v1.0/";
 
 const axiosInstance = axios.create({
   baseURL,

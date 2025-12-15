@@ -21,8 +21,6 @@ import { AttachmentModal, MediaModal, postDraft, postStory, PostStoryModal } fro
 import ToastUtils from "../../utils/toast";
 import { Assignment, getAssignments } from "../../services/calls/assignmentService";
 import { deleteFile, fileUpload } from "../../services/calls/imageUpload";
-import LottieView from "lottie-react-native";
-import { AppLottie } from "../../config/AppLottie";
 import { useRoute } from "@react-navigation/native";
 import { pick, types } from '@react-native-documents/picker';
 import FontSizePicker from "../../component/FontSizePicker";
@@ -36,7 +34,7 @@ const BLOCKED_EXTENSIONS = [
     '.js', '.ts', '.py', '.rb', '.jar', '.apk'
 ];
 
-const MAX_FILE_SIZE_MB = 20;
+const MAX_FILE_SIZE_MB = 100;
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 const customFontAction = "customFontPicker";
@@ -123,6 +121,7 @@ const EditorScreen = ({ navigation }: any) => {
             showLoader()
             const results = await pick({
                 type: [types.allFiles],
+                allowMultiSelection: true,
             });
 
             const uploadedItems: AttachmentModal[] = [];
