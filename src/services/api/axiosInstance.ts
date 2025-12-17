@@ -3,6 +3,8 @@ import { persistor, store } from "../../redux/store";
 import { clearToken } from "../../redux/slices/authSlice";
 import { clearUserDetails } from "../../redux/slices/userSlice";
 import ToastUtils from "../../utils/toast";
+import RNBlobUtil from 'react-native-blob-util';
+import { Endpoints } from "../endpoints/endpoints";
 
 const baseURL = __DEV__
   ? "http://103.85.92.212:7200/api/v1.0/"
@@ -82,3 +84,77 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
+
+
+export const uploadWithBlobUtil = async (file: any) => {
+  const realPath = await getRealPath(file.uri, file.name);
+
+  try {
+    const response = await RNBlobUtil
+      .config({
+        timeout: 1000 * 60 * 5,
+      })
+      .fetch(
+        'POST',
+        baseURL + Endpoints.IMAGE.fileUpload,
+        {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${store.getState().auth.token}`,
+        },
+        [
+          {
+            name: 'file',
+            filename: file.name,
+            type: file.type,
+            data: RNBlobUtil.wrap(realPath),
+          },
+        ],
+      );
+
+    const status = response.info().status;
+    if (status < 200 || status >= 300) {
+      throw new Error(`Upload failed with status ${status}`);
+    }
+
+    const data = response.data ? JSON.parse(response.data) : { files: [] };
+
+    await RNBlobUtil.fs.unlink(realPath).catch(() => {});
+
+    return data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getRealPath = async (uri: string, fileName: string) => {
+  await cleanOldTempFiles();
+
+  if (uri.startsWith('file://')) {
+    return uri.replace('file://', '');
+  }
+
+  const destPath =
+    RNBlobUtil.fs.dirs.CacheDir +
+    '/upload_' +
+    Date.now() +
+    '_' +
+    fileName;
+
+  await RNBlobUtil.fs.cp(uri, destPath);
+
+  return destPath;
+};
+
+
+const cleanOldTempFiles = async () => {
+  try {
+    const cacheDir = RNBlobUtil.fs.dirs.CacheDir;
+    const files = await RNBlobUtil.fs.ls(cacheDir);
+
+    for (const file of files) {
+      if (file.startsWith('upload_')) {
+        await RNBlobUtil.fs.unlink(`${cacheDir}/${file}`).catch(() => {});
+      }
+    }
+  } catch {}
+};

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     Text,
     View,
@@ -27,6 +27,8 @@ import FontSizePickerSimple from "../../component/FontSizePicker";
 import ColorPickerModal from "../../component/ColorPickerModal";
 import ImagePicker from 'react-native-image-crop-picker';
 import { hideLoader, showLoader } from "../../../App";
+import { initUploadAppState, isBackground } from "../../hooks/useUploadAppState";
+import { uploadWithBlobUtil } from "../../services/api/axiosInstance";
 
 const BLOCKED_EXTENSIONS = [
     '.php', '.exe', '.env', '.sh', '.bat', '.cmd', '.msi',
@@ -63,7 +65,15 @@ const FontIcon = ({ tintColor }: { tintColor: string }) => (
 
 const DraftStoryScreen = ({ navigation, route }: any) => {
     const { item } = route.params;
-    console.log("Draft Screen itemData: ", item);
+
+    useEffect(() => {
+        console.log("Draft Screen itemData: ", item);
+    }, [item]);
+
+    useEffect(() => {
+        console.log("Draft Screen itemData: ", item);
+    }, []);
+
 
     const richText = React.useRef<RichEditor>(null);
     const [title, setTitle] = useState(item.headline);
@@ -88,7 +98,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
         "Noto Sans"
     ]);
     const [assignmentList, setAssignmentList] = useState<Assignment[]>([]);
-    const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(item.title);
+    const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
     const [showAssignmentDropdown, setShowAssignmentDropdown] = useState(false);
     const [mediaList, setMediaList] = useState<MediaModal[]>(
         normalizeMedia(item?.media)
@@ -103,6 +113,112 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
     const [currentMode, setCurrentMode] = useState<'text' | 'background'>('text');
     const [textColor, setTextColor] = useState('#000000');
     const [bgColor, setBgColor] = useState('#ffffff');
+
+    const [pendingUploads, setPendingUploads] = useState<any[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
+
+    const pendingUploadsRef = useRef<any[]>([]);
+    const isUploadingRef = useRef(false);
+
+    const AUTO_SAVE_INTERVAL = 15000;
+
+    const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const lastSavedRef = useRef<string>('');
+    const isSavingDraftRef = useRef(false);
+    const isSubmittingRef = useRef(false);
+    const [lastSavedAt, setLastSavedAt] = useState<string>('');
+
+
+    const getDraftSnapshot = () => {
+        return JSON.stringify({
+            title: title?.trim(),
+            description: htmlContent?.trim(),
+            media: mediaList,
+            attachment: attachmentList,
+            assignmentId: selectedAssignment?.id ?? null,
+        });
+    };
+
+    const autoSaveDraft = async () => {
+        if (isSavingDraftRef.current) return;
+        if (isSubmittingRef.current) return;
+
+        const snapshot = getDraftSnapshot();
+
+        if (snapshot === lastSavedRef.current) return;
+        if (!title.trim() && !htmlContent.trim()) return;
+
+        try {
+            isSavingDraftRef.current = true;
+
+            const payload: PostStoryModal = {
+                headLine: title.trim(),
+                description: htmlContent.trim(),
+                media: mediaList,
+                attachment: attachmentList,
+            };
+
+            await postDraft(payload, {
+                storyId: item.id,
+                assignmentId: selectedAssignment?.id ?? undefined,
+            });
+
+            lastSavedRef.current = snapshot;
+            console.log('💾 Auto-saved');
+            setLastSavedAt(new Date().toLocaleTimeString());
+        } catch (e) {
+            console.log('⚠️ Auto-save failed', e);
+        } finally {
+            isSavingDraftRef.current = false;
+        }
+    };
+
+    useEffect(() => {
+        lastSavedRef.current = getDraftSnapshot();
+
+        autoSaveTimerRef.current = setInterval(() => {
+            autoSaveDraft();
+        }, AUTO_SAVE_INTERVAL);
+
+        return () => {
+            if (autoSaveTimerRef.current) {
+                clearInterval(autoSaveTimerRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        pendingUploadsRef.current = pendingUploads;
+    }, [pendingUploads]);
+
+    useEffect(() => {
+        isUploadingRef.current = isUploading;
+    }, [isUploading]);
+
+    useEffect(() => {
+        const cleanup = initUploadAppState(() => {
+            if (
+                pendingUploadsRef.current.length > 0 &&
+                !isUploadingRef.current
+            ) {
+                ToastUtils.info('Resuming uploads...');
+                setTimeout(() => {
+                    retryPendingUploads();
+                }, 300);
+            }
+        });
+
+        return cleanup;
+    }, []);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            autoSaveDraft();
+        }, 2000);
+
+        return () => clearTimeout(timeout);
+    }, [title, htmlContent]);
+
 
     const fetchAssignments = async () => {
         try {
@@ -121,69 +237,157 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
     }, [])
 
     const handleAttachments = async () => {
+        if (isUploading) {
+            console.log('⚠️ Upload already in progress');
+            return;
+        }
+
+        let filesToQueue: any[] = [];
+
         try {
-            showLoader()
+            console.log('📂 Opening file picker');
+
             const results = await pick({
                 type: [types.allFiles],
+                allowMultiSelection: true,
             });
 
-            const uploadedItems: AttachmentModal[] = [];
+            if (!results?.length) return;
+
+            console.log(`📎 Selected ${results.length} files`);
+
+            setIsUploading(true);
+            showLoader();
 
             for (const file of results) {
-                console.log('Picked file:', file.uri, file.name, file.type, file.size);
-
-                const fileExt = file.name?.substring(file.name.lastIndexOf('.')).toLowerCase();
-                if (BLOCKED_EXTENSIONS.includes(fileExt)) {
-                    Alert.alert("Unsupported File", `Files of type ${fileExt} are not allowed.`);
-                    continue;
-                }
+                console.log('➡️ Processing file:', {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    uri: file.uri,
+                });
 
                 if (file.size && file.size > MAX_FILE_SIZE) {
                     Alert.alert(
-                        "File Too Large",
-                        `The file "${file.name}" exceeds ${MAX_FILE_SIZE_MB} MB limit.`
+                        'File Too Large',
+                        `The file "${file.name}" exceeds ${MAX_FILE_SIZE_MB}MB and will be skipped.`,
                     );
                     continue;
                 }
 
-                const formData = new FormData();
-                formData.append('file', {
-                    uri: file.uri,
-                    name: file.name,
-                    type: file.type,
-                } as any);
+                if (isBackground()) {
+                    console.log('⏸ App background → queue remaining files');
+                    filesToQueue.push(file);
+                    continue;
+                }
 
-                const uploadResponse = await fileUpload(formData);
+                try {
+                    console.log('⬆️ Upload started:', file.name);
+
+                    const uploadResponse = await uploadWithBlobUtil(file);
+                    const uploadedUrl = uploadResponse?.files?.[0]?.url;
+
+                    if (!uploadedUrl) throw new Error('No URL returned');
+
+                    let mediaType: 'Image' | 'Video' | 'Document' = 'Document';
+                    if (file.type?.startsWith('image')) mediaType = 'Image';
+                    if (file.type?.startsWith('video')) mediaType = 'Video';
+
+                    setAttachmentList(prev => [
+                        ...prev,
+                        {
+                            mediaType,
+                            caption: '',
+                            shotTime: '',
+                            filePath: uploadedUrl,
+                        },
+                    ]);
+
+                    console.log('✅ Upload success:', file.name);
+                    setTimeout(() => {
+                        autoSaveDraft();
+                    }, 300);
+
+                } catch (err) {
+                    console.error('❌ Upload failed:', file.name, err);
+                    filesToQueue.push(file);
+                }
+            }
+
+            if (filesToQueue.length > 0) {
+                setPendingUploads(prev => [...prev, ...filesToQueue]);
+                console.log(`📥 Queued ${filesToQueue.length} files`);
+            }
+        } catch (err) {
+            console.error('🚨 Attachment Upload Error:', err);
+            Alert.alert('Error', 'Failed to upload attachments.');
+        } finally {
+            setIsUploading(false);
+            hideLoader();
+            console.log('🛑 Upload flow finished');
+        }
+    };
+
+    const retryPendingUploads = async () => {
+        if (
+            isBackground() ||
+            pendingUploadsRef.current.length === 0 ||
+            isUploadingRef.current
+        ) return;
+
+
+
+        setIsUploading(true);
+        showLoader();
+
+        const retryQueue = [...pendingUploadsRef.current];
+        setPendingUploads([]);
+        pendingUploadsRef.current = [];
+
+        console.log('🔁 Retrying pending uploads:', retryQueue.length);
+
+        try {
+            for (const file of retryQueue) {
+                console.log('⬆️ Retrying:', file.name);
+
+                const uploadResponse = await uploadWithBlobUtil(file);
                 const uploadedUrl = uploadResponse?.files?.[0]?.url;
-                if (!uploadedUrl) continue;
 
-                let mediaType = 'Document';
+                if (!uploadedUrl) throw new Error('Upload failed');
+
+                let mediaType: 'Image' | 'Video' | 'Document' = 'Document';
                 if (file.type?.startsWith('image')) mediaType = 'Image';
                 if (file.type?.startsWith('video')) mediaType = 'Video';
 
-                uploadedItems.push({
-                    mediaType,
-                    caption: '',
-                    shotTime: '',
-                    filePath: uploadedUrl,
-                });
-            }
+                setAttachmentList(prev => [
+                    ...prev,
+                    {
+                        mediaType,
+                        caption: '',
+                        shotTime: '',
+                        filePath: uploadedUrl,
+                    },
+                ]);
 
-            setAttachmentList(prev => [...prev, ...uploadedItems]);
-        } catch (err: any) {
-            // new package throws a cancel error similar to old API
-            if (err?.code === 'CANCELLED' || err?.message?.includes('canceled')) {
-                // user cancelled — ignore
-            } else {
-                console.error('Attachment Upload Error:', err);
-                Alert.alert('Error', 'Failed to upload attachments.');
+                setTimeout(() => {
+                    autoSaveDraft();
+                }, 500);
+
             }
+        } catch (err) {
+            console.error('❌ Retry failed:', err);
         } finally {
-            hideLoader()
+            setIsUploading(false);
+            hideLoader();
         }
     };
 
     const handleSubmit = async () => {
+
+        if (autoSaveTimerRef.current) {
+            clearInterval(autoSaveTimerRef.current);
+        }
+
         if (!title.trim() || !htmlContent.trim()) {
             Alert.alert("Missing Data", "Please add both Title and Description!");
             return;
@@ -198,6 +402,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
         console.log("MediaList: ", mediaList);
 
         try {
+            isSubmittingRef.current = true;
             console.log("📤 Payload to send:", finalPayload);
             const response = await postStory(finalPayload, { storyId: item.id, assignmentId: selectedAssignment?.id ?? undefined });
             console.log("response poststory: ", response);
@@ -228,6 +433,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
             const response = await postDraft(finalPayload, { storyId: item.id, assignmentId: selectedAssignment?.id ?? undefined });
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
+            lastSavedRef.current = getDraftSnapshot();
             navigation.goBack()
         } catch (error) {
             console.error("API Error:", error);
@@ -274,6 +480,9 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                 return;
             } else {
                 richText.current?.insertImage(uploadedUrl);
+                setTimeout(() => {
+                    autoSaveDraft();
+                }, 500);
             }
 
         } catch (error) {
@@ -322,6 +531,9 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                     return;
                 } else {
                     richText.current?.insertVideo(uploadedUrl);
+                    setTimeout(() => {
+                        autoSaveDraft();
+                    }, 500);
                 }
 
             }
@@ -462,11 +674,18 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                         setTitle("");
                         setHtmlContent("");
                         richText.current?.setContentHTML("");
+                        setTimeout(() => {
+                            autoSaveDraft();
+                        }, 300);
                     }}>
                         <Text style={styles.clearText}>{AppString.common.clear}</Text>
                     </TouchableOpacity>
 
                     <View style={{ flexDirection: 'row' }} >
+                        <GlobalText style={styles.lastSavedText}>
+                            {lastSavedAt ? `Saved at ${lastSavedAt}` : 'Auto Draft Not saved yet'}
+                        </GlobalText>
+
                         <TouchableOpacity onPress={handleDraft}>
                             <Text style={styles.draftText}>{AppString.common.draft}</Text>
                         </TouchableOpacity>

@@ -12,6 +12,10 @@ export const styles = StyleSheet.create({
         // paddingTop: 20,
         // paddingBottom: 40,
     },
+    lastSavedText: {
+        marginHorizontal: 24,
+        color: AppColor.color_9A9A9A
+    },
     title: {
         fontSize: 16,
         fontWeight: 400,
