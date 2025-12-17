@@ -52,17 +52,18 @@ export interface EditorOutput {
 }
 
 export interface EditorProps {
-    initialTitle?: string;
     initialHtml?: string;
-    assignments?: Assignment[];
-    initialAssignmentId?: string | number | null;
 
-    onChange?: (data: EditorOutput) => void;
+    storyId?: number;
+    storyDescId?: number | null;
+
+    onDraft?: (html: string) => void;
+    onSubmit?: (html: string) => void;
+
+    onChangeHtml?: (html: string) => void;
 
     showLoader?: () => void;
     hideLoader?: () => void;
-
-    showSubmitBar?: boolean;
 }
 
 const BLOCKED_EXTENSIONS = [
@@ -87,6 +88,9 @@ const Editor: React.FC<EditorProps> = ({
     initialHtml = "",
     showLoader,
     hideLoader,
+    onDraft,
+    onSubmit,
+    onChangeHtml
 }) => {
     const richText = useRef<RichEditor | null>(null);
 
@@ -444,9 +448,27 @@ const Editor: React.FC<EditorProps> = ({
                 </ScrollView>
             </View>
 
+            <View style={styles.actionBar}>
+                <TouchableOpacity onPress={() => onDraft?.(htmlContent)}>
+                    <Text style={styles.draftText}>{AppString.common.draft}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.submitBtn}
+                    onPress={() => onSubmit?.(htmlContent)}
+                >
+                    <Image source={AppImage.submit_ic} style={styles.submitIcon} />
+                    <Text style={styles.submitTextTopBar}>{AppString.common.submit}</Text>
+                </TouchableOpacity>
+            </View>
+
+
             <View style={styles.editorWrapper}>
                 <RichEditor
                     ref={richText}
+                    useContainer
+                    scrollEnabled
+                    automaticallyAdjustContentInsets={false}
                     placeholder="Start writing something awesome..."
                     initialContentHTML={initialHtml}
                     editorStyle={{
@@ -459,11 +481,15 @@ const Editor: React.FC<EditorProps> = ({
             `,
                     }}
                     style={styles.richEditor}
-                    onChange={(text) => setHtmlContent(text)}
+                    onChange={(text) => {
+                        setHtmlContent(text);
+                        onChangeHtml?.(text);
+                    }}
+
                 />
             </View>
 
-            <View style={styles.mediaContainer}>
+            {/* <View style={styles.mediaContainer}>
                 <Text style={styles.mediaHeader}>Media Attachments</Text>
 
                 <TouchableOpacity style={styles.uploadBox} onPress={handleAttachments}>
@@ -503,7 +529,7 @@ const Editor: React.FC<EditorProps> = ({
                         })}
                     </View>
                 )}
-            </View>
+            </View> */}
 
             <Modal visible={showLinkModal} transparent animationType="fade" onRequestClose={() => setShowLinkModal(false)}>
                 <View style={styles.modalOverlayCenter}>
@@ -602,6 +628,31 @@ const styles = StyleSheet.create({
     clearText: { color: "#666" },
     draftText: { color: "#999", marginRight: 8 },
     submitText: { color: "#2f9d27" },
+    actionBar: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        marginTop: 8,
+        gap: 16,
+    },
+
+    submitBtn: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+
+    submitIcon: {
+        width: 16,
+        height: 16,
+        tintColor: AppColor.color_27AE60,
+    },
+    submitTextTopBar: {
+        fontSize: 16,
+        color: AppColor.color_27AE60,
+        marginRight: 20,
+        fontWeight: "500",
+    },
     titleInput: {
         backgroundColor: "#fff",
         borderRadius: 8,
@@ -626,7 +677,15 @@ const styles = StyleSheet.create({
     customToolText: { fontWeight: "600" },
     colorBlock: { width: 18, height: 12, marginLeft: 6, borderRadius: 2, borderWidth: 1, borderColor: "#ddd" },
     richToolbar: { backgroundColor: "transparent", paddingVertical: 6 },
-    editorWrapper: { height: 360, backgroundColor: "#fff", borderRadius: 12, overflow: "hidden", borderWidth: 1, borderColor: "#eee" },
+    // editorWrapper: { height: 360, backgroundColor: "#fff", borderRadius: 12, overflow: "hidden", borderWidth: 1, borderColor: "#eee" },
+    editorWrapper: {
+        flex: 1,
+        minHeight: 360,
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "#eee",
+    },
     richEditor: { flex: 1, padding: 8 },
     assignmentContainer: { marginTop: 12 },
     assignmentRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },

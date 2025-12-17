@@ -8,6 +8,7 @@ export interface PostStoryModal {
   attachment?: AttachmentModal[];
 }
 
+
 export interface AttachmentModal {
   mediaType: string;
   caption: string;
@@ -28,32 +29,55 @@ export interface Story {
   reporterId: number;
   headline: string;
   description: string;
+  assignmentId?: number | null;
   categoryId: number;
   divisionId: number;
+  beatId?: number | null;
   districtId: number;
   statusId: number;
   version: string;
-
+  
   amendmentReason?: string | null;
   verificationLevel?: number | null;
   verificationNote?: string | null;
-
+  
   legalSensitivity?: boolean;
   legalMandatory?: boolean;
   legalMaskIdentity?: boolean;
   legalDecision?: string | null;
-
+  
   duplicateFlag?: boolean;
   claimedBy?: number | null;
-
+  
   releasedAt?: string | null;
   usedAt?: string | null;
   archivalLock?: boolean;
-  createdAt?: string
-  updatedAt?: string
-  status?: string
-  attachment?: Attachment[]
-  media?: Media[]
+  createdAt?: string;
+  updatedAt?: string;
+  status?: string;
+  reporterName?: string;
+  storyDescription?: StoryDescription[];
+  media?: Media[];
+  attachment?: Attachment[];
+  category?: any;
+  beats?: any;
+}
+
+export interface DescNewUpdateModal {
+  StoryDescription: StoryDescriptionDTO[];
+}
+
+export interface StoryDescriptionDTO {
+  id?: number;
+  Desc: string;
+  StatusId: number;
+}
+
+export interface StoryDescription {
+  id: number;
+  desc: string;
+  statusId: number;
+  createdAt?: string;
 }
 
 export interface Media {
@@ -82,17 +106,6 @@ export interface Attachment {
   provenanceCredential?: boolean;
 }
 
-//  "id": 23,
-//       "mediaType": "Photo",
-//       "caption": null,
-//       "rights": null,
-//       "storyId": 62,
-//       "shotLocation": null,
-//       "shotTime": null,
-//       "filePath": "35.jpg",
-//       "isAttachment": true,
-//       "provenanceCredential": false
-
 export interface PaginatedStories {
   data: Story[];
   page: number;
@@ -105,6 +118,10 @@ export interface PaginatedStories {
 type StoiesParams = {
   storyId?: number;
   assignmentId?: number;
+}
+
+type DescNewUpdateParams = {
+  storyId?: number;
 }
 
 export const postStory = async (payload: PostStoryModal, params?: StoiesParams) => {
@@ -134,6 +151,28 @@ export const postDraft = async (payload: PostStoryModal, params?: StoiesParams) 
     return response.data;
   } catch (error: any) {
     console.log("postDraft error:", error?.response?.data || error);
+    throw error;
+  }
+};
+
+export const descNewUpdate = async (payload: DescNewUpdateModal, params?: DescNewUpdateParams) => {
+  try {
+
+    const response = await axiosInstance.put(`${Endpoints.Stories.descNewupdate}/${params?.storyId}`, payload);
+    return response.data;
+  } catch (error: any) {
+    console.log("descNewUpdate error:", error?.response?.data || error);
+    throw error;
+  }
+};
+
+export const getStoryByID = async (params?: DescNewUpdateParams) => {
+  try {
+
+    const response = await axiosInstance.get(`${Endpoints.Stories.descNewupdate}/${params?.storyId}`);
+    return response.data;
+  } catch (error: any) {
+    console.log("getStoryByID error:", error?.response?.data || error);
     throw error;
   }
 };
