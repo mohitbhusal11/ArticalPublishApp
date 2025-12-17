@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { View, ScrollView, Image } from "react-native";
+import { View, ScrollView, Image, Alert } from "react-native";
 import GlobalText from "../../component/GlobalText";
-import { AttachmentModal } from "../../services/calls/stories";
+import { AttachmentModal, descNewUpdate, getStoryByID } from "../../services/calls/stories";
 import { AppImage } from "../../config/AppImage";
 import { AppColor } from "../../config/AppColor";
 import { AppString } from "../../strings";
 import { RichEditor } from "react-native-pell-rich-editor";
-import GlobalButton from "../../component/GlobalButton";
 import { styles } from "./style";
 import Editor from "../../component/EditorComponent/Editor";
+import GlobalButton from "../../component/GlobalButton";
+import { hideLoader, showLoader } from "../../../App";
+import ToastUtils from "../../utils/toast";
 
 type Status = 'draft' | 'submit' | 'publish' | 'review';
 
@@ -29,141 +31,175 @@ function getStatusColorAdvanced(status: Status): string {
 
 const StoryDetailScreen = ({ route }: any) => {
   const { item } = route.params;
-  console.log("Story description:", item.description);
-
+  const storyId = item.id;
+  const [storyData, setStoryData] = useState(item);
+  const [newUpdateHtml, setNewUpdateHtml] = useState("");
   console.log(item);
   const [attachmentList] = useState<AttachmentModal[]>(item.attachment)
-  const richText = React.useRef<RichEditor>(null);
   const [showNewUpdate, setShowNewUpdate] = useState(false)
 
-  const [editorState, setEditorState] = useState(null);
+  const renderStoryUpdates = () => {
+    const updates = storyData.storyDescription ?? [];
 
-  const renderNewUpdate = () => {
-    return (
+    return updates.map((update: any, index: number) => {
+      const isEditable = update.statusId === 1;
 
-      <View style={[styles.htmlContainer, { marginVertical: 24 }]}>
-        <GlobalText style={{ fontSize: 16, fontWeight: 600, color: AppColor.mainColor }} >last update date: {new Date().toDateString()} </GlobalText>
-        <RichEditor
-          ref={richText}
-          placeholder="Start writing something awesome..."
-          initialContentHTML={item.description}
-          androidLayerType={"hardware"}
-          useContainer={false}
-          disabled={true}
-          style={{
-            flex: 1,
-            height: 500,
-            backgroundColor: "#fff",
-            borderWidth: 2,
-            margin: 5,
-            elevation: 2,
-            borderRadius: 12,
-          }}
-          editorStyle={{
-            backgroundColor: AppColor.ffffff,
-            color: AppColor.color_222,
-            placeholderColor: AppColor.color_aaa,
-            contentCSSText: `
-                  body {
-                      font-size: 16px;
-                      height: 100%;
-                      max-height: 500px;
-                      overflow-y: auto;   
-                      padding: 10px;
-                      font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
-                  }
-                  img, video {
-                      max-width: 100% !important;
-                      height: auto !important;
-                      border-radius: 8px;
-                      margin: 8px 0;
-                      display: block;
-                      object-fit: contain !important;
-                      max-height: 250px !important;
-                  }
-              `,
-          }}
-        />
-      </View>
-    )
-  }
+      return (
+        <View
+          key={update.id}
+          style={[styles.htmlContainer, { marginVertical: 16 }]}
+        >
+          <GlobalText
+            style={{
+              fontSize: 16,
+              fontWeight: "600",
+              color: AppColor.mainColor,
+              marginBottom: 8,
+            }}
+          >
+            Update {index + 1}
+            {update.createdAt && ` • ${new Date(update.createdAt).toDateString()}`}
+          </GlobalText>
+
+          {isEditable ? (
+            <Editor
+              initialHtml={update.desc}
+              storyId={storyId}
+              storyDescId={update.id}
+              onDraft={(html) => handleSave(html, 1, update.id)}
+              onSubmit={(html) => handleSave(html, 2, update.id)}
+            />
+          ) : (
+            <RichEditor
+              disabled
+              useContainer
+              initialContentHTML={update.desc}
+              androidLayerType="hardware"
+              style={{
+                height: 500,
+                backgroundColor: "#fff",
+                borderWidth: 2,
+              }}
+            />
+          )}
+        </View>
+      );
+    });
+  };
+
+  const refetchStory = async () => {
+    try {
+      const data = await getStoryByID({ storyId: storyId });
+      setStoryData(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+  const renderMainStory = () => (
+    <View style={[styles.htmlContainer, { marginVertical: 16 }]}>
+      <GlobalText
+        style={{ fontSize: 16, fontWeight: "600", color: AppColor.mainColor }}
+      >
+        Original Story
+      </GlobalText>
+
+      <RichEditor
+        disabled
+        useContainer
+        initialContentHTML={storyData.description}
+        androidLayerType="hardware"
+        style={{
+          height: 500,
+          backgroundColor: "#fff",
+          borderWidth: 2,
+          // borderRadius: 12,
+        }}
+      />
+    </View>
+  );
+
+  const handleSave = async (
+    html: string,
+    statusId: 1 | 2,
+    storyDescId?: number
+  ) => {
+    try {
+      showLoader?.();
+
+      const payload = {
+        StoryDescription: [
+          {
+            ...(storyDescId ? { id: storyDescId } : {}),
+            Desc: html,
+            StatusId: statusId,
+          },
+        ],
+      };
+
+      console.log("payload: ", payload);
+      console.log("storyData.id: ", storyData.id);
+
+
+      await descNewUpdate(payload, {
+        storyId: storyData.id,
+      });
+
+      ToastUtils.success(statusId === 1
+          ? "Draft saved successfully"
+          : "Story submitted successfully")
+
+      // 🔄 REFRESH SCREEN DATA AFTER SAVE
+      await refetchStory(); // your API call
+      if (!storyDescId) {
+        setNewUpdateHtml("");       // clear editor content
+        setShowNewUpdate(false);    // hide editor
+      }
+    } catch (err) {
+      // Alert.alert("Error Something went wrong");
+      ToastUtils.error("Error Something went wrong")
+    } finally {
+      hideLoader?.();
+    }
+  };
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-      <GlobalText style={styles.headline}>{item.headline}</GlobalText>
+      <GlobalText style={styles.headline}>{storyData.headline}</GlobalText>
 
       <View style={styles.metaContainer}>
         <GlobalText style={styles.metaText}>
-          {AppString.common.status}: <GlobalText style={[styles.metaValue, { color: getStatusColorAdvanced(item.status) }]}>{item.status || "Unknown"}</GlobalText>
+          {AppString.common.status}: <GlobalText style={[styles.metaValue, { color: getStatusColorAdvanced(storyData.status) }]}>{item.status || "Unknown"}</GlobalText>
         </GlobalText>
         <GlobalText style={styles.metaText}>
           {AppString.common.created}:{" "}
-          <GlobalText style={styles.metaValue}>{item.createdAt}</GlobalText>
+          <GlobalText style={styles.metaValue}>{storyData.createdAt}</GlobalText>
         </GlobalText>
         <GlobalText style={styles.metaText}>
           {AppString.common.updated}:{" "}
-          <GlobalText style={styles.metaValue}>{item.updatedAt}</GlobalText>
+          <GlobalText style={styles.metaValue}>{storyData.updatedAt}</GlobalText>
         </GlobalText>
       </View>
 
-      {/* <GlobalButton style={{ marginBottom: 10, padding: 12 }} onPress={() => setShowNewUpdate(!showNewUpdate)}><GlobalText style={{ color: AppColor.ffffff }} >{showNewUpdate ? AppString.common.cancelNewUpdate : AppString.common.newUpdate}</GlobalText></GlobalButton> */}
+      <GlobalButton style={{ marginBottom: 10, padding: 12 }} onPress={() => setShowNewUpdate(!showNewUpdate)}><GlobalText style={{ color: AppColor.ffffff }} >{showNewUpdate ? AppString.common.cancelNewUpdate : AppString.common.newUpdate}</GlobalText></GlobalButton>
 
-      {
-        showNewUpdate &&
-        <View style={{ marginVertical: 24, backgroundColor: AppColor.color_9A9A9A }} >
+      {showNewUpdate && (
+        <View style={{ marginVertical: 24 }}>
           <Editor
-            initialTitle=""
-            initialHtml=""
+            initialHtml={newUpdateHtml}
+            storyId={storyId}
+            storyDescId={null}
+            onChangeHtml={setNewUpdateHtml}
+            onDraft={(html) => handleSave(html, 1)}
+            onSubmit={(html) => handleSave(html, 2)}
           />
         </View>
-      }
+      )}
 
-      <View style={styles.htmlContainer}>
-        <RichEditor
-          ref={richText}
-          placeholder="Start writing something awesome..."
-          initialContentHTML={item.description}
-          androidLayerType={"hardware"}
-          useContainer={false}
-          disabled={true}
-          scrollEnabled={false}
-          style={{
-            flex: 1,
-            height: 500,
-            backgroundColor: "#fff",
-            borderWidth: 2,
-            margin: 5,
-            elevation: 2,
-            borderRadius: 12,
-          }}
-          editorStyle={{
-            backgroundColor: AppColor.ffffff,
-            color: AppColor.color_222,
-            placeholderColor: AppColor.color_aaa,
-            contentCSSText: `
-                  body {
-                      font-size: 16px;
-                      height: 100%;
-                      max-height: 500px;
-                      overflow-y: auto;   
-                      padding: 10px;
-                      font-family: 'NotoSans-Regular', 'Arial', 'Mangal', 'NotoSansDevanagari-Regular', sans-serif;
-                  }
-                  img, video {
-                      max-width: 100% !important;
-                      height: auto !important;
-                      border-radius: 8px;
-                      margin: 8px 0;
-                      display: block;
-                      object-fit: contain !important;
-                      max-height: 250px !important;
-                  }
-              `,
-          }}
-        />
-      </View>
+      {renderMainStory()}
 
-      {/* {renderNewUpdate()} */}
+      {renderStoryUpdates()}
 
       {attachmentList.length > 0 && (
         <View style={styles.mediaContainer}>
