@@ -5,21 +5,20 @@ import { clearUserDetails } from "../../redux/slices/userSlice";
 import ToastUtils from "../../utils/toast";
 import RNBlobUtil from 'react-native-blob-util';
 import { Endpoints } from "../endpoints/endpoints";
+import { API_BASE_URL, API_KEY } from "../../env";
 
-const baseURL = __DEV__
-  ? "https://rensapi.rajexpress.com/api/v1.0/"
-  : "https://rensapi.rajexpress.com/api/v1.0/";
+if (!API_BASE_URL) {
+  console.warn("⚠️ API_BASE_URL is empty. Network layer is disabled.");
+}
 
-  // ? "http://172.168.0.14:7200/api/v1.0/"
-  // : "http://172.168.0.14:7200/api/v1.0/";
+console.log("Using API base URL:", API_BASE_URL); //  
 
 const axiosInstance = axios.create({
-  baseURL,
-  // timeout: 15000,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
     "X-Client-Type": "mobile",
-    "x-api-key": "cyezieny2h"
+    ...(API_KEY ? { "X-API-KEY": API_KEY } : {}),
   },
 });
 
@@ -99,7 +98,7 @@ export const uploadWithBlobUtil = async (file: any) => {
       })
       .fetch(
         'POST',
-        baseURL + Endpoints.IMAGE.fileUpload,
+        API_BASE_URL + Endpoints.IMAGE.fileUpload,
         {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${store.getState().auth.token}`,
