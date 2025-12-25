@@ -34,7 +34,7 @@ const StoryDetailScreen = ({ route }: any) => {
   const storyId = item.id;
   const [storyData, setStoryData] = useState(item);
   const [newUpdateHtml, setNewUpdateHtml] = useState("");
-  console.log(item);
+  // console.log(item);
   const [attachmentList] = useState<AttachmentModal[]>(item.attachment)
   const [showNewUpdate, setShowNewUpdate] = useState(false)
 
@@ -90,6 +90,8 @@ const StoryDetailScreen = ({ route }: any) => {
   const refetchStory = async () => {
     try {
       const data = await getStoryByID({ storyId: storyId });
+      console.log("Data story details: ",data);
+      
       setStoryData(data);
     } catch (error) {
       console.log(error);

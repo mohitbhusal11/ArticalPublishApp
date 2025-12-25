@@ -79,6 +79,7 @@ const EditorScreen = ({ navigation }: any) => {
     const [cols, setCols] = useState("");
     const [mediaList, setMediaList] = useState<MediaModal[]>([])
     const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>([])
+    const [storyId, setStoryId] = useState<number | null>(null)
 
     const [showFontModal, setShowFontModal] = useState(false);
     const [fonts] = useState([
@@ -125,14 +126,12 @@ const EditorScreen = ({ navigation }: any) => {
         });
     };
 
-
     const autoSaveDraft = async () => {
         if (isSavingDraftRef.current) return;
 
         const trimmedTitle = title.trim();
         const trimmedBody = htmlContent.trim();
 
-        // ❌ Do not save if both empty
         if (!trimmedTitle && !trimmedBody) return;
 
         const snapshot = getDraftSnapshot();
@@ -148,12 +147,14 @@ const EditorScreen = ({ navigation }: any) => {
                 attachment: attachmentList,
             };
 
-            await postDraft(payload, {
+            const response = await postDraft(payload, {
+                storyId: storyId ?? undefined,
                 assignmentId: selectedAssignment?.id ?? undefined,
             });
 
             lastSavedRef.current = snapshot;
-            console.log('💾 Auto draft saved');
+            console.log('💾 Auto draft saved: ', response);
+            setStoryId(response.id);
             setLastSavedAt(new Date().toLocaleTimeString());
         } catch (err) {
             console.log('⚠️ Auto draft failed', err);
@@ -184,8 +185,6 @@ const EditorScreen = ({ navigation }: any) => {
         return () => clearTimeout(timeout);
     }, [title, htmlContent, mediaList, attachmentList, selectedAssignment]);
 
-
-
     useEffect(() => {
         pendingUploadsRef.current = pendingUploads;
     }, [pendingUploads]);
@@ -209,7 +208,6 @@ const EditorScreen = ({ navigation }: any) => {
 
         return cleanup;
     }, []);
-
 
     const fetchAssignments = async () => {
         try {
@@ -380,7 +378,7 @@ const EditorScreen = ({ navigation }: any) => {
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postStory(finalPayload, { assignmentId: selectedAssignment?.id ?? undefined });
+            const response = await postStory(finalPayload, {storyId: storyId ?? undefined, assignmentId: selectedAssignment?.id ?? undefined });
             console.log("response poststory: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
@@ -406,8 +404,8 @@ const EditorScreen = ({ navigation }: any) => {
 
         try {
             console.log("📤 Payload to send:", finalPayload);
-            const response = await postDraft(finalPayload, { assignmentId: selectedAssignment?.id ?? undefined });
-            console.log("response poststory: ", response);
+            const response = await postDraft(finalPayload, {storyId: storyId ?? undefined, assignmentId: selectedAssignment?.id ?? undefined });
+            console.log("response postDraft: ", response);
             ToastUtils.success("Story created successfully");
             navigation.goBack()
         } catch (error) {

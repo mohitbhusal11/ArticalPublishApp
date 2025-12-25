@@ -7,8 +7,8 @@ import RNBlobUtil from 'react-native-blob-util';
 import { Endpoints } from "../endpoints/endpoints";
 
 const baseURL = __DEV__
-  ? "http://103.85.92.212:7200/api/v1.0/"
-  : "http://103.85.92.212:7200/api/v1.0/";
+  ? "https://rensapi.rajexpress.com/api/v1.0/"
+  : "https://rensapi.rajexpress.com/api/v1.0/";
 
   // ? "http://172.168.0.14:7200/api/v1.0/"
   // : "http://172.168.0.14:7200/api/v1.0/";
