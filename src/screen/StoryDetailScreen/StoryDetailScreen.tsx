@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, Image, Alert } from "react-native";
+import { View, ScrollView, Image } from "react-native";
 import GlobalText from "../../component/GlobalText";
 import { AttachmentModal, descNewUpdate, getStoryByID } from "../../services/calls/stories";
 import { AppImage } from "../../config/AppImage";
@@ -161,6 +161,7 @@ const StoryDetailScreen = ({ route }: any) => {
     } catch (err) {
       // Alert.alert("Error Something went wrong");
       ToastUtils.error("Error Something went wrong")
+      console.log(err);
     } finally {
       hideLoader?.();
     }
