@@ -32,5 +32,9 @@ export const Endpoints = {
   Assignment: {
     assignment: "assignments/myassignment",
     statusUpdate: "assignments/updated-acceptance"
+  },
+  Notification: {
+    getNotifications: "notifications/me",
+    markAsRead: "notifications/mark-as-read"
   }
 };
