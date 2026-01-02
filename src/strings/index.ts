@@ -6,6 +6,7 @@ export const AppString = {
     enterYourCredentials: "Enter Your  Credentials",
     forgotPasswordTitle: "Forgot Password",
     userID: "User Id",
+    email: "E-mail",
     userName: "User Name",
     enterNumber: "Enter Register Mobile Number",
     password: "Password",

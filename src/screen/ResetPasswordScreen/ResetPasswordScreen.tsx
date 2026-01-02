@@ -10,7 +10,7 @@ import GlobalText from "../../component/GlobalText"
 import GlobalButton from "../../component/GlobalButton"
 
 const ResetPasswordScreen = ({ route, navigation }: any) => {
-  const { userId } = route.params;
+  const { resetToken } = route.params;
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
 
@@ -33,13 +33,11 @@ const ResetPasswordScreen = ({ route, navigation }: any) => {
 
   const verifyOTP = async () => {
     try {
-      const res = await resetPassword(userId, newPassword);
+      const res = await resetPassword(resetToken, newPassword);
       console.log("reset Password success:", res);
-      if (res?.result) {
-        ToastUtils.success(res.messageUser)
+      ToastUtils.success(res.message)
+      if(res.statusCode === 200){
         navigation.goBack()
-      } else {
-        ToastUtils.warn(res.messageUser)
       }
     } catch (error: any) {
       console.log("reset Password error:", error);

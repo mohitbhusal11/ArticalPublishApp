@@ -3,9 +3,12 @@ export const Endpoints = {
     LOGIN: "auth/login",
     LOGOUT: "auth/logout",
     SENDOTP: "auth/send-otp",
-    reset: "auth/reset",
+    reset: "auth/reset-password/token",
     verifyOtp: "auth/verify-otp",
     changePassword: "auth/change-password",
+    emailOtp: "auth/forgot-password/email-otp",
+    verifyEmailOtp: "auth/reset-password/email-otp",
+    resetPasswordWithToken: "auth/reset-password/token",
   },
   USER: {
     PROFILE: "users/me",

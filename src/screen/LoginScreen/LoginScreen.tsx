@@ -24,8 +24,9 @@ import GlobalButton from '../../component/GlobalButton';
 import LottieView from 'lottie-react-native';
 import { AppLottie } from '../../config/AppLottie';
 import { hideLoader, showLoader } from '../../../App';
+import { getFCMToken } from '../../notifications/FCMTokenManager';
 
-const LoginScreen = () => {
+const LoginScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const [userId, setUserID] = useState('');
   const [password, setPassword] = useState('');
@@ -66,8 +67,11 @@ const LoginScreen = () => {
     if (!validateInputs()) return;
     try {
       showLoader()
-      const res = await dispatch<any>(login(userId, password, 'fcmToken', deviceId));
-      ToastUtils.success('Login successful! response: ', res);
+      const myFcmToken = await getFCMToken()
+      console.log("FCM token: ", myFcmToken);
+      const res = await dispatch<any>(login(userId, password, myFcmToken, deviceId));
+      console.log('Login response:', res);
+      ToastUtils.success('Login successful! response');
     } catch (error) {
       console.log('Login error:', error);
     } finally {
@@ -127,7 +131,7 @@ const LoginScreen = () => {
               </Pressable>
             </View>
 
-            {/* <View style={styles.otherOthers}>
+            <View style={styles.otherOthers}>
               <TouchableOpacity
                 onPress={() => navigation.navigate("ForgotPasswordScreen")}
                 style={styles.forgotPasswordContainer}
@@ -136,7 +140,7 @@ const LoginScreen = () => {
                   {AppString.common.forgotPassword}
                 </GlobalText>
               </TouchableOpacity>
-            </View> */}
+            </View>
           </View>
 
           <View style={styles.buttonWrapper}>

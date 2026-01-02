@@ -127,6 +127,8 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
     const isSavingDraftRef = useRef(false);
     const isSubmittingRef = useRef(false);
     const [lastSavedAt, setLastSavedAt] = useState<string>('');
+    const [embeddedLink, setEmbeddedLink] = useState('');
+    const [showEmbeddedModal, setShowEmbeddedModal] = useState(false);
 
 
     const getDraftSnapshot = () => {
@@ -380,6 +382,23 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
             setIsUploading(false);
             hideLoader();
         }
+    };
+
+    const handleEmbeddedLink = () => {
+        console.log("clicked embeddedLink function");
+        setShowEmbeddedModal(true)
+    }
+    const insertEmbeddedCode = () => {
+        if (embeddedLink.trim()) {
+            richText.current?.insertHTML(embeddedLink);
+            setEmbeddedLink("");
+            setShowEmbeddedModal(false);
+        }
+    };
+    const closeEmbeddedModal = () => {
+        setShowEmbeddedModal(false);
+        setLinkTitle('');
+        setLinkUrl('');
     };
 
     const handleSubmit = async () => {
@@ -741,6 +760,14 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                                 <Text style={styles.customToolText}>A+</Text>
                             </TouchableOpacity>
 
+                            <TouchableOpacity onPress={handleEmbeddedLink}
+                                style={styles.customToolButton}
+                            >
+                                <Text style={[styles.customToolText, { fontSize: 20 }]}>
+                                    {"<>"}
+                                </Text>
+                            </TouchableOpacity>
+
                             <RichToolbar
                                 editor={richText}
                                 selectedIconTint="#2563eb"
@@ -972,6 +999,38 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
                             <TouchableOpacity
                                 style={[styles.button, styles.insertButton]}
                                 onPress={insertLink}
+                            >
+                                <Text style={styles.insertText}>{AppString.common.insert}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal visible={showEmbeddedModal} transparent animationType="fade" onRequestClose={closeEmbeddedModal}>
+                <View style={styles.overlay}>
+                    <View style={styles.modalBox}>
+                        <GlobalText style={styles.linkTitle}>Insert Embedded Code</GlobalText>
+                        <TextInput
+                            placeholder="Embedded Code (HTML/iframe)"
+                            value={embeddedLink}
+                            onChangeText={setEmbeddedLink}
+                            style={[styles.textInput, { marginBottom: 20 }]}
+                            multiline
+                            numberOfLines={4}
+                        />
+
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.cancelButton]}
+                                onPress={closeEmbeddedModal}
+                            >
+                                <Text style={styles.cancelText}>{AppString.common.cancel}</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.button, styles.insertButton]}
+                                onPress={insertEmbeddedCode}
                             >
                                 <Text style={styles.insertText}>{AppString.common.insert}</Text>
                             </TouchableOpacity>

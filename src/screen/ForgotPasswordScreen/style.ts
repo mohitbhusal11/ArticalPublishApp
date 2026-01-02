@@ -67,6 +67,11 @@ export const styles = StyleSheet.create({
         marginTop: 24,
         resizeMode: 'contain'
     },
+    disabledInput: {
+        opacity: 0.7,
+        backgroundColor: '#f0f0f0',
+        color: '#666',
+    },
     titileWithLines: {
         flexDirection: 'row',
         justifyContent: 'space-evenly',

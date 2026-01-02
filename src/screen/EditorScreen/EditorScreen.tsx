@@ -74,7 +74,9 @@ const EditorScreen = ({ navigation }: any) => {
     const [showLinkModal, setShowLinkModal] = useState(false);
     const [linkTitle, setLinkTitle] = useState('');
     const [linkUrl, setLinkUrl] = useState('');
+    const [embeddedLink, setEmbeddedLink] = useState('');
     const [showTableModal, setShowTableModal] = useState(false);
+    const [showEmbeddedModal, setShowEmbeddedModal] = useState(false);
     const [rows, setRows] = useState("");
     const [cols, setCols] = useState("");
     const [mediaList, setMediaList] = useState<MediaModal[]>([])
@@ -525,6 +527,11 @@ const EditorScreen = ({ navigation }: any) => {
         setShowTableModal(true);
     };
 
+    const handleEmbeddedLink = () => {
+        console.log("clicked embeddedLink function");
+        setShowEmbeddedModal(true)
+    }
+
     const handleConfirmInsert = () => {
         const numRows = parseInt(rows, 10);
         const numCols = parseInt(cols, 10);
@@ -564,8 +571,22 @@ const EditorScreen = ({ navigation }: any) => {
         }
     };
 
+    const insertEmbeddedCode = () => {
+        if (embeddedLink.trim()) {
+            richText.current?.insertHTML(embeddedLink);
+            setEmbeddedLink("");
+            setShowEmbeddedModal(false);
+        }
+    };
+
     const closeModal = () => {
         setShowLinkModal(false);
+        setLinkTitle('');
+        setLinkUrl('');
+    };
+
+    const closeEmbeddedModal = () => {
+        setShowEmbeddedModal(false);
         setLinkTitle('');
         setLinkUrl('');
     };
@@ -713,6 +734,14 @@ const EditorScreen = ({ navigation }: any) => {
                                 style={styles.customToolButton}
                                 onPress={handleFontSize}>
                                 <Text style={styles.customToolText}>A+</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={handleEmbeddedLink}
+                                style={styles.customToolButton}
+                            >
+                                <Text style={[styles.customToolText, { fontSize: 20 }]}>
+                                    {"<>"}
+                                </Text>
                             </TouchableOpacity>
 
                             <RichToolbar
@@ -959,6 +988,38 @@ const EditorScreen = ({ navigation }: any) => {
                             <TouchableOpacity
                                 style={[styles.button, styles.insertButton]}
                                 onPress={insertLink}
+                            >
+                                <Text style={styles.insertText}>{AppString.common.insert}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal visible={showEmbeddedModal} transparent animationType="fade" onRequestClose={closeEmbeddedModal}>
+                <View style={styles.overlay}>
+                    <View style={styles.modalBox}>
+                        <GlobalText style={styles.linkTitle}>Insert Embedded Code</GlobalText>
+                        <TextInput
+                            placeholder="Embedded Code (HTML/iframe)"
+                            value={embeddedLink}
+                            onChangeText={setEmbeddedLink}
+                            style={[styles.textInput, { marginBottom: 20 }]}
+                            multiline
+                            numberOfLines={4}
+                        />
+
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.cancelButton]}
+                                onPress={closeEmbeddedModal}
+                            >
+                                <Text style={styles.cancelText}>{AppString.common.cancel}</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.button, styles.insertButton]}
+                                onPress={insertEmbeddedCode}
                             >
                                 <Text style={styles.insertText}>{AppString.common.insert}</Text>
                             </TouchableOpacity>

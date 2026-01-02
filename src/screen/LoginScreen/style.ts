@@ -142,7 +142,8 @@ export const styles = StyleSheet.create({
     },
     otherOthers: {
         flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        marginTop: 12
     },
     checkboxContainer: {
         flexDirection: 'row',
@@ -166,9 +167,9 @@ export const styles = StyleSheet.create({
         height: 50,
     },
     forgotPasswordText: {
-        fontSize: 12,
+        fontSize: 14,
         color: AppColor.mainColor,
-        fontWeight: 500
+        fontWeight: 600
     },
     loaderOverlay: {
         position: "absolute",

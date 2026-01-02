@@ -2,8 +2,15 @@ import { setToken } from "../../redux/slices/authSlice";
 import { AppDispatch } from "../../redux/store";
 import axiosInstance from "../api/axiosInstance";
 import { Endpoints } from "../endpoints/endpoints";
-import { ForgotOTPResponse, VerifyOTPResponse } from "../models/AuthModel";
+import { VerifyOTPResponse } from "../models/AuthModel";
 import { fetchUserDetails } from "./userService";
+
+
+interface VerifyEmailOtpModel {
+  statusCode: number;
+  message: string;
+  resetToken: string;
+}
 
 export const login =
   (userName: string, password: string, fcmToken: string | null, deviceId : string) =>
@@ -11,7 +18,7 @@ export const login =
       const response = await axiosInstance.post(Endpoints.AUTH.LOGIN, {
         UserName: userName,
         Password: password,
-        // clientType: "mobile",
+        // platform: "APP",
         // fcmToken: fcmToken,
         // deviceId: deviceId
       });
@@ -26,18 +33,53 @@ export const login =
       return response.data;
     };
 
-export const forgotPassword = async (userName: string) => {
-  const response = await axiosInstance.post<ForgotOTPResponse>(Endpoints.AUTH.SENDOTP, { userName: userName });
-  return response.data
+// Update your authService.ts with better error handling
+
+export const forgotPassword = async (email: string): Promise<any> => {
+  console.log("body email: ", email);
+  
+  try {
+    const response = await axiosInstance.post(
+      Endpoints.AUTH.emailOtp, 
+      { email: email }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error('Forgot password error:', error);
+    throw error;
+  }
 }
 
-export const verifyOtp = async (userName: string, otp: string) => {
-  const response = await axiosInstance.post<VerifyOTPResponse>(Endpoints.AUTH.verifyOtp, { userName: userName, otp: otp });
-  return response.data
+export const verifyEmailOtp = async (email: string, otp: string): Promise<any> => {
+  console.log('=== DEBUG VERIFY OTP ===');
+  console.log('Email:', email);
+  console.log('OTP:', otp);
+  console.log('Endpoint:', Endpoints.AUTH.verifyEmailOtp);
+  console.log('Full URL:', axiosInstance.defaults.baseURL + Endpoints.AUTH.verifyEmailOtp);
+  
+  try {
+    const response = await axiosInstance.post<VerifyEmailOtpModel>(
+      Endpoints.AUTH.verifyEmailOtp, 
+      { 
+        email: email, 
+        otp: otp 
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log('Response:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error response:', error.response);
+    throw error;
+  }
 }
 
-export const resetPassword = async (userName: string, newPassword: string) => {
-  const response = await axiosInstance.post<VerifyOTPResponse>(Endpoints.AUTH.reset, { userName: userName, NewPassword: newPassword });
+export const resetPassword = async (resetToken: string, newPassword: string) => {
+  const response = await axiosInstance.post(Endpoints.AUTH.reset, { token: resetToken, newPassword: newPassword });
   return response.data
 }
 
