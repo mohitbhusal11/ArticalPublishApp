@@ -15,11 +15,12 @@ interface VerifyEmailOtpModel {
 export const login =
   (userName: string, password: string, fcmToken: string | null, deviceId : string) =>
     async (dispatch: AppDispatch) => {
+      console.log('Full URL:', axiosInstance.defaults.baseURL + Endpoints.AUTH.LOGIN);
       const response = await axiosInstance.post(Endpoints.AUTH.LOGIN, {
         UserName: userName,
         Password: password,
-        // platform: "APP",
-        // fcmToken: fcmToken,
+        platform: "APP",
+        fcmToken: fcmToken,
         // deviceId: deviceId
       });
 

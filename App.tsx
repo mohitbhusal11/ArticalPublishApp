@@ -13,6 +13,7 @@ import { AppColor } from './src/config/AppColor';
 import { registerNotificationListeners } from './src/notifications/NotificationService';
 import AppUpdateChecker from './src/screen/AppUpdateCheckerScreen/AppUpdateChecker';
 import LoaderModal, { LoaderModalRef } from './src/component/LoaderModal';
+import { navigationRef } from './src/navigation/NavigationService';
 
 export const loaderRef = createRef<LoaderModalRef>();
 
@@ -46,11 +47,8 @@ function App() {
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'light-content'} />
         <Provider store={store}>
           <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
-            <NavigationContainer>
-              {/* <MainNavigation /> */}
-
+            <NavigationContainer ref={navigationRef}>
               <AppUpdateChecker onForceUpdate={setForceUpdate} />
-
               {forceUpdate ? (
                 <View
                   style={{
