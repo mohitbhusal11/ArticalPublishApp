@@ -73,7 +73,7 @@ const LoginScreen = ({navigation}) => {
       console.log('Login response:', res);
       ToastUtils.success('Login successful! response');
     } catch (error) {
-      console.log('Login error:', error);
+      console.log(error);
     } finally {
       hideLoader()
     }

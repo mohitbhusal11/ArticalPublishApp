@@ -1,13 +1,11 @@
 import messaging from '@react-native-firebase/messaging';
-import { Alert } from 'react-native';
+import { navigate } from '../navigation/NavigationService';
 
 export function registerNotificationListeners() {
   // Foreground
   messaging().onMessage(async remoteMessage => {
-    Alert.alert(
-      remoteMessage.notification?.title || 'New Notification',
-      remoteMessage.notification?.body || ''
-    );
+    console.log('Foreground message received:', remoteMessage);
+
   });
 
   // Background (message handled silently)
@@ -17,15 +15,31 @@ export function registerNotificationListeners() {
 
   // When notification tapped in background
   messaging().onNotificationOpenedApp(remoteMessage => {
-    console.log('App opened from background by notification:', remoteMessage.notification);
+    console.log('Opened from background:', remoteMessage);
+
+    const screen = remoteMessage.data?.screen as string | undefined;
+    const id = remoteMessage.data?.id as string | undefined;
+
+    // Navigate
+    if (screen) {
+      navigate(screen, { id });
+    }
   });
+
 
   // When notification tapped from quit state
   messaging()
     .getInitialNotification()
     .then(remoteMessage => {
       if (remoteMessage) {
-        console.log('App opened from quit state by notification:', remoteMessage.notification);
+        console.log('Opened from quit state:', remoteMessage);
+
+        const screen = remoteMessage.data?.screen as string | undefined;
+        const id = remoteMessage.data?.id as string | undefined;
+
+        if (screen) {
+          navigate(screen, { id });
+        }
       }
     });
 }
