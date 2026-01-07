@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, ScrollView, TouchableOpacity } from "react-native";
 import GlobalText from "../../component/GlobalText";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -7,6 +7,7 @@ import {
     Assignment,
     updateAssignment,
     UpdateAssignmentModal,
+    getAssignmentById
 } from "../../services/calls/assignmentService";
 import ToastUtils from "../../utils/toast";
 import { AppColor } from "../../config/AppColor";
@@ -15,12 +16,57 @@ import { hideLoader, showLoader } from "../../../App";
 const AssignmentDetailsScreen = () => {
     const route = useRoute<any>();
     const navigation = useNavigation<any>();
-    const item: Assignment = route.params;
+    
+    // Handle both parameter formats
+    const params = route.params || {};
+    const itemFromParams = params.item || params;
+    const idFromParams = params.id;
+    
+    const assignmentId = itemFromParams?.id || idFromParams;
 
-    const [assignment, setAssignment] = useState<Assignment>(item);
+    const [assignment, setAssignment] = useState<Assignment | null>(itemFromParams || null);
+    const [loading, setLoading] = useState(!itemFromParams);
+
+    useEffect(() => {
+        const fetchAssignment = async () => {
+            if (!itemFromParams && assignmentId) {
+                try {
+                    setLoading(true);
+                    const data = await getAssignmentById(assignmentId);
+                    console.log(data);
+                    setAssignment(data);
+                } catch (error) {
+                    console.log("Error fetching assignment:", error);
+                    ToastUtils.error("Failed to load assignment");
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchAssignment();
+    }, [itemFromParams, assignmentId]);
+
+    if (loading) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <GlobalText>Loading assignment...</GlobalText>
+            </View>
+        );
+    }
+
+    if (!assignment) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <GlobalText>Assignment not found</GlobalText>
+            </View>
+        );
+    }
 
     const getBadgeColor = () => {
-        switch (assignment.status.toLowerCase()) {
+        const status = assignment.status.toLowerCase();
+        
+        switch (status) {
             case "pending":
                 return AppColor.color_F39C12;
             case "accepted":
@@ -36,7 +82,7 @@ const AssignmentDetailsScreen = () => {
 
     const handleAccept = async (id: number) => {
         try {
-            showLoader()
+            showLoader();
             const payload: UpdateAssignmentModal = {
                 assignmentId: id,
                 isAccepted: true,
@@ -45,7 +91,7 @@ const AssignmentDetailsScreen = () => {
             await updateAssignment(payload);
 
             setAssignment((prev) => ({
-                ...prev,
+                ...prev!,
                 status: "accepted",
                 isAccepted: true,
             }));
@@ -54,13 +100,13 @@ const AssignmentDetailsScreen = () => {
         } catch (error) {
             ToastUtils.error("Failed to accept assignment");
         } finally {
-            hideLoader()
+            hideLoader();
         }
     };
 
     const handleDecline = async (id: number) => {
         try {
-            showLoader()
+            showLoader();
             const payload: UpdateAssignmentModal = {
                 assignmentId: id,
                 isAccepted: false,
@@ -69,7 +115,7 @@ const AssignmentDetailsScreen = () => {
             await updateAssignment(payload);
 
             setAssignment((prev) => ({
-                ...prev,
+                ...prev!,
                 status: "rejected",
                 isAccepted: false,
             }));
@@ -78,7 +124,7 @@ const AssignmentDetailsScreen = () => {
         } catch (error) {
             ToastUtils.error("Failed to decline assignment");
         } finally {
-            hideLoader()
+            hideLoader();
         }
     };
 
@@ -88,14 +134,12 @@ const AssignmentDetailsScreen = () => {
         if (status === "pending") {
             return (
                 <View style={styles.actionRow}>
-
                     <TouchableOpacity
                         style={[styles.button, styles.acceptBtn]}
                         onPress={() => handleAccept(assignment.id)}
                     >
                         <GlobalText style={styles.btnText}>Accept</GlobalText>
                     </TouchableOpacity>
-
 
                     <TouchableOpacity
                         style={[styles.button, styles.declineBtn]}
@@ -143,7 +187,6 @@ const AssignmentDetailsScreen = () => {
 
     return (
         <ScrollView style={styles.container}>
-
             <GlobalText style={styles.title}>{assignment.title}</GlobalText>
 
             <View style={styles.card}>

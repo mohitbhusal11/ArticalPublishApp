@@ -5,7 +5,6 @@ import {
     TouchableOpacity,
 } from "react-native";
 import FastImage from "react-native-fast-image";
-
 import GlobalSafeArea from "../../component/GlobalSafeArea";
 import GlobalText from "../../component/GlobalText";
 import { AppImage } from "../../config/AppImage";
@@ -20,13 +19,13 @@ const NotificationsScreen: React.FC<{ navigation?: any }> = ({ navigation }) => 
     const [items, setItems] = useState<NotificationItem[]>([]);
 
     const loadNotifications = async () => {
-    try {
-        const notifications = await fetchNotifications();
-        setItems(notifications);
-    } catch (error) {
-        console.log("Error fetching notifications:", error);
-    }
-};
+        try {
+            const notifications = await fetchNotifications();
+            setItems(notifications);
+        } catch (error) {
+            console.log("Error fetching notifications:", error);
+        }
+    };
 
     useEffect(() => {
         loadNotifications();
@@ -34,7 +33,6 @@ const NotificationsScreen: React.FC<{ navigation?: any }> = ({ navigation }) => 
 
     const handleNotificationClick = async (item: NotificationItem) => {
         try {
-            // Optimistic UI update
             setItems(prev =>
                 prev.map(n =>
                     n.id === item.id ? { ...n, isRead: true } : n
@@ -43,11 +41,24 @@ const NotificationsScreen: React.FC<{ navigation?: any }> = ({ navigation }) => 
 
             await markNotificationAsRead(item.id);
 
-            // Optional navigation
-            // navigation?.navigate("SomeScreen", { id: item.id });
+            if (item.entityType && item.entityId) {
+                const type = item.entityType.toLowerCase();
+                
+                if (type === 'story') {
+                    navigation?.navigate("StoryDetailScreen", { id: item.entityId });
+                } else if (type === 'assignment') {
+                    // navigation?.navigate("AssignmentDetailsScreen", { id: item.entityId });
+                    navigation?.navigate("AssignmentsScreen");
+                }
+            }
 
         } catch (error) {
-            console.log("Error marking notification as read:", error);
+            console.log("Error handling notification:", error);
+            setItems(prev =>
+                prev.map(n =>
+                    n.id === item.id ? { ...n, isRead: item.isRead } : n
+                )
+            );
         }
     };
 
@@ -67,14 +78,12 @@ const NotificationsScreen: React.FC<{ navigation?: any }> = ({ navigation }) => 
                 ]}
                 onPress={() => handleNotificationClick(item)}
             >
-                {/* Icon */}
                 <FastImage
                     source={source as any}
                     style={styles.icon}
                     resizeMode={FastImage.resizeMode.contain}
                 />
 
-                {/* Content */}
                 <View style={styles.content}>
                     <View style={styles.titleRow}>
                         <GlobalText
@@ -110,6 +119,8 @@ const NotificationsScreen: React.FC<{ navigation?: any }> = ({ navigation }) => 
 
     return (
         <GlobalSafeArea style={styles.container}>
+            <GlobalText style={styles.screenTitle}>Complete Your KYC</GlobalText>
+            <View style={styles.headerSpacer} />
             <FlatList
                 data={items}
                 keyExtractor={(item) => item.id.toString()}

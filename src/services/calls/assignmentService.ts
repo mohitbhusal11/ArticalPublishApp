@@ -79,3 +79,14 @@ export const updateAssignment = async (payload: UpdateAssignmentModal) => {
     throw error;
   }
 }; 
+
+
+export const getAssignmentById = async (id: number): Promise<Assignment> => {
+    try {
+        const response = await axiosInstance.get(`${Endpoints.Assignment.assignmentByID}/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching assignment by ID:", error);
+        throw error;
+    }
+};

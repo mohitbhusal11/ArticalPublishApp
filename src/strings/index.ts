@@ -79,6 +79,8 @@ export const AppString = {
     video: "Video",
     doc: "Doc",
     newUpdate: "New Update",
-    cancelNewUpdate: "Cancel New Update"
+    cancelNewUpdate: "Cancel New Update",
+    kyc: "KYC",
+    kycDesc: "Know Your Customer (KYC) is a process of verifying the identity of clients.",
   },
 };

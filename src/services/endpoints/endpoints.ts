@@ -31,10 +31,11 @@ export const Endpoints = {
   },
   Assignment: {
     assignment: "assignments/myassignment",
+    assignmentByID: "assignments",
     statusUpdate: "assignments/updated-acceptance"
   },
   Notification: {
     getNotifications: "notifications/me",
-    markAsRead: "notifications/mark-as-read"
+    markAsRead: "notifications/mark-read"
   }
 };

@@ -28,7 +28,29 @@ export const styles = StyleSheet.create({
         borderLeftWidth: 3,
         borderLeftColor: AppColor.mainColor,
     },
-
+    // Add these to your style.ts file
+    entityContainer: {
+        flexDirection: 'row',
+        marginTop: 4,
+        marginBottom: 4,
+    },
+    entityType: {
+        fontSize: 12,
+        color: '#666',
+        backgroundColor: '#f0f0f0',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 4,
+        marginRight: 8,
+    },
+    entityId: {
+        fontSize: 12,
+        color: '#666',
+        backgroundColor: '#e8f5e9',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
     icon: {
         width: 46,
         height: 46,
@@ -45,6 +67,18 @@ export const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         marginBottom: 2,
+    },
+
+    screenTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        marginBottom: 16,
+        textAlign: 'center',
+        marginTop: 24
+    },
+    headerSpacer: {
+        height: 1,
+        backgroundColor: AppColor.c000000
     },
 
     title: {

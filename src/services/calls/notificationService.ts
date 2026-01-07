@@ -41,6 +41,8 @@ export const fetchNotifications = async () => {
 
 export const markNotificationAsRead = async (notificationId: string | number) => {
   try {
+    console.log(`Marking notification as read: ${Endpoints.Notification.markAsRead}/${notificationId}`);
+
     const response = await axiosInstance.put(`${Endpoints.Notification.markAsRead}/${notificationId}`);
     console.log("markNotificationAsRead: ", response.data);
     return response.data;

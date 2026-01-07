@@ -15,6 +15,7 @@ import StoryDetailScreen from '../screen/StoryDetailScreen/StoryDetailScreen';
 import DraftStoryScreen from '../screen/DraftStoryScreen/DraftStoryScreen';
 import AssignmentDetailsScreen from '../screen/AssignmentDetailsScreen/AssignmentDetailsScreen';
 import NotificationsScreen from '../screen/Notifications/NotificationsScreen';
+import KYCScreen from '../screen/KYCScreen/KYCScreen';
 
 export type RootStackParamList = {
   BottomNavigation: undefined;
@@ -31,6 +32,7 @@ export type RootStackParamList = {
   DraftStoryScreen: {item: Story};
   AssignmentDetailsScreen: undefined;
   NotificationsScreen: undefined;
+  KYCScreen: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -53,6 +55,7 @@ const MainNavigation = () => {
           <Stack.Screen name="DraftStoryScreen" component={DraftStoryScreen} />
           <Stack.Screen name="AssignmentDetailsScreen" component={AssignmentDetailsScreen} />
           <Stack.Screen name="NotificationsScreen" component={NotificationsScreen} />
+          <Stack.Screen name="KYCScreen" component={KYCScreen} />
 
         </>
       ) : (
