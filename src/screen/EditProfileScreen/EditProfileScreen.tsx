@@ -1,24 +1,36 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import {
   ScrollView,
   View,
-  TextInput,
   TouchableOpacity,
   Platform,
   StyleSheet,
 } from 'react-native'
-import { useSelector } from 'react-redux'
 import FastImage from 'react-native-fast-image'
 import DateTimePicker from '@react-native-community/datetimepicker'
 
-import { RootState } from '../../redux/store'
 import GlobalSafeArea from '../../component/GlobalSafeArea'
 import GlobalText from '../../component/GlobalText'
+import FormInput from '../../component/FormInput'
+
 import { AppString } from '../../strings'
 import { AppColor } from '../../config/AppColor'
+import {
+  fetchBankByIfsc,
+  getReporterDetails,
+  putReporterDetails,
+  ReporterResponse,
+  UpdateReporterRequest,
+} from '../../services/calls/userService'
+import { AppImage } from '../../config/AppImage'
 
-const EditProfileScreen = () => {
-  const user = useSelector((state: RootState) => state.userDetails.details)
+const EditProfileScreen = ({ navigation }) => {
+  const [reporter, setReporter] = useState<ReporterResponse | null>(null)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [ifscLoading, setIfscLoading] = useState(false)
+
+  const ifscTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [form, setForm] = useState({
     fatherName: '',
@@ -29,20 +41,95 @@ const EditProfileScreen = () => {
     permanentAddress: '',
     presentAddress: '',
     education: '',
-    experience: '',
     accountNumber: '',
     bankName: '',
     branchName: '',
     ifscCode: '',
   })
 
-  const [showDatePicker, setShowDatePicker] = useState(false)
+  /* =========================
+     FORM CHANGE HANDLER
+  ========================= */
+  const onChange = useCallback(
+    (key: keyof typeof form, value: string) => {
+      setForm(prev => ({ ...prev, [key]: value }))
+    },
+    []
+  )
 
-  const onChange = (key: keyof typeof form, value: string) => {
-    setForm(prev => ({ ...prev, [key]: value }))
+  /* =========================
+     IFSC HANDLER (DEBOUNCED)
+  ========================= */
+  const handleIfscChange = (value: string) => {
+    const ifsc = value.toUpperCase()
+    onChange('ifscCode', ifsc)
+
+    if (ifscTimeoutRef.current) {
+      clearTimeout(ifscTimeoutRef.current)
+    }
+
+    if (ifsc.length < 5) {
+      onChange('bankName', '')
+      onChange('branchName', '')
+      return
+    }
+
+    ifscTimeoutRef.current = setTimeout(async () => {
+      try {
+        setIfscLoading(true)
+        const bank = await fetchBankByIfsc(ifsc)
+
+        onChange('bankName', bank.BANK)
+        onChange('branchName', bank.BRANCH)
+      } catch {
+        onChange('bankName', '')
+        onChange('branchName', '')
+      } finally {
+        setIfscLoading(false)
+      }
+    }, 600)
   }
 
-  /* DOB LIMIT */
+  /* =========================
+     FETCH REPORTER DATA
+  ========================= */
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const data = await getReporterDetails()
+        setReporter(data)
+
+        setForm({
+          fatherName: data?.fatherName ?? '',
+          dob: data?.dob ?? '',
+          email: data?.email ?? '',
+          secondaryPhone: data?.secondaryMobile ?? '',
+          zipCode: data?.zipcode?.toString() ?? '',
+          permanentAddress: data?.permanentAddress ?? '',
+          presentAddress: data?.presentAddress ?? '',
+          education: data?.education ?? '',
+          accountNumber: data?.accountNumber ?? '',
+          bankName: data?.bankName ?? '',
+          branchName: data?.branchName ?? '',
+          ifscCode: data?.ifscCode ?? '',
+        })
+      } catch (e) {
+        console.log('init error', e)
+      }
+    }
+
+    init()
+
+    return () => {
+      if (ifscTimeoutRef.current) {
+        clearTimeout(ifscTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  /* =========================
+     DATE PICKER
+  ========================= */
   const maxDate = new Date()
   maxDate.setDate(maxDate.getDate() - 1)
 
@@ -52,58 +139,65 @@ const EditProfileScreen = () => {
   const onDateChange = (_: any, selectedDate?: Date) => {
     setShowDatePicker(false)
     if (selectedDate) {
-      setForm(prev => ({
-        ...prev,
-        dob: selectedDate.toISOString().split('T')[0],
-      }))
+      onChange('dob', selectedDate.toISOString().split('T')[0])
     }
   }
 
-  const handleSave = () => {
-    const body = {
-      ...form,
+  /* =========================
+     SAVE PROFILE
+  ========================= */
+  const handleSave = async () => {
+    if (!reporter || loading) return
+
+    try {
+      setLoading(true)
+
+      const body: UpdateReporterRequest = {
+        fatherName: form.fatherName || null,
+        zipcode: form.zipCode ? Number(form.zipCode) : null,
+        dob: form.dob || null,
+        imageUrl: reporter.imageUrl || null,
+        secondaryMobile: form.secondaryPhone || null,
+        email: form.email || null,
+        accountNumber: form.accountNumber || null,
+        bankName: form.bankName || null,
+        branchName: form.branchName || null,
+        ifscCode: form.ifscCode || null,
+        presentAddress: form.presentAddress || null,
+        permanentAddress: form.permanentAddress || null,
+        education: form.education || null,
+        kycDocuments: reporter.kycDocuments,
+      }
+
+      await putReporterDetails(body)
+      navigation.goBack()
+    } catch (e) {
+      console.log('Save error', e)
+    } finally {
+      setLoading(false)
     }
-    console.log('SAVE BODY', body)
   }
 
-  const RenderInput = ({
-    label,
-    placeholder,
-    value,
-    onChangeText,
-    keyboardType = 'default',
-    editable = true,
-  }: any) => (
-    <>
-      <GlobalText style={styles.fieldTitle}>{label}</GlobalText>
-      <TextInput
-        style={[
-          styles.fieldInput,
-          !editable && { backgroundColor: AppColor.color_E9E9E9 },
-        ]}
-        placeholder={placeholder}
-        value={value}
-        onChangeText={onChangeText}
-        keyboardType={keyboardType}
-        editable={editable}
-      />
-    </>
-  )
-
+  /* =========================
+     UI
+  ========================= */
   return (
     <GlobalSafeArea style={styles.mainContainer}>
-      <ScrollView style={styles.scrollerView}>
-
-        {/* ===== OLD PROFILE CARD (UNCHANGED) ===== */}
+      <ScrollView keyboardShouldPersistTaps="handled">
+        {/* PROFILE CARD */}
         <View style={styles.editProfileContainer}>
           <GlobalText style={styles.editProfileText}>
-            {AppString.common.editProfile}
+            {AppString.common.profile}
           </GlobalText>
 
           <View style={styles.imageContainer}>
             <FastImage
               style={styles.profileIcon}
-              source={{ uri: user?.imgUrl }}
+              source={
+                reporter?.imageUrl
+                  ? { uri: reporter.imageUrl }
+                  : AppImage.profile_placeholder_ic
+              }
             />
           </View>
 
@@ -113,123 +207,82 @@ const EditProfileScreen = () => {
             {AppString.common.name}
           </GlobalText>
           <GlobalText style={styles.userName}>
-            {user?.userName}
+            {reporter?.fullName}
           </GlobalText>
 
           <GlobalText style={styles.mobileNumberTitile}>
             {AppString.common.mobileNumber}
           </GlobalText>
           <GlobalText style={styles.mobileNumber}>
-            +91 {user?.mobileNo}
+            +91 {reporter?.primaryMobile}
           </GlobalText>
         </View>
 
-        {/* ===== NEW EDITABLE SECTION (MATCHING STYLE) ===== */}
         <View style={styles.editProfileContainer}>
+          <GlobalText style={styles.editProfileText}>
+            {AppString.common.editProfile}
+          </GlobalText>
 
-          <RenderInput
-            label="Father Name"
-            placeholder="Enter father name"
-            value={form.fatherName}
-            onChangeText={(v: string) => onChange('fatherName', v)}
-          />
+           <FormInput label="Father Name" value={form.fatherName}
+              onChangeText={v => onChange('fatherName', v)} />
 
-          <GlobalText style={styles.fieldTitle}>Date of Birth</GlobalText>
-          <TouchableOpacity
-            style={styles.fieldInput}
-            onPress={() => setShowDatePicker(true)}>
-            <GlobalText>
-              {form.dob || 'Select date of birth'}
-            </GlobalText>
-          </TouchableOpacity>
+            <GlobalText style={styles.fieldTitle}>Date of Birth</GlobalText>
+            <TouchableOpacity
+              style={styles.fieldInput}
+              onPress={() => setShowDatePicker(true)}>
+              <GlobalText>{form.dob || 'Select date of birth'}</GlobalText>
+            </TouchableOpacity>
 
-          {showDatePicker && (
-            <DateTimePicker
-              value={maxDate}
-              mode="date"
-              maximumDate={maxDate}
-              minimumDate={minDate}
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={onDateChange}
-            />
-          )}
+            {showDatePicker && (
+              <DateTimePicker
+                value={form.dob ? new Date(form.dob) : maxDate}
+                mode="date"
+                maximumDate={maxDate}
+                minimumDate={minDate}
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={onDateChange}
+              />
+            )}
 
-          <RenderInput
-            label="Email ID"
-            placeholder="Enter email"
-            value={form.email}
-            onChangeText={(v: string) => onChange('email', v)}
-          />
-
-          <RenderInput
-            label="Secondary Mobile No"
-            placeholder="Enter mobile number"
-            keyboardType="number-pad"
-            value={form.secondaryPhone}
-            onChangeText={(v: string) => onChange('secondaryPhone', v)}
-          />
-
-          <RenderInput
-            label="Zip Code"
-            keyboardType="number-pad"
-            value={form.zipCode}
-            onChangeText={(v: string) => onChange('zipCode', v)}
-          />
-
-          <RenderInput
-            label="Permanent Address"
-            value={form.permanentAddress}
-            onChangeText={(v: string) => onChange('permanentAddress', v)}
-          />
-
-          <RenderInput
-            label="Present Address"
-            value={form.presentAddress}
-            onChangeText={(v: string) => onChange('presentAddress', v)}
-          />
-
-          <RenderInput
-            label="Education"
-            value={form.education}
-            onChangeText={(v: string) => onChange('education', v)}
-          />
-
-          <RenderInput
-            label="Experience"
-            value={form.experience}
-            onChangeText={(v: string) => onChange('experience', v)}
-          />
-
-          <RenderInput
-            label="Account Number"
-            keyboardType="number-pad"
-            value={form.accountNumber}
-            onChangeText={(v: string) => onChange('accountNumber', v)}
-          />
-
-          <RenderInput
-            label="Bank Name"
-            value={form.bankName}
-            onChangeText={(v: string) => onChange('bankName', v)}
-          />
-
-          <RenderInput
-            label="Branch Name"
-            value={form.branchName}
-            onChangeText={(v: string) => onChange('branchName', v)}
-          />
-
-          <RenderInput
-            label="IFSC Code"
-            value={form.ifscCode}
-            onChangeText={(v: string) => onChange('ifscCode', v)}
-          />
-
-          <TouchableOpacity style={styles.button} onPress={handleSave}>
-            <GlobalText style={styles.buttonText}>Save</GlobalText>
-          </TouchableOpacity>
+            <FormInput label="Email" value={form.email}
+              onChangeText={v => onChange('email', v)} />
 
         </View>
+
+        <View style={styles.editProfileContainer}>
+          <GlobalText style={styles.editProfileText}>
+            {AppString.common.bankDetails}
+          </GlobalText>
+          <FormInput label="Account Number"
+            keyboardType="number-pad"
+            value={form.accountNumber}
+            onChangeText={v => onChange('accountNumber', v)} />
+
+          <FormInput
+            label="IFSC Code"
+            value={form.ifscCode}
+            autoCapitalize="characters"
+            onChangeText={handleIfscChange}
+          />
+
+          <FormInput label="Bank Name" value={form.bankName} editable={false} />
+          <FormInput label="Branch Name" value={form.branchName} editable={false} />
+
+        </View>
+
+
+        <TouchableOpacity
+          style={[styles.button, loading && { opacity: 0.6 }]}
+          disabled={loading}
+          onPress={handleSave}>
+          <GlobalText style={styles.buttonText}>Save</GlobalText>
+        </TouchableOpacity>
+
+        {ifscLoading && (
+          <GlobalText style={{ marginTop: 8 }}>
+            Fetching bank details...
+          </GlobalText>
+        )}
       </ScrollView>
     </GlobalSafeArea>
   )
@@ -434,14 +487,14 @@ const styles = StyleSheet.create({
   },
 
   button: {
-  backgroundColor: AppColor.mainColor, // ✅ REQUIRED
-  borderRadius: 10,
-  justifyContent: "center",
-  alignItems: "center",
-  marginTop: 24,
-  marginHorizontal: 18,
-  paddingVertical: 14, // ✅ Gives height
-},
+    backgroundColor: AppColor.mainColor, // ✅ REQUIRED
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 24,
+    marginHorizontal: 18,
+    paddingVertical: 14, // ✅ Gives height
+  },
 
   buttonText: {
     color: AppColor.color_ffffff,

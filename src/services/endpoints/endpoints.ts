@@ -12,6 +12,8 @@ export const Endpoints = {
   },
   USER: {
     PROFILE: "users/me",
+    REPORTER: "reporters/me",
+    KYC_MASTER: "master?type=7"
   },
   DeleteUser: {
     DeleteUser: "user"

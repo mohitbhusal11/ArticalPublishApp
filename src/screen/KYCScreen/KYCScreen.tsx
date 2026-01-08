@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   ScrollView,
   View,
@@ -13,34 +13,62 @@ import ImagePicker from 'react-native-image-crop-picker'
 import GlobalSafeArea from '../../component/GlobalSafeArea'
 import { styles } from './style'
 
-/* 🔹 Dummy backend response */
-const kycConfigFromBackend = [
-  {
-    id: 'aadhaar',
-    title: 'Aadhaar Card',
-    numberLabel: 'Aadhaar Number',
-    numberLength: 12,
-    keyboardType: 'number-pad',
-  },
-  {
-    id: 'pan',
-    title: 'PAN Card',
-    numberLabel: 'PAN Number',
-    numberLength: 10,
-    keyboardType: 'default',
-  },
-]
+import { getReporterDetails, getRequiredKycTypes, KycDocument, KycTypeItem, putReporterDetails, ReporterResponse, UpdateReporterRequest } from '../../services/calls/userService'
+
+
+type KycFormItem = {
+  documentTypeId: number
+  documentName: string
+  number: string
+  image: string | null
+  error: string
+}
 
 const KYCScreen = () => {
-  const [kycData, setKycData] = useState<any>(
-    kycConfigFromBackend.reduce((acc, doc) => {
-      acc[doc.id] = { number: '', image: null, error: '' }
-      return acc
-    }, {})
-  )
+  const [reporter, setReporter] = useState<ReporterResponse | null>(null)
+  const [kycTypes, setKycTypes] = useState<KycTypeItem[]>([])
+  const [kycForm, setKycForm] = useState<Record<number, KycFormItem>>({})
+  const [loading, setLoading] = useState(false)
 
-  /* 🔹 Select / Replace Image */
-  const pickImage = async (docId: string) => {
+  /* ================= FETCH & MERGE ================= */
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const [kycTypeRes, reporterRes] = await Promise.all([
+          getRequiredKycTypes(),
+          getReporterDetails(),
+        ])
+
+        setReporter(reporterRes)
+        setKycTypes(kycTypeRes.data)
+
+        const mergedForm: Record<number, KycFormItem> = {}
+
+        kycTypeRes.data.forEach(type => {
+          const existing = reporterRes.kycDocuments.find(
+            d => d.DocumentName === type.value
+          )
+
+          mergedForm[type.id] = {
+            documentTypeId: type.id,
+            documentName: type.value,
+            number: existing?.DocumentNumber || '',
+            image: existing?.DocumentUrl || null,
+            error: '',
+          }
+        })
+
+        setKycForm(mergedForm)
+      } catch (e) {
+        console.log('KYC init error', e)
+      }
+    }
+
+    init()
+  }, [])
+
+  /* ================= IMAGE PICKER ================= */
+  const pickImage = async (id: number) => {
     try {
       const image = await ImagePicker.openPicker({
         width: 600,
@@ -49,63 +77,53 @@ const KYCScreen = () => {
         compressImageQuality: 0.8,
       })
 
-      setKycData((prev: any) => ({
+      setKycForm(prev => ({
         ...prev,
-        [docId]: {
-          ...prev[docId],
-          image: image.path,
-          error: '',
-        },
+        [id]: { ...prev[id], image: image.path, error: '' },
       }))
-    } catch (err) {
-      // User cancelled – ignore
-    }
+    } catch {}
   }
 
-  const handleNumberChange = (
-    docId: string,
-    value: string,
-    maxLength: number
-  ) => {
-    if (value.length > maxLength) return
-
-    setKycData((prev: any) => ({
-      ...prev,
-      [docId]: {
-        ...prev[docId],
-        number: value,
-        error: '',
-      },
-    }))
-  }
-
-  const validateAndSubmit = () => {
+  /* ================= SUBMIT ================= */
+  const handleSubmit = async () => {
     let valid = true
-    const updated = { ...kycData }
+    const updated = { ...kycForm }
 
-    kycConfigFromBackend.forEach(doc => {
-      const data = updated[doc.id]
-
-      if (data.number.length !== doc.numberLength) {
-        data.error = `Invalid ${doc.title} number`
+    Object.values(updated).forEach(item => {
+      if (!item.number) {
+        item.error = 'Enter document number'
         valid = false
-      } else if (!data.image) {
-        data.error = `Upload ${doc.title} image`
+      } else if (!item.image) {
+        item.error = 'Upload document image'
         valid = false
       }
     })
 
-    setKycData(updated)
-    if (!valid) return
+    setKycForm(updated)
+    if (!valid || !reporter) return
 
-    const apiBody = kycConfigFromBackend.map(doc => ({
-      documentType: doc.id,
-      documentNumber: kycData[doc.id].number,
-      documentImage: kycData[doc.id].image,
+    const kycDocuments: KycDocument[] = Object.values(kycForm).map(item => ({
+      DocumentName: item.documentName,
+      DocumentNumber: item.number,
+      DocumentUrl: item.image!,
     }))
 
-    console.log('KYC BODY', apiBody)
-    Alert.alert('Success', 'KYC submitted successfully')
+    try {
+      setLoading(true)
+
+      const body: UpdateReporterRequest = {
+        kycDocuments,
+      }
+
+      const updatedReporter = await putReporterDetails(body)
+      setReporter(updatedReporter)
+
+      Alert.alert('Success', 'KYC submitted successfully')
+    } catch (e) {
+      console.log('KYC submit error', e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -113,37 +131,33 @@ const KYCScreen = () => {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Text style={styles.title}>Complete Your KYC</Text>
 
-        {kycConfigFromBackend.map(doc => {
-          const data = kycData[doc.id]
+        {kycTypes.map(type => {
+          const item = kycForm[type.id]
+          if (!item) return null
 
           return (
-            <View key={doc.id} style={styles.card}>
-              <Text style={styles.docTitle}>{doc.title}</Text>
+            <View key={type.id} style={styles.card}>
+              <Text style={styles.docTitle}>{type.value}</Text>
 
               <TextInput
-                style={[
-                  styles.input,
-                  data.error && { borderColor: 'red' },
-                ]}
-                placeholder={doc.numberLabel}
-                keyboardType={doc.keyboardType as any}
-                value={data.number}
+                style={[styles.input, item.error && { borderColor: 'red' }]}
+                placeholder={`${type.value} Number`}
+                value={item.number}
                 onChangeText={v =>
-                  handleNumberChange(doc.id, v, doc.numberLength)
+                  setKycForm(prev => ({
+                    ...prev,
+                    [type.id]: { ...prev[type.id], number: v, error: '' },
+                  }))
                 }
               />
 
-              {/* IMAGE PICKER */}
               <TouchableOpacity
                 style={styles.imageBox}
-                onPress={() => pickImage(doc.id)}>
-
-                {data.image ? (
+                onPress={() => pickImage(type.id)}
+              >
+                {item.image ? (
                   <>
-                    <Image
-                      source={{ uri: data.image }}
-                      style={styles.image}
-                    />
+                    <Image source={{ uri: item.image }} style={styles.image} />
                     <View style={styles.replaceOverlay}>
                       <Text style={styles.replaceText}>Change</Text>
                     </View>
@@ -153,14 +167,18 @@ const KYCScreen = () => {
                 )}
               </TouchableOpacity>
 
-              {!!data.error && (
-                <Text style={styles.errorText}>{data.error}</Text>
+              {!!item.error && (
+                <Text style={styles.errorText}>{item.error}</Text>
               )}
             </View>
           )
         })}
 
-        <TouchableOpacity style={styles.saveButton} onPress={validateAndSubmit}>
+        <TouchableOpacity
+          style={[styles.saveButton, loading && { opacity: 0.6 }]}
+          disabled={loading}
+          onPress={handleSubmit}
+        >
           <Text style={styles.saveText}>Submit KYC</Text>
         </TouchableOpacity>
       </ScrollView>

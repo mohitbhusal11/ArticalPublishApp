@@ -53,6 +53,8 @@ export const AppString = {
     logoutDesc: "Sign out from your account",
     WhatsApp: "WhatsApp",
     editProfile: "Edit Profile",
+    profile: "Profile",
+    bankDetails: "Bank Details",
     mobileNumber: "Mobile Number",
     Newpasswordcannotbesameasoldpassword: "New password cannot be same as old password",
     OldPassword: "Old Password",
