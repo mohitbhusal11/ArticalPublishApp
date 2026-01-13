@@ -14,6 +14,8 @@ import GlobalSafeArea from '../../component/GlobalSafeArea'
 import { styles } from './style'
 
 import { getReporterDetails, getRequiredKycTypes, KycDocument, KycTypeItem, putReporterDetails, ReporterResponse, UpdateReporterRequest } from '../../services/calls/userService'
+import { localServerImageUpload } from '../../services/calls/imageUpload'
+import { navigate } from '../../navigation/NavigationService'
 
 
 type KycFormItem = {
@@ -24,7 +26,7 @@ type KycFormItem = {
   error: string
 }
 
-const KYCScreen = () => {
+const KYCScreen = ({navigation}) => {
   const [reporter, setReporter] = useState<ReporterResponse | null>(null)
   const [kycTypes, setKycTypes] = useState<KycTypeItem[]>([])
   const [kycForm, setKycForm] = useState<Record<number, KycFormItem>>({})
@@ -77,12 +79,46 @@ const KYCScreen = () => {
         compressImageQuality: 0.8,
       })
 
+      setLoading(true)
+
+      // 🔼 upload immediately
+      const uploadedUrl = await uploadImageAndGetUrl(image)
+
+      // ✅ save PUBLIC URL, not local path
       setKycForm(prev => ({
         ...prev,
-        [id]: { ...prev[id], image: image.path, error: '' },
+        [id]: {
+          ...prev[id],
+          image: uploadedUrl,
+          error: '',
+        },
       }))
-    } catch {}
+    } catch (e) {
+      console.log('Image upload error', e)
+      Alert.alert('Upload failed', 'Please try again')
+    } finally {
+      setLoading(false)
+    }
   }
+
+
+
+  const uploadImageAndGetUrl = async (image: any): Promise<string> => {
+    const formData = new FormData()
+
+    formData.append('image', {
+      uri: image.path,
+      type: image.mime || 'image/jpeg',
+      name: image.filename || 'upload.jpg',
+    } as any)
+
+    const response = await localServerImageUpload(formData)
+
+    // ✅ adjust based on your API response
+    // example: { data: { url: "https://cdn.xxx/image.jpg" } }
+    return response.file.url
+  }
+
 
   /* ================= SUBMIT ================= */
   const handleSubmit = async () => {
@@ -113,11 +149,12 @@ const KYCScreen = () => {
 
       const body: UpdateReporterRequest = {
         kycDocuments,
+        zipcode: reporter.zipcode || null,
       }
 
       const updatedReporter = await putReporterDetails(body)
       setReporter(updatedReporter)
-
+      navigation.goBack()
       Alert.alert('Success', 'KYC submitted successfully')
     } catch (e) {
       console.log('KYC submit error', e)

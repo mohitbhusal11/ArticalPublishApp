@@ -24,7 +24,7 @@ import {
 } from '../../services/calls/userService'
 import { AppImage } from '../../config/AppImage'
 
-const EditProfileScreen = ({ navigation }) => {
+const EditProfileScreen = ({ navigation }: any) => {
   const [reporter, setReporter] = useState<ReporterResponse | null>(null)
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -36,16 +36,32 @@ const EditProfileScreen = ({ navigation }) => {
     fatherName: '',
     dob: '',
     email: '',
-    secondaryPhone: '',
-    zipCode: '',
-    permanentAddress: '',
-    presentAddress: '',
-    education: '',
+    secondaryPhone: '',  // ✅ secondaryMobile
+    zipCode: '',         // ✅ zipcode
+    permanentAddress: '', // ✅ permanentAddress
+    presentAddress: '',   // ✅ presentAddress
+    education: '',        // ✅ education
+
+    spouseName: '',
+    husbandName: '',
+    firstChildName: '',
+    secondChildName: '',
+    thirdChildName: '',
+
+    jobLocation: '',
+    experience: '',
+    designation: '',
+    currentCompany: '',
+
     accountNumber: '',
     bankName: '',
     branchName: '',
     ifscCode: '',
+    phonePeNo: '',
   })
+
+
+
 
   /* =========================
      FORM CHANGE HANDLER
@@ -108,11 +124,25 @@ const EditProfileScreen = ({ navigation }) => {
           permanentAddress: data?.permanentAddress ?? '',
           presentAddress: data?.presentAddress ?? '',
           education: data?.education ?? '',
-          accountNumber: data?.accountNumber ?? '',
-          bankName: data?.bankName ?? '',
-          branchName: data?.branchName ?? '',
-          ifscCode: data?.ifscCode ?? '',
+
+          spouseName: data?.spouseName ?? '',
+          husbandName: data?.husbandName ?? '',
+          firstChildName: data?.firstChildName ?? '',
+          secondChildName: data?.secondChildName ?? '',
+          thirdChildName: data?.thirdChildName ?? '',
+
+          jobLocation: data?.jobLocation ?? '',
+          experience: data?.experience ?? '',
+          designation: data?.designation ?? '',
+          currentCompany: data?.currentCompany ?? '',
+
+          accountNumber: data?.bankDetails.accountNumber ?? '',
+          bankName: data?.bankDetails.bankName ?? '',
+          branchName: data?.bankDetails.branchName ?? '',
+          ifscCode: data?.bankDetails.ifscCode ?? '',
+          phonePeNo: data?.bankDetails.phonePeNo ?? '',
         })
+
       } catch (e) {
         console.log('init error', e)
       }
@@ -159,15 +189,29 @@ const EditProfileScreen = ({ navigation }) => {
         imageUrl: reporter.imageUrl || null,
         secondaryMobile: form.secondaryPhone || null,
         email: form.email || null,
+        presentAddress: form.presentAddress || null,
+        permanentAddress: form.permanentAddress || null,
+        education: form.education || null,
+        spouseName: form.spouseName || null,
+        husbandName: form.husbandName || null,
+        firstChildName: form.firstChildName || null,
+        secondChildName: form.secondChildName || null,
+        thirdChildName: form.thirdChildName || null,
+
+        jobLocation: form.jobLocation || null,
+        experience: form.experience || null,
+        designation: form.designation || null,
+        currentCompany: form.currentCompany || null,
+
         accountNumber: form.accountNumber || null,
         bankName: form.bankName || null,
         branchName: form.branchName || null,
         ifscCode: form.ifscCode || null,
-        presentAddress: form.presentAddress || null,
-        permanentAddress: form.permanentAddress || null,
-        education: form.education || null,
+        phonePeNo: form.phonePeNo || null,
+        // 🔴 REQUIRED – pass as-is
         kycDocuments: reporter.kycDocuments,
       }
+      console.log('PUT Reporter Request:', JSON.stringify(body, null, 2))
 
       await putReporterDetails(body)
       navigation.goBack()
@@ -223,30 +267,96 @@ const EditProfileScreen = ({ navigation }) => {
             {AppString.common.editProfile}
           </GlobalText>
 
-           <FormInput label="Father Name" value={form.fatherName}
-              onChangeText={v => onChange('fatherName', v)} />
+          <FormInput label="Father Name" value={form.fatherName}
+            onChangeText={v => onChange('fatherName', v)} />
 
-            <GlobalText style={styles.fieldTitle}>Date of Birth</GlobalText>
-            <TouchableOpacity
-              style={styles.fieldInput}
-              onPress={() => setShowDatePicker(true)}>
-              <GlobalText>{form.dob || 'Select date of birth'}</GlobalText>
-            </TouchableOpacity>
+          <GlobalText style={styles.fieldTitle}>Date of Birth</GlobalText>
+          <TouchableOpacity
+            style={styles.fieldInput}
+            onPress={() => setShowDatePicker(true)}>
+            <GlobalText>{form.dob || 'Select date of birth'}</GlobalText>
+          </TouchableOpacity>
 
-            {showDatePicker && (
-              <DateTimePicker
-                value={form.dob ? new Date(form.dob) : maxDate}
-                mode="date"
-                maximumDate={maxDate}
-                minimumDate={minDate}
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={onDateChange}
-              />
-            )}
+          {showDatePicker && (
+            <DateTimePicker
+              value={form.dob ? new Date(form.dob) : maxDate}
+              mode="date"
+              maximumDate={maxDate}
+              minimumDate={minDate}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={onDateChange}
+            />
+          )}
 
-            <FormInput label="Email" value={form.email}
-              onChangeText={v => onChange('email', v)} />
+          <FormInput label="Email" value={form.email}
+            onChangeText={v => onChange('email', v)} />
 
+          <FormInput
+            label="Secondary Mobile"
+            keyboardType="phone-pad"
+            value={form.secondaryPhone}
+            onChangeText={v => onChange('secondaryPhone', v)}
+          />
+
+          <FormInput
+            label="Zip Code"
+            keyboardType="number-pad"
+            value={form.zipCode}
+            onChangeText={v => onChange('zipCode', v)}
+          />
+
+          <FormInput
+            label="Present Address"
+            value={form.presentAddress}
+            onChangeText={v => onChange('presentAddress', v)}
+          />
+
+          <FormInput
+            label="Permanent Address"
+            value={form.permanentAddress}
+            onChangeText={v => onChange('permanentAddress', v)}
+          />
+
+          <FormInput
+            label="Education"
+            value={form.education}
+            onChangeText={v => onChange('education', v)}
+          />
+
+
+          <FormInput label="Spouse Name" value={form.spouseName}
+            onChangeText={v => onChange('spouseName', v)} />
+
+          <FormInput label="Husband Name" value={form.husbandName}
+            onChangeText={v => onChange('husbandName', v)} />
+
+          <FormInput label="First Child Name" value={form.firstChildName}
+            onChangeText={v => onChange('firstChildName', v)} />
+
+          <FormInput label="Second Child Name" value={form.secondChildName}
+            onChangeText={v => onChange('secondChildName', v)} />
+
+          <FormInput label="Third Child Name" value={form.thirdChildName}
+            onChangeText={v => onChange('thirdChildName', v)} />
+
+        </View>
+
+        <View style={styles.editProfileContainer}>
+          <GlobalText style={styles.editProfileText}>
+            Job Details
+          </GlobalText>
+
+          <FormInput label="Current Company" value={form.currentCompany}
+            onChangeText={v => onChange('currentCompany', v)} />
+
+          <FormInput label="Designation" value={form.designation}
+            onChangeText={v => onChange('designation', v)} />
+
+          <FormInput label="Experience" value={form.experience}
+            onChangeText={v => onChange('experience', v)} />
+
+          <FormInput label="Job Location" value={form.jobLocation}
+            onChangeText={v => onChange('jobLocation', v)} />
         </View>
 
         <View style={styles.editProfileContainer}>
@@ -267,6 +377,14 @@ const EditProfileScreen = ({ navigation }) => {
 
           <FormInput label="Bank Name" value={form.bankName} editable={false} />
           <FormInput label="Branch Name" value={form.branchName} editable={false} />
+
+          <FormInput
+            label="PhonePe Number"
+            keyboardType="phone-pad"
+            value={form.phonePeNo}
+            onChangeText={v => onChange('phonePeNo', v)}
+          />
+
 
         </View>
 

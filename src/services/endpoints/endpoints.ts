@@ -20,6 +20,7 @@ export const Endpoints = {
   },
   IMAGE: {
     fileUpload: "file-upload/multiple",
+    localServerImageUpload: "file-upload/localserver/single",
     deleteFile: "file-upload/delete"
   },
   Home: {

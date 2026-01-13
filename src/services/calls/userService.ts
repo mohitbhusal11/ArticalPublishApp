@@ -9,45 +9,76 @@ export interface ReporterResponse {
   id: number
   reporterCode: string
   fullName: string
-  fatherName: string
-  zipcode: number
-  dob: string
-  imageUrl: string
-  primaryMobile: string
-  secondaryMobile: string
-  email: string
 
+  fatherName: string | null
+  spouseName: string | null
+  husbandName: string | null
+
+  firstChildName: string | null
+  secondChildName: string | null
+  thirdChildName: string | null
+
+  zipcode: number | null
+  dob: string | null
+  imageUrl: string | null
+
+  primaryMobile: string | null
+  secondaryMobile: string | null
+  email: string | null
+
+  presentAddress: string | null
+  permanentAddress: string | null
+  education: string | null
+
+  experience: string | null
+  designation: string | null
+  currentCompany: string | null
+  jobLocation: string | null
+
+  // 🔹 Bank
+  bankDetails : BankDetailsResponse
+
+  // 🔹 System / Mapping IDs
   stateId: number
-  rateCardDetailsId: number
+  rateCardDetailsId: number | null
   divisionId: number
   districtId: number
   beatId: number
   repoterTypeId: number
   entityTypeId: number
 
+  // 🔹 Flags
   kycCompleted: boolean
   trainingCompleted: boolean
+  agreementSigned: boolean
+  isDeviceBound: boolean
 
-  accountNumber: string
-  bankName: string
-  branchName: string
-  ifscCode: string
-
-  presentAddress: string
-  permanentAddress: string
-  education: string
-  experience: string
-  designation: string
+  // 🔹 Dates
+  dateOfJoining: string | null
+  trainingCompletedOn: string | null
+  agreementSignedDate: string | null
 
   eSignStatusId: number | null
-  trainingCompletedOn: string | null
-  isDeviceBound: boolean
-  performanceSnapshot: string
+  performanceSnapshot: any | null
 
-  createdAt: string | null
+  createdAt: any
   userId: number
 
+  // 🔴 REQUIRED
   kycDocuments: KycDocument[]
+}
+
+export interface BankDetailsResponse {
+  accountNumber: string | null
+  bankCode: string | null
+  bankName: string | null
+  branchName: string | null
+  createdAt: string | null
+  ifscCode: string | null
+  phonePeNo: string | null
+  status: string | null
+  statusId: number | null
+  verifiedAt: string | null
 }
 
 export interface UpdateReporterRequest {
@@ -58,6 +89,19 @@ export interface UpdateReporterRequest {
   secondaryMobile?: string | null
   email?: string | null
 
+  spouseName?: string | null
+  husbandName?: string | null
+  firstChildName?: string | null
+  secondChildName?: string | null
+  thirdChildName?: string | null
+
+  jobLocation?: string | null
+  experience?: string | null
+  designation?: string | null
+  currentCompany?: string | null
+
+  phonePeNo?: string | null
+
   accountNumber?: string | null
   bankName?: string | null
   branchName?: string | null
@@ -66,11 +110,10 @@ export interface UpdateReporterRequest {
   presentAddress?: string | null
   permanentAddress?: string | null
   education?: string | null
-  experience?: string | null
 
-  // 🔴 backend requires this ALWAYS
   kycDocuments: KycDocument[]
 }
+
 
 export interface KycDocument {
   id?: number
@@ -163,8 +206,6 @@ export const putReporterDetails = async (
     throw error
   }
 }
-
-
 
 export const getRequiredKycTypes = async (): Promise<KycTypeResponse> => {
   const response = await axiosInstance.get(Endpoints.USER.KYC_MASTER)
