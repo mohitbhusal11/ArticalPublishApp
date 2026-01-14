@@ -53,6 +53,8 @@ export const AppString = {
     logoutDesc: "Sign out from your account",
     WhatsApp: "WhatsApp",
     editProfile: "Edit Profile",
+    profile: "Profile",
+    bankDetails: "Bank Details",
     mobileNumber: "Mobile Number",
     Newpasswordcannotbesameasoldpassword: "New password cannot be same as old password",
     OldPassword: "Old Password",
@@ -79,6 +81,8 @@ export const AppString = {
     video: "Video",
     doc: "Doc",
     newUpdate: "New Update",
-    cancelNewUpdate: "Cancel New Update"
+    cancelNewUpdate: "Cancel New Update",
+    kyc: "KYC",
+    kycDesc: "Know Your Customer (KYC) is a process of verifying the identity of clients.",
   },
 };

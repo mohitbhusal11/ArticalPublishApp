@@ -12,12 +12,15 @@ export const Endpoints = {
   },
   USER: {
     PROFILE: "users/me",
+    REPORTER: "reporters/me",
+    KYC_MASTER: "master?type=7"
   },
   DeleteUser: {
     DeleteUser: "user"
   },
   IMAGE: {
     fileUpload: "file-upload/multiple",
+    localServerImageUpload: "file-upload/localserver/single",
     deleteFile: "file-upload/delete"
   },
   Home: {
@@ -31,6 +34,11 @@ export const Endpoints = {
   },
   Assignment: {
     assignment: "assignments/myassignment",
+    assignmentByID: "assignments",
     statusUpdate: "assignments/updated-acceptance"
+  },
+  Notification: {
+    getNotifications: "notifications/me",
+    markAsRead: "notifications/mark-read"
   }
 };

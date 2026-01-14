@@ -236,6 +236,7 @@ const DraftStoryScreen = ({ navigation, route }: any) => {
 
     useEffect(() => {
         fetchAssignments()
+        handleSelectFont("Noto Sans")
     }, [])
 
     const handleAttachments = async () => {

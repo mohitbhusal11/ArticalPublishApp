@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, ScrollView, Image } from "react-native";
 import GlobalText from "../../component/GlobalText";
 import { AttachmentModal, descNewUpdate, getStoryByID } from "../../services/calls/stories";
@@ -30,13 +30,55 @@ function getStatusColorAdvanced(status: Status): string {
 }
 
 const StoryDetailScreen = ({ route }: any) => {
-  const { item } = route.params;
-  const storyId = item.id;
-  const [storyData, setStoryData] = useState(item);
+  const params = route.params || {};
+  
+  // Check if we have item or just id
+  const itemFromParams = params.item;
+  const idFromParams = params.id;
+  
+  const storyId = itemFromParams?.id || idFromParams;
+  
+  const [storyData, setStoryData] = useState(itemFromParams || null);
   const [newUpdateHtml, setNewUpdateHtml] = useState("");
-  // console.log(item);
-  const [attachmentList] = useState<AttachmentModal[]>(item.attachment)
-  const [showNewUpdate, setShowNewUpdate] = useState(false)
+  const [loading, setLoading] = useState(!itemFromParams);
+  const [attachmentList, setAttachmentList] = useState<AttachmentModal[]>(itemFromParams?.attachment || []);
+  const [showNewUpdate, setShowNewUpdate] = useState(false);
+
+  useEffect(() => {
+    const fetchStory = async () => {
+      if (!itemFromParams && storyId) {
+        try {
+          setLoading(true);
+          const data = await getStoryByID({ storyId });
+          setStoryData(data);
+          setAttachmentList(data.attachment || []);
+        } catch (error) {
+          console.log("Error fetching story:", error);
+          ToastUtils.error("Failed to load story");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchStory();
+  }, [itemFromParams, storyId]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <GlobalText>Loading...</GlobalText>
+      </View>
+    );
+  }
+
+  if (!storyData) {
+    return (
+      <View style={styles.container}>
+        <GlobalText>Story not found</GlobalText>
+      </View>
+    );
+  }
 
   const renderStoryUpdates = () => {
     const updates = storyData.storyDescription ?? [];
@@ -90,14 +132,11 @@ const StoryDetailScreen = ({ route }: any) => {
   const refetchStory = async () => {
     try {
       const data = await getStoryByID({ storyId: storyId });
-      console.log("Data story details: ",data);
-      
       setStoryData(data);
     } catch (error) {
       console.log(error);
     }
   };
-
 
   const renderMainStory = () => (
     <View style={[styles.htmlContainer, { marginVertical: 16 }]}>
@@ -116,7 +155,6 @@ const StoryDetailScreen = ({ route }: any) => {
           height: 500,
           backgroundColor: "#fff",
           borderWidth: 2,
-          // borderRadius: 12,
         }}
       />
     </View>
@@ -140,10 +178,6 @@ const StoryDetailScreen = ({ route }: any) => {
         ],
       };
 
-      console.log("payload: ", payload);
-      console.log("storyData.id: ", storyData.id);
-
-
       await descNewUpdate(payload, {
         storyId: storyData.id,
       });
@@ -152,14 +186,12 @@ const StoryDetailScreen = ({ route }: any) => {
           ? "Draft saved successfully"
           : "Story submitted successfully")
 
-      // 🔄 REFRESH SCREEN DATA AFTER SAVE
-      await refetchStory(); // your API call
+      await refetchStory();
       if (!storyDescId) {
-        setNewUpdateHtml("");       // clear editor content
-        setShowNewUpdate(false);    // hide editor
+        setNewUpdateHtml("");
+        setShowNewUpdate(false);
       }
     } catch (err) {
-      // Alert.alert("Error Something went wrong");
       ToastUtils.error("Error Something went wrong")
       console.log(err);
     } finally {
@@ -173,7 +205,7 @@ const StoryDetailScreen = ({ route }: any) => {
 
       <View style={styles.metaContainer}>
         <GlobalText style={styles.metaText}>
-          {AppString.common.status}: <GlobalText style={[styles.metaValue, { color: getStatusColorAdvanced(storyData.status) }]}>{item.status || "Unknown"}</GlobalText>
+          {AppString.common.status}: <GlobalText style={[styles.metaValue, { color: getStatusColorAdvanced(storyData.status) }]}>{storyData.status || "Unknown"}</GlobalText>
         </GlobalText>
         <GlobalText style={styles.metaText}>
           {AppString.common.created}:{" "}
@@ -185,7 +217,11 @@ const StoryDetailScreen = ({ route }: any) => {
         </GlobalText>
       </View>
 
-      <GlobalButton style={{ marginBottom: 10, padding: 12 }} onPress={() => setShowNewUpdate(!showNewUpdate)}><GlobalText style={{ color: AppColor.ffffff }} >{showNewUpdate ? AppString.common.cancelNewUpdate : AppString.common.newUpdate}</GlobalText></GlobalButton>
+      <GlobalButton style={{ marginBottom: 10, padding: 12 }} onPress={() => setShowNewUpdate(!showNewUpdate)}>
+        <GlobalText style={{ color: AppColor.ffffff }} >
+          {showNewUpdate ? AppString.common.cancelNewUpdate : AppString.common.newUpdate}
+        </GlobalText>
+      </GlobalButton>
 
       {showNewUpdate && (
         <View style={{ marginVertical: 24 }}>
@@ -236,7 +272,6 @@ const StoryDetailScreen = ({ route }: any) => {
                       <GlobalText style={styles.docText}>{AppString.common.doc}</GlobalText>
                     </View>
                   )}
-
                 </View>
               );
             })}

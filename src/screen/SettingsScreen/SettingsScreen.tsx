@@ -39,6 +39,9 @@ const SettingsScreen = ({ navigation }: any) => {
   const handleEditProfileClick = () => {
     navigation.navigate('EditProfileScreen')
   }
+  const handleKYCclick = () => {
+    navigation.navigate('KYCScreen')
+  }
 
   const logoutUser = async () => {
     try {
@@ -103,6 +106,15 @@ const SettingsScreen = ({ navigation }: any) => {
         </Pressable>
 
         <View style={styles.moreOptionContainer} >
+          <SettingsRow
+            icon={AppImage.kyc_ic}
+            title={AppString.common.kyc}
+            subtitle={AppString.common.kycDesc}
+            onPress={
+              handleKYCclick
+            }
+          />
+          <View style={styles.divider} />
           <SettingsRow
             icon={AppImage.bottomnavigation_notification_ic}
             title={AppString.common.pushNotification}

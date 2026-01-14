@@ -225,6 +225,7 @@ const EditorScreen = ({ navigation }: any) => {
 
     useEffect(() => {
         fetchAssignments()
+        handleSelectFont("Noto Sans")
     }, [])
 
     const handleAttachments = async () => {

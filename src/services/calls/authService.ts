@@ -19,8 +19,8 @@ export const login =
       const response = await axiosInstance.post(Endpoints.AUTH.LOGIN, {
         UserName: userName,
         Password: password,
-        platform: "APP",
-        fcmToken: fcmToken,
+        // platform: "APP",
+        // fcmToken: fcmToken,
         // deviceId: deviceId
       });
 

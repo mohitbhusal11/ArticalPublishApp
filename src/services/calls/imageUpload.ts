@@ -15,6 +15,10 @@ interface UploadResponse {
     files: UploadedFile[];
 }
 
+interface LocalUploadResponse {
+    message: string;
+    file: UploadedFile;
+}
 interface DeleteFileBody {
     fileKey: string
 }
@@ -48,3 +52,19 @@ export const deleteFile = async (payload: DeleteFileBody) => {
     }
 };
 
+export const localServerImageUpload = async (formData: FormData) => {
+    try {
+        const url = Endpoints.IMAGE.localServerImageUpload;
+
+        const response = await axiosInstance.post<LocalUploadResponse>(url, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Upload failed:", error);
+        throw error;
+    }
+};
