@@ -13,22 +13,22 @@ import ImagePicker from 'react-native-image-crop-picker'
 import GlobalSafeArea from '../../component/GlobalSafeArea'
 import { styles } from './style'
 
-import { getReporterDetails, getRequiredKycTypes, KycDocument, KycTypeItem, putReporterDetails, ReporterResponse, UpdateReporterRequest } from '../../services/calls/userService'
+import { getReporterDetails, KycDocument, putReporterDetails, ReporterResponse, UpdateKycDocument, UpdateReporterRequest } from '../../services/calls/userService'
 import { localServerImageUpload } from '../../services/calls/imageUpload'
-import { navigate } from '../../navigation/NavigationService'
 
 
 type KycFormItem = {
   documentTypeId: number
+  originalDoc: KycDocument
   documentName: string
   number: string
   image: string | null
   error: string
 }
 
-const KYCScreen = ({navigation}) => {
+
+const KYCScreen = ({ navigation }) => {
   const [reporter, setReporter] = useState<ReporterResponse | null>(null)
-  const [kycTypes, setKycTypes] = useState<KycTypeItem[]>([])
   const [kycForm, setKycForm] = useState<Record<number, KycFormItem>>({})
   const [loading, setLoading] = useState(false)
 
@@ -36,26 +36,18 @@ const KYCScreen = ({navigation}) => {
   useEffect(() => {
     const init = async () => {
       try {
-        const [kycTypeRes, reporterRes] = await Promise.all([
-          getRequiredKycTypes(),
-          getReporterDetails(),
-        ])
-
+        const reporterRes = await getReporterDetails()
         setReporter(reporterRes)
-        setKycTypes(kycTypeRes.data)
 
         const mergedForm: Record<number, KycFormItem> = {}
 
-        kycTypeRes.data.forEach(type => {
-          const existing = reporterRes.kycDocuments.find(
-            d => d.DocumentName === type.value
-          )
-
-          mergedForm[type.id] = {
-            documentTypeId: type.id,
-            documentName: type.value,
-            number: existing?.DocumentNumber || '',
-            image: existing?.DocumentUrl || null,
+        reporterRes.kycDocuments.forEach((doc, index) => {
+          mergedForm[index] = {
+            documentTypeId: index,
+            originalDoc: doc,
+            documentName: doc.documentName,
+            number: doc.documentNumber,
+            image: doc.documentUrl,
             error: '',
           }
         })
@@ -68,6 +60,8 @@ const KYCScreen = ({navigation}) => {
 
     init()
   }, [])
+
+
 
   /* ================= IMAGE PICKER ================= */
   const pickImage = async (id: number) => {
@@ -139,17 +133,19 @@ const KYCScreen = ({navigation}) => {
     if (!valid || !reporter) return
 
     const kycDocuments: KycDocument[] = Object.values(kycForm).map(item => ({
-      DocumentName: item.documentName,
-      DocumentNumber: item.number,
-      DocumentUrl: item.image!,
+      ...item.originalDoc,
+      documentName: item.documentName.trim(),
+      documentNumber: item.number.trim(),
+      documentUrl: item.image!,
     }))
+
+
 
     try {
       setLoading(true)
 
       const body: UpdateReporterRequest = {
-        kycDocuments,
-        zipcode: reporter.zipcode || null,
+        kycDocuments
       }
 
       const updatedReporter = await putReporterDetails(body)
@@ -168,48 +164,48 @@ const KYCScreen = ({navigation}) => {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <Text style={styles.title}>Complete Your KYC</Text>
 
-        {kycTypes.map(type => {
-          const item = kycForm[type.id]
-          if (!item) return null
+        {Object.values(kycForm).map(item => (
+          <View key={item.documentTypeId} style={styles.card}>
+            <Text style={styles.docTitle}>{item.documentName}</Text>
 
-          return (
-            <View key={type.id} style={styles.card}>
-              <Text style={styles.docTitle}>{type.value}</Text>
+            <TextInput
+              style={[styles.input, item.error && { borderColor: 'red' }]}
+              placeholder={`${item.documentName} Number`}
+              value={item.number}
+              onChangeText={v =>
+                setKycForm(prev => ({
+                  ...prev,
+                  [item.documentTypeId]: {
+                    ...prev[item.documentTypeId],
+                    number: v,
+                    error: '',
+                  },
+                }))
+              }
+            />
 
-              <TextInput
-                style={[styles.input, item.error && { borderColor: 'red' }]}
-                placeholder={`${type.value} Number`}
-                value={item.number}
-                onChangeText={v =>
-                  setKycForm(prev => ({
-                    ...prev,
-                    [type.id]: { ...prev[type.id], number: v, error: '' },
-                  }))
-                }
-              />
-
-              <TouchableOpacity
-                style={styles.imageBox}
-                onPress={() => pickImage(type.id)}
-              >
-                {item.image ? (
-                  <>
-                    <Image source={{ uri: item.image }} style={styles.image} />
-                    <View style={styles.replaceOverlay}>
-                      <Text style={styles.replaceText}>Change</Text>
-                    </View>
-                  </>
-                ) : (
-                  <Text style={styles.uploadText}>Upload Image</Text>
-                )}
-              </TouchableOpacity>
-
-              {!!item.error && (
-                <Text style={styles.errorText}>{item.error}</Text>
+            <TouchableOpacity
+              style={styles.imageBox}
+              onPress={() => pickImage(item.documentTypeId)}
+            >
+              {item.image ? (
+                <>
+                  <Image source={{ uri: item.image }} style={styles.image} />
+                  <View style={styles.replaceOverlay}>
+                    <Text style={styles.replaceText}>Change</Text>
+                  </View>
+                </>
+              ) : (
+                <Text style={styles.uploadText}>Upload Image</Text>
               )}
-            </View>
-          )
-        })}
+            </TouchableOpacity>
+
+            {!!item.error && (
+              <Text style={styles.errorText}>{item.error}</Text>
+            )}
+          </View>
+        ))}
+
 
         <TouchableOpacity
           style={[styles.saveButton, loading && { opacity: 0.6 }]}

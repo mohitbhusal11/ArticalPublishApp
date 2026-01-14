@@ -116,10 +116,22 @@ export interface UpdateReporterRequest {
 
 
 export interface KycDocument {
-  id?: number
-  DocumentName: string
-  DocumentNumber: string
-  DocumentUrl: string
+  id: number
+  reporterId: number
+  documentName: string
+  documentNumber: string
+  documentUrl: string
+
+  statusId: number
+  statusCode: number
+  status: 'Pending' | 'Approved' | 'Rejected'
+
+  verifiedByUserId: number | null
+  verifiedAt: string | null
+  rejectionReason: string | null
+
+  createdAt: any
+  updatedAt: any
 }
 
 export interface KycTypeItem {
@@ -190,6 +202,8 @@ export const getReporterDetails = async (): Promise<ReporterResponse> => {
 export const putReporterDetails = async (
   body: UpdateReporterRequest
 ): Promise<ReporterResponse> => {
+  console.log(body);
+  
   try {
     const response = await axiosInstance.put(
       Endpoints.USER.REPORTER,
